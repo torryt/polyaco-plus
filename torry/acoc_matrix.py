@@ -22,7 +22,7 @@ class AcocMatrix:
         return edges
 
     def init_vertices(self, x_size, y_size):
-        return list(product(range(1, x_size + 1), range(1, y_size + 1)))
+        return list(product(range(0, x_size), range(0, y_size)))
 
     def get_connected_edges(self, vertex):
         edges = []
@@ -36,7 +36,7 @@ class AcocMatrix:
         for edge in self.edges:
             plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
         plt.plot(x_coord, y_coord, 'o')
-        plt.axis([0, self.x_size + 1, 0, self.y_size + 1])
+        plt.axis([min(x_coord)-1, self.x_size + 1, min(y_coord)-1, self.y_size + 1])
         plt.show()
 
 
@@ -57,5 +57,5 @@ class AcocEdge:
 
 
 if __name__ == "__main__":
-    matrix = AcocMatrix(10, 10)
+    matrix = AcocMatrix(2, 2)
     matrix.show_plot()

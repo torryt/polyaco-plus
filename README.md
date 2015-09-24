@@ -1,1 +1,2 @@
-# ant-colony-optimization-classification
+# ACO Classification
+An algorithm using Ant Colony Optimization for classification

@@ -8,19 +8,19 @@ class TestEdge(unittest.TestCase):
         vertex_a = (1, 1)
         vertex_b = (2, 2)
         edge = AcocEdge(vertex_a, vertex_b)
-        self.assertTrue(edge.has_vertex(vertex_a, vertex_b))
+        self.assertTrue(edge.has_both_vertices(vertex_a, vertex_b))
 
     def test_have_vertices_returns_true_on_identical_vertices_but_reversed(self):
         vertex_a = (1, 1)
         vertex_b = (2, 2)
         edge = AcocEdge(vertex_a, vertex_b)
-        self.assertTrue(edge.has_vertex(vertex_b, vertex_a))
+        self.assertTrue(edge.has_both_vertices(vertex_b, vertex_a))
 
     def test_have_vertices_returns_false_if_not_both_vertices_are_there(self):
         vertex_a = (1, 1)
         vertex_b = (2, 2)
         edge = AcocEdge(vertex_a, vertex_b)
-        self.assertFalse(edge.has_vertex(vertex_a, vertex_a))
+        self.assertFalse(edge.has_both_vertices(vertex_a, vertex_a))
 
     def test_edge_count_should_be_12_in_3_by_3_matrix(self):
         matrix = AcocMatrix(3, 3)

@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-from acoc_matrix import AcocMatrix
 from random import random
+from itertools import repeat
+
 import numpy as np
 import matplotlib.pyplot as plt
-from itertools import repeat
+
+from acoc_matrix import AcocMatrix
+from pheromone_plot import LivePheromonePlot
 
 ant_count = 100
 # TODO: Prøv å øke denne
-pheromone_constant = 20.0
-decay_constant = 0.01
+pheromone_constant = 40.0
+decay_constant = 0.005
 
 
 def normalize_0_to_1(values):
@@ -87,6 +90,8 @@ def shortest_path(matrix, start_vertex, target_vertex):
     results = []
     global_shortest_path = list(repeat(0, 9999))
 
+    live_plot = LivePheromonePlot(matrix, start_vertex, target_vertex)
+
     for i in range(ant_count):
         ant = Ant(start_vertex)
 
@@ -107,6 +112,9 @@ def shortest_path(matrix, start_vertex, target_vertex):
         progress_string = "\rProgress: {}/{}".format(i, ant_count)
         sys.stdout.write(progress_string)
         sys.stdout.flush()
+        live_plot.update(matrix.edges)
+
+    live_plot.close()
 
     print("\nShortest path length: {}".format(len(global_shortest_path)))
     return results
@@ -137,6 +145,6 @@ def plot_pheromone_values(matrix):
 
 if __name__ == "__main__":
     matrix = AcocMatrix(10, 10)
-    ant_paths = shortest_path(matrix, (1, 1), (8, 8))
-    # plot_path_lengths(ant_paths)
+    ap = shortest_path(matrix, (1, 1), (8, 8))
     plot_pheromone_values(matrix)
+    plot_path_lengths(ap)

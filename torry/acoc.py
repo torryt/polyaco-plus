@@ -105,7 +105,7 @@ def shortest_path(matrix, start_vertex, target_vertex):
         if iteration % 10 == 0:
             print("Iteration {} avg. path length: {}".format(iteration, iter_result))
     show_plot_results(results)
-    print convert_path_to_edge_list(global_shortest_path)
+    print(convert_path_to_edge_list(global_shortest_path))
 
     return results
 

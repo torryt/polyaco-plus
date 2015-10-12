@@ -13,8 +13,8 @@ from ant import Ant
 
 
 ant_count = 100
-pheromone_constant = 20.0
-decay_constant = 0.03
+pheromone_constant = 10.0
+decay_constant = 0.05
 iteration_count = 1
 
 # TODO Alltid styrke pheromonene til den beste løsningen
@@ -52,12 +52,10 @@ def all_has_completed_tour(ants, target_vertex):
                 return False
     return True
 
-
 def get_unique_edges(path):
     z = set(path)
     unique_edges = list(z)
     return unique_edges
-
 
 def put_pheromones(matrix, path, target_vertex):
     unique_edges = get_unique_edges(path)
@@ -66,7 +64,6 @@ def put_pheromones(matrix, path, target_vertex):
             if orig_edge.has_both_vertices(edge.a_vertex, edge.b_vertex):
                 orig_edge.pheromone_strength += pheromone_constant / len(path)
                 break
-
 
 def pheromones_decay(matrix, initial_pheromone_value):
     for edge in matrix.edges:
@@ -102,7 +99,6 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
         put_pheromones(matrix, shorter_path, target_vertex)
         global_shortest_path = shorter_path
 
-
         results.append(ant.edges_travelled)
         pheromones_decay(matrix, 0.1)
 
@@ -129,7 +125,4 @@ if __name__ == "__main__":
         path_lengths = [len(p) for p in ant_paths]
         all_path_lengths[i,:]=path_lengths
 
-    # TODO Slå sammen disse plottene til en figur
-    plotter.plot_path(_shortest_path, mtrx)
-    plotter.plot_pheromone_values(mtrx)
-    plotter.plot_path_lengths(all_path_lengths.mean(0))
+    plotter.draw_all(all_path_lengths.mean(0),_shortest_path, mtrx)

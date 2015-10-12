@@ -12,7 +12,7 @@ from acoc_plotter import LivePheromonePlot
 from ant import Ant
 
 
-ant_count = 20
+ant_count = 100
 pheromone_constant = 10.0
 decay_constant = 0.05
 iteration_count = 1
@@ -121,11 +121,8 @@ if __name__ == "__main__":
 
     for i in range(iteration_count):
         mtrx = AcocMatrix(20, 20)
-        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), True)
+        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), False)
         path_lengths = [len(p) for p in ant_paths]
         all_path_lengths[i,:]=path_lengths
 
-    # TODO Slå sammen disse plottene til en figur
-   # plotter.plot_path(_shortest_path, mtrx)
-    plotter.plot_pheromone_values(mtrx)
-    plotter.plot_path_lengths(all_path_lengths.mean(0))
+    plotter.draw_all(all_path_lengths.mean(0),_shortest_path, mtrx)

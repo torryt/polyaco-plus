@@ -14,7 +14,8 @@ from ant import Ant
 
 ant_count = 100
 pheromone_constant = 20.0
-decay_constant = 0.005
+decay_constant = 0.03
+iteration_count = 1
 
 # TODO Alltid styrke pheromonene til den beste løsningen
 
@@ -74,11 +75,10 @@ def pheromones_decay(matrix, initial_pheromone_value):
             edge.pheromone_strength = initial_pheromone_value
 
 
-def is_shorter_path(edges_travelled, global_shortest_path):
-    if len(edges_travelled) < len(global_shortest_path):
-        global_shortest_path = edges_travelled
-        return True, global_shortest_path
-    return False, global_shortest_path
+def is_shorter_path(edges_travelled, shorter_path):
+    if len(edges_travelled) < len(shorter_path):
+        shorter_path = edges_travelled
+    return shorter_path
 
 
 def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
@@ -98,9 +98,10 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
                 ant.edges_travelled.append(edge)
             else:
                 ant_at_target = True
-        shorter_path, global_shortest_path = is_shorter_path(ant.edges_travelled, global_shortest_path)
-        if shorter_path:
-            put_pheromones(matrix, global_shortest_path, target_vertex)
+        shorter_path = is_shorter_path(ant.edges_travelled, global_shortest_path)
+        put_pheromones(matrix, shorter_path, target_vertex)
+        global_shortest_path = shorter_path
+
 
         results.append(ant.edges_travelled)
         pheromones_decay(matrix, 0.1)
@@ -120,10 +121,15 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
 
 if __name__ == "__main__":
     # TODO Ta gjennomsnittet av mange kjøringer, f.eks 100
-    mtrx = AcocMatrix(20, 20)
-    ant_paths, shortest_path = shortest_path(mtrx, (1, 1), (15, 15), False)
+    all_path_lengths = np.zeros((iteration_count,ant_count))
+
+    for i in range(iteration_count):
+        mtrx = AcocMatrix(20, 20)
+        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), True)
+        path_lengths = [len(p) for p in ant_paths]
+        all_path_lengths[i,:]=path_lengths
 
     # TODO Slå sammen disse plottene til en figur
-    plotter.plot_path(shortest_path, mtrx)
+    plotter.plot_path(_shortest_path, mtrx)
     plotter.plot_pheromone_values(mtrx)
-    plotter.plot_path_lengths([len(p) for p in ant_paths])
+    plotter.plot_path_lengths(all_path_lengths.mean(0))

@@ -12,8 +12,10 @@ from pheromone_plot import LivePheromonePlot
 
 ant_count = 100
 # TODO: Prøv å øke denne
-pheromone_constant = 40.0
+pheromone_constant = 20.0
 decay_constant = 0.005
+
+# TODO Alltid styrke pheromonene til den beste løsningen
 
 
 def normalize_0_to_1(values):
@@ -22,7 +24,7 @@ def normalize_0_to_1(values):
     normalize_const = 1.0 / values.sum()
     return values * normalize_const
 
-
+# TODO Se om det er no bugs her
 def next_edge_and_vertex(matrix, ant):
     ignore_edges = [ant.edges_travelled[-1]] if len(ant.edges_travelled)>0 else []
     connected_edges = \
@@ -115,6 +117,7 @@ def shortest_path(matrix, start_vertex, target_vertex):
         live_plot.update(matrix.edges)
 
     live_plot.close()
+    plot_path(global_shortest_path)
 
     print("\nShortest path length: {}".format(len(global_shortest_path)))
     return results
@@ -135,6 +138,13 @@ def plot_path_lengths(ant_paths):
     plt.show()
 
 
+def plot_path(path):
+    for edge in path:
+        plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
+    plt.axis([-1, matrix.x_size, -1, matrix.y_size])
+    plt.show()
+
+
 def plot_pheromone_values(matrix):
     for edge in matrix.edges:
         line = plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
@@ -144,7 +154,8 @@ def plot_pheromone_values(matrix):
 
 
 if __name__ == "__main__":
-    matrix = AcocMatrix(10, 10)
-    ap = shortest_path(matrix, (1, 1), (8, 8))
+    # TODO Ta gjennomsnittet av mange kjøringer, f.eks 100
+    matrix = AcocMatrix(20, 20)
+    ant_p, shortest_path = shortest_path(matrix, (1, 1), (15, 15))
     plot_pheromone_values(matrix)
-    plot_path_lengths(ap)
+    plot_path_lengths(ant_p)

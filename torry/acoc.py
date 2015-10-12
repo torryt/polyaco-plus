@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from acoc_matrix import AcocMatrix
+import sys
 from random import random
-import numpy as np
-import matplotlib.pyplot as plt
 from itertools import repeat
 
-# TODO: Prøv med en maur
-ant_count = 10
-iterations = 1000
+import numpy as np
+import matplotlib.pyplot as plt
+
+from acoc_matrix import AcocMatrix
+from pheromone_plot import LivePheromonePlot
+
+ant_count = 100
 # TODO: Prøv å øke denne
-pheromone_constant = 1.0
-decay_constant = 0.1
+pheromone_constant = 40.0
+decay_constant = 0.005
 
 
 def normalize_0_to_1(values):
@@ -21,22 +23,19 @@ def normalize_0_to_1(values):
     return values * normalize_const
 
 
-def next_edge(matrix, ant):
-    # TODO: Uten ignore_list
+def next_edge_and_vertex(matrix, ant):
+    ignore_edges = [ant.edges_travelled[-1]] if len(ant.edges_travelled)>0 else []
     connected_edges = \
-        matrix.get_connected_edges(ant.current_vertex, ant.edges_travelled)
-    if len(connected_edges) == 0:
-        return ant.current_vertex, False
+        matrix.get_connected_edges(ant.current_vertex, ignore_edges)
     probabilities = normalize_0_to_1(np.array([e.pheromone_strength for e in connected_edges]))
 
-    # TODO: Random are the same for all in iteration
-    p = random()
+    rand_num = random()
     cumulative_prob = 0
     for i, edge in enumerate(connected_edges):
         cumulative_prob += probabilities[i]
-        if p <= cumulative_prob:
+        if rand_num <= cumulative_prob:
             if edge.a_vertex != ant.current_vertex:
-                return edge, edge.a_vertex,
+                return edge, edge.a_vertex
             else:
                 return edge, edge.b_vertex
 
@@ -50,75 +49,74 @@ def all_has_completed_tour(ants, target_vertex):
     return True
 
 
-# TODO: Sett pheromone for hver unike edge
+def get_unique_edges(path):
+    z = set(path)
+    unique_edges = list(z)
+    return unique_edges
+
+
 def put_pheromones(matrix, path, target_vertex):
-    for edge in path:
+    unique_edges = get_unique_edges(path)
+    for edge in unique_edges:
         for orig_edge in matrix.edges:
             if orig_edge.has_both_vertices(edge.a_vertex, edge.b_vertex):
                 orig_edge.pheromone_strength += pheromone_constant / len(path)
+                break
 
 
-def pheromones_decay(matrix):
-    # TODO: Slett pheromones med en viss sannsynlighet
+def pheromones_decay(matrix, initial_pheromone_value):
     for edge in matrix.edges:
-        edge.pheromone_strength *= (1 - pheromone_constant)
-
-
-def iteration_result(matrix, ants):
-    return np.array([len(ant.edges_travelled) for ant in ants]).mean()
+        rand_num = random()
+        if rand_num < decay_constant:
+            edge.pheromone_strength = initial_pheromone_value
 
 
 def show_plot_results(results):
-    x_coord = range(0, len(results))
-    y_coord = results
-    plt.plot(x_coord, y_coord)
-    plt.axis([0, max(x_coord), 0, max(y_coord)])
+    x_coordinates = range(0, len(results))
+    y_coordinates = results
+    plt.plot(x_coordinates, y_coordinates)
+    plt.axis([0, max(x_coordinates), 0, max(y_coordinates)])
     plt.show()
 
 
-def has_shorter_path(ants, global_shortest_path):
-    for ant in ants:
-        if len(ant.edges_travelled) < len(global_shortest_path):
-            global_shortest_path = ant.edges_travelled
-            return True, global_shortest_path
+def is_shorter_path(edges_travelled, global_shortest_path):
+    if len(edges_travelled) < len(global_shortest_path):
+        global_shortest_path = edges_travelled
+        return True, global_shortest_path
     return False, global_shortest_path
-
-
-def remove_dead_ended_ants(ants):
-    for ant in ants:
-        if not ant.current_vertex:
-            ants.remove(ant)
-    return ants
 
 
 def shortest_path(matrix, start_vertex, target_vertex):
     results = []
-    global_shortest_path = list(repeat(0, 2000))
+    global_shortest_path = list(repeat(0, 9999))
 
-    for iteration in range(iterations):
-        ants = [Ant(start_vertex)] * ant_count
+    live_plot = LivePheromonePlot(matrix, start_vertex, target_vertex)
 
-        all_ants_at_target = False
-        while not all_ants_at_target:
-            for ant in ants:
-                if not ant.current_vertex == target_vertex and ant.current_vertex:
-                    edge, ant.current_vertex = next_edge(matrix, ant)
-                    ant.edges_travelled.append(edge)
-            all_ants_at_target = all_has_completed_tour(ants, target_vertex)
+    for i in range(ant_count):
+        ant = Ant(start_vertex)
 
-        ants = remove_dead_ended_ants(ants)
-        is_shorter_path = has_shorter_path(ants, global_shortest_path)
-        if is_shorter_path[0]:
-            global_shortest_path = is_shorter_path[1]
+        ant_at_target = False
+        while not ant_at_target:
+            if ant.current_vertex != target_vertex:
+                edge, ant.current_vertex = next_edge_and_vertex(matrix, ant)
+                ant.edges_travelled.append(edge)
+            else:
+                ant_at_target = True
+        shorter_path, global_shortest_path = is_shorter_path(ant.edges_travelled, global_shortest_path)
+        if shorter_path:
             put_pheromones(matrix, global_shortest_path, target_vertex)
 
-        # pheromones_decay(matrix)
-        iter_result = iteration_result(matrix, ants)
-        results.append(iter_result)
-        if iteration % 1 == 0:
-            print("Iteration {} avg. path length: {}".format(iteration, iter_result))
-    print("Shortest path length: {}".format(min(results)))
-    show_plot_results(results)
+        results.append(ant.edges_travelled)
+        pheromones_decay(matrix, 0.1)
+
+        progress_string = "\rProgress: {}/{}".format(i, ant_count)
+        sys.stdout.write(progress_string)
+        sys.stdout.flush()
+        live_plot.update(matrix.edges)
+
+    live_plot.close()
+
+    print("\nShortest path length: {}".format(len(global_shortest_path)))
     return results
 
 
@@ -127,5 +125,26 @@ class Ant:
         self.current_vertex = start_vertex
         self.edges_travelled = []
 
+
+def plot_path_lengths(ant_paths):
+    x_coord = range(len(ant_paths))
+    path_lengths = [len(p) for p in ant_paths]
+    y_coord = path_lengths
+    plt.plot(x_coord, y_coord, 'k-')
+    plt.axis([0, len(ant_paths), 0, max(path_lengths)])
+    plt.show()
+
+
+def plot_pheromone_values(matrix):
+    for edge in matrix.edges:
+        line = plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
+        plt.setp(line, linewidth=edge.pheromone_strength)
+    plt.axis([-1, matrix.x_size, -1, matrix.y_size])
+    plt.show()
+
+
 if __name__ == "__main__":
-    shortest_path(AcocMatrix(10, 10), (1, 1), (8, 8))
+    matrix = AcocMatrix(10, 10)
+    ap = shortest_path(matrix, (1, 1), (8, 8))
+    plot_pheromone_values(matrix)
+    plot_path_lengths(ap)

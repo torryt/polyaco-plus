@@ -17,8 +17,6 @@ pheromone_constant = 20.0
 decay_constant = 0.03
 iteration_count = 1
 
-# TODO Alltid styrke pheromonene til den beste løsningen
-
 
 def normalize_0_to_1(values):
     if values.sum() == 0.0:
@@ -27,7 +25,6 @@ def normalize_0_to_1(values):
     return values * normalize_const
 
 
-# TODO Se om det er no bugs her
 def next_edge_and_vertex(matrix, ant):
     ignore_edges = [ant.edges_travelled[-1]] if len(ant.edges_travelled) > 0 else []
     connected_edges = matrix.get_connected_edges(ant.current_vertex, ignore_edges)
@@ -102,7 +99,6 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
         put_pheromones(matrix, shorter_path, target_vertex)
         global_shortest_path = shorter_path
 
-
         results.append(ant.edges_travelled)
         pheromones_decay(matrix, 0.1)
 
@@ -120,7 +116,6 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
 
 
 if __name__ == "__main__":
-    # TODO Ta gjennomsnittet av mange kjøringer, f.eks 100
     all_path_lengths = np.zeros((iteration_count,ant_count))
 
     for i in range(iteration_count):

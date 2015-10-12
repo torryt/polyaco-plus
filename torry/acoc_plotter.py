@@ -1,7 +1,5 @@
 from matplotlib import pyplot as plt
 
-__author__ = 'torrytufteland'
-
 
 class LivePheromonePlot:
     def __init__(self, matrix, start_vertex, target_vertex):
@@ -28,12 +26,11 @@ class LivePheromonePlot:
         plt.pause(0.01)
 
 
-def plot_path_lengths(ant_paths):
-    x_coord = range(len(ant_paths))
-    path_lengths = [len(p) for p in ant_paths]
+def plot_path_lengths(path_lengths):
+    x_coord = range(len(path_lengths))
     y_coord = path_lengths
     plt.plot(x_coord, y_coord, 'k-')
-    plt.axis([0, len(ant_paths), 0, max(path_lengths)])
+    plt.axis([0, len(path_lengths), 0, max(path_lengths)])
     plt.show()
 
 

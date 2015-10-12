@@ -7,13 +7,12 @@ from itertools import repeat
 import numpy as np
 
 from acoc_matrix import AcocMatrix
-import acoc_plotter as plt
+import acoc_plotter as plotter
 from acoc_plotter import LivePheromonePlot
 from ant import Ant
 
 
 ant_count = 100
-# TODO: Prøv å øke denne
 pheromone_constant = 20.0
 decay_constant = 0.005
 
@@ -82,11 +81,12 @@ def is_shorter_path(edges_travelled, global_shortest_path):
     return False, global_shortest_path
 
 
-def shortest_path(matrix, start_vertex, target_vertex):
+def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
     results = []
     global_shortest_path = list(repeat(0, 9999))
 
-    live_plot = LivePheromonePlot(matrix, start_vertex, target_vertex)
+    if live_plot:
+        live_plot = LivePheromonePlot(matrix, start_vertex, target_vertex)
 
     for i in range(ant_count):
         ant = Ant(start_vertex)
@@ -108,18 +108,22 @@ def shortest_path(matrix, start_vertex, target_vertex):
         progress_string = "\rProgress: {}/{}".format(i, ant_count)
         sys.stdout.write(progress_string)
         sys.stdout.flush()
-        live_plot.update(matrix.edges)
+        if live_plot:
+            live_plot.update(matrix.edges)
 
-    live_plot.close()
-    plt.plot_path(global_shortest_path, matrix)
+    if live_plot:
+        live_plot.close()
 
     print("\nShortest path length: {}".format(len(global_shortest_path)))
-    return results
+    return results, global_shortest_path
 
 
 if __name__ == "__main__":
     # TODO Ta gjennomsnittet av mange kjøringer, f.eks 100
     mtrx = AcocMatrix(20, 20)
-    ant_p, shortest_path = shortest_path(mtrx, (1, 1), (15, 15))
-    plt.plot_pheromone_values(mtrx)
-    plt.plot_path_lengths(ant_p)
+    ant_paths, shortest_path = shortest_path(mtrx, (1, 1), (15, 15), False)
+
+    # TODO Slå sammen disse plottene til en figur
+    plotter.plot_path(shortest_path, mtrx)
+    plotter.plot_pheromone_values(mtrx)
+    plotter.plot_path_lengths([len(p) for p in ant_paths])

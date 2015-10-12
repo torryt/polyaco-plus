@@ -5,13 +5,14 @@ from random import random
 from itertools import repeat
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from acoc_matrix import AcocMatrix
-from pheromone_plot import LivePheromonePlot
+import acoc_plotter as plotter
+from acoc_plotter import LivePheromonePlot
+from ant import Ant
+
 
 ant_count = 100
-# TODO: Prøv å øke denne
 pheromone_constant = 20.0
 decay_constant = 0.005
 
@@ -24,11 +25,11 @@ def normalize_0_to_1(values):
     normalize_const = 1.0 / values.sum()
     return values * normalize_const
 
+
 # TODO Se om det er no bugs her
 def next_edge_and_vertex(matrix, ant):
-    ignore_edges = [ant.edges_travelled[-1]] if len(ant.edges_travelled)>0 else []
-    connected_edges = \
-        matrix.get_connected_edges(ant.current_vertex, ignore_edges)
+    ignore_edges = [ant.edges_travelled[-1]] if len(ant.edges_travelled) > 0 else []
+    connected_edges = matrix.get_connected_edges(ant.current_vertex, ignore_edges)
     probabilities = normalize_0_to_1(np.array([e.pheromone_strength for e in connected_edges]))
 
     rand_num = random()
@@ -73,14 +74,6 @@ def pheromones_decay(matrix, initial_pheromone_value):
             edge.pheromone_strength = initial_pheromone_value
 
 
-def show_plot_results(results):
-    x_coordinates = range(0, len(results))
-    y_coordinates = results
-    plt.plot(x_coordinates, y_coordinates)
-    plt.axis([0, max(x_coordinates), 0, max(y_coordinates)])
-    plt.show()
-
-
 def is_shorter_path(edges_travelled, global_shortest_path):
     if len(edges_travelled) < len(global_shortest_path):
         global_shortest_path = edges_travelled
@@ -88,11 +81,12 @@ def is_shorter_path(edges_travelled, global_shortest_path):
     return False, global_shortest_path
 
 
-def shortest_path(matrix, start_vertex, target_vertex):
+def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
     results = []
     global_shortest_path = list(repeat(0, 9999))
 
-    live_plot = LivePheromonePlot(matrix, start_vertex, target_vertex)
+    if live_plot:
+        live_plot = LivePheromonePlot(matrix, start_vertex, target_vertex)
 
     for i in range(ant_count):
         ant = Ant(start_vertex)
@@ -114,48 +108,22 @@ def shortest_path(matrix, start_vertex, target_vertex):
         progress_string = "\rProgress: {}/{}".format(i, ant_count)
         sys.stdout.write(progress_string)
         sys.stdout.flush()
-        live_plot.update(matrix.edges)
+        if live_plot:
+            live_plot.update(matrix.edges)
 
-    live_plot.close()
-    plot_path(global_shortest_path)
+    if live_plot:
+        live_plot.close()
 
     print("\nShortest path length: {}".format(len(global_shortest_path)))
-    return results
-
-
-class Ant:
-    def __init__(self, start_vertex):
-        self.current_vertex = start_vertex
-        self.edges_travelled = []
-
-
-def plot_path_lengths(ant_paths):
-    x_coord = range(len(ant_paths))
-    path_lengths = [len(p) for p in ant_paths]
-    y_coord = path_lengths
-    plt.plot(x_coord, y_coord, 'k-')
-    plt.axis([0, len(ant_paths), 0, max(path_lengths)])
-    plt.show()
-
-
-def plot_path(path):
-    for edge in path:
-        plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
-    plt.axis([-1, matrix.x_size, -1, matrix.y_size])
-    plt.show()
-
-
-def plot_pheromone_values(matrix):
-    for edge in matrix.edges:
-        line = plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
-        plt.setp(line, linewidth=edge.pheromone_strength)
-    plt.axis([-1, matrix.x_size, -1, matrix.y_size])
-    plt.show()
+    return results, global_shortest_path
 
 
 if __name__ == "__main__":
     # TODO Ta gjennomsnittet av mange kjøringer, f.eks 100
-    matrix = AcocMatrix(20, 20)
-    ant_p, shortest_path = shortest_path(matrix, (1, 1), (15, 15))
-    plot_pheromone_values(matrix)
-    plot_path_lengths(ant_p)
+    mtrx = AcocMatrix(20, 20)
+    ant_paths, shortest_path = shortest_path(mtrx, (1, 1), (15, 15), False)
+
+    # TODO Slå sammen disse plottene til en figur
+    plotter.plot_path(shortest_path, mtrx)
+    plotter.plot_pheromone_values(mtrx)
+    plotter.plot_path_lengths([len(p) for p in ant_paths])

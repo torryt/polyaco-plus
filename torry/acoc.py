@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     for i in range(iteration_count):
         mtrx = AcocMatrix(20, 20)
-        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), False)
+        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), True)
         path_lengths = [len(p) for p in ant_paths]
         all_path_lengths[i,:]=path_lengths
 

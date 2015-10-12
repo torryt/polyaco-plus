@@ -30,7 +30,6 @@ def plot_path_lengths(path_lengths):
     y_coord = path_lengths
     plt.plot(x_coord, y_coord, 'k-')
     plt.axis([0, len(path_lengths), 0, max(path_lengths)])
-    plt.show()
 
 
 def plot_path(path, matrix):

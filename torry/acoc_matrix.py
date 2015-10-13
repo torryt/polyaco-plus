@@ -13,12 +13,20 @@ def init_edges(x_size, y_size, coordinates):
     edges = []
     for x, y in coordinates:
         if x != x_size - 1:
-            east_neighbor = (x + 1, y)
-            edges.append(AcocEdge((x, y), east_neighbor))
+            east_neighbor = Vertex(x + 1, y)
+            edges.append(AcocEdge(Vertex(x, y), east_neighbor))
         if y != y_size - 1:
-            north_neighbor = (x, y + 1)
-            edges.append(AcocEdge((x, y), north_neighbor))
+            north_neighbor = Vertex(x, y + 1)
+            edges.append(AcocEdge(Vertex(x, y), north_neighbor))
     return edges
+
+
+def connect_edges_to_vertex(vertex, edges):
+    connected_edges = []
+    for e in edges:
+        if ((vertex.x, vertex.y) == e.vertex_a.coordinates()) or ((vertex.x, vertex.y) == e.vertex_b.coordinates()):
+            connected_edges.append(e)
+    vertex.connected_edges = connected_edges
 
 
 def init_matrix(x_size, y_size):
@@ -27,12 +35,7 @@ def init_matrix(x_size, y_size):
     edges = init_edges(x_size, y_size, points)
 
     for v in vertices:
-        connected_edges = []
-        for e in edges:
-            if ((v.x, v.y) == e.vertex_a.coordinates()) or ((v.x, v.y) == e.vertex_b.coordinates()):
-                connected_edges.append(e)
-        v.connected_edges = connected_edges
-
+        connect_edges_to_vertex(v, edges)
     return vertices, edges
 
 
@@ -50,11 +53,18 @@ class AcocMatrix:
         plt.axis([min(x_coord) - 1, self.x_size, min(y_coord) - 1, self.y_size])
         plt.show()
 
+    def find_vertex(self, x_y):
+        for v in self.vertices:
+            if (v.x, v.y) == x_y:
+                return v
+        return None
+        # return next((v for v in self.vertices if v.coordinates() == x_y), None)
+
 
 class AcocEdge:
-    def __init__(self, point_a, point_b, pheromone_strength=0.1):
-        self.vertex_a = Vertex(*point_a)
-        self.vertex_b = Vertex(*point_b)
+    def __init__(self, vertex_a, vertex_b, pheromone_strength=0.1):
+        self.vertex_a = vertex_a
+        self.vertex_b = vertex_b
         self.pheromone_strength = pheromone_strength
 
     def __repr__(self):

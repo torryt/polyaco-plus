@@ -1,5 +1,6 @@
 import unittest
-from acoc_matrix import AcocEdge, AcocMatrix
+from acoc_matrix import AcocEdge, AcocMatrix, Vertex
+import acoc_matrix as am
 
 
 class TestEdge(unittest.TestCase):
@@ -41,6 +42,24 @@ class TestEdge(unittest.TestCase):
     def test_vertex_count_should_be_6_in_2_by_3_matrix(self):
         vertices = AcocMatrix(2, 3).vertices
         self.assertEqual(6, len(vertices))
+
+
+class TestVertex(unittest.TestCase):
+    def test_connect_edges_to_vertex_should_be_1(self):
+        v1 = Vertex(0, 0)
+        v2 = Vertex(1, 2)
+        e = AcocEdge(v1, v2)
+        am.connect_edges_to_vertex(v1, [e])
+        self.assertEqual(1, len(v1.connected_edges))
+
+    def test_connect_edges_to_vertex_should_be_2(self):
+            v1 = Vertex(0, 0)
+            v2 = Vertex(1, 2)
+            v3 = Vertex(1, 1)
+            e1 = AcocEdge(v1, v2)
+            e2 = AcocEdge(v1, v3)
+            am.connect_edges_to_vertex(v1, [e1, e2])
+            self.assertEqual(2, len(v1.connected_edges))
 
 
 class TestGetConnectedEdges(unittest.TestCase):

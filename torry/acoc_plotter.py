@@ -2,20 +2,21 @@ from matplotlib import pyplot as plt
 
 
 class LivePheromonePlot:
-    def __init__(self, matrix, start_vertex, target_vertex):
+    def __init__(self, matrix, start_coordinates, target_coordinates):
         plt.ion()
         self.plot_lines = []
         for edge in matrix.edges:
-            line = plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
+            line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
             plt.setp(line, linewidth=edge.pheromone_strength)
             self.plot_lines.append(line)
-        plt.plot([start_vertex[0], target_vertex[0]], [start_vertex[1], target_vertex[1]], 'o')
+        plt.plot([start_coordinates[0], target_coordinates[0]], [start_coordinates[1], target_coordinates[1]], 'o')
 
         plt.axis([-1, matrix.x_size, -1, matrix.y_size])
         plt.draw()
         plt.pause(0.01)
 
-    def close(self):
+    @staticmethod
+    def close():
         plt.clf()
         plt.ioff()
 
@@ -34,13 +35,13 @@ def plot_path_lengths(path_lengths):
 
 def plot_path(path, matrix):
     for edge in path:
-        plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
+        plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
     plt.axis([-1, matrix.x_size, -1, matrix.y_size])
 
 
 def plot_pheromone_values(matrix):
     for edge in matrix.edges:
-        line = plt.plot([edge.a_vertex[0], edge.b_vertex[0]], [edge.a_vertex[1], edge.b_vertex[1]], 'k-')
+        line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
     plt.axis([-1, matrix.x_size, -1, matrix.y_size])
 

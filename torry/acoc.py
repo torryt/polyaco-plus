@@ -99,7 +99,7 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
 
         path_lengths.append(len(ant.edges_travelled))
         print_on_current_line("Ant: {}/{}".format(i+1, ant_count))
-        if live_plot and i % 40 == 0:
+        if live_plot and i % 20 == 0:
             live_plot.update(matrix.edges)
 
     if live_plot:

@@ -46,7 +46,19 @@ def plot_pheromone_values(matrix):
     plt.axis([-1, matrix.x_size, -1, matrix.y_size])
 
 
-def draw_all(all_paths, shortest_path, matrix):
+def plot_two_path_lengths(path_length1, path_length2):
+    x_coord = range(len(path_length1))
+    y_coord = path_length1
+
+    x_coord2 = range(len(path_length2))
+    y_coord2 = path_length2
+
+    plt.plot(x_coord, y_coord, 'g')
+    plt.plot(x_coord2, y_coord2, 'r')
+    plt.axis([0, len(path_length1), 0, max(path_length1)])
+
+
+def draw_all(all_paths, shortest_path, matrix, random, ran_path_lengths=None):
     plt.figure(1)
     plt.subplot(211)
     plt.title("Path")
@@ -55,18 +67,16 @@ def draw_all(all_paths, shortest_path, matrix):
     plt.title("Pheromone Values")
     plot_pheromone_values(matrix)
 
-    plt.figure(2)
-    plt.title("Path Lengths")
-    plot_path_lengths(all_paths)
+    if not random:
+        plt.figure(2)
+        plt.title("ACO Path Lengths")
+        plot_path_lengths(all_paths)
+    else:
+        plot_aco_and_random(all_paths, ran_path_lengths)
     plt.show()
 
 
-def draw_random(all_paths, shortest_path, matrix):
-    plt.figure(1)
-    plt.subplot(211)
-    plt.title("Path Lengths")
-    plot_path_lengths(all_paths)
-    plt.subplot(212)
-    plt.title("Path")
-    plot_path(shortest_path, matrix)
+def plot_aco_and_random(aco_path_lengths, random_path_lengths):
+    plt.figure(2)
+    plot_two_path_lengths(aco_path_lengths, random_path_lengths)
     plt.show()

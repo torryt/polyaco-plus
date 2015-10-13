@@ -11,13 +11,11 @@ import torry.acoc_plotter as plotter
 from torry.acoc_plotter import LivePheromonePlot
 from torry.ant import Ant
 
-
-ant_count = 100
+ant_count = 10
 pheromone_constant = 10.0
 decay_constant = 0.05
 iteration_count = 1
-
-# TODO Alltid styrke pheromonene til den beste løsningen
+naive_data = True
 
 
 def normalize_0_to_1(values):
@@ -118,14 +116,42 @@ def shortest_path(matrix, start_vertex, target_vertex, live_plot=True):
     return results, global_shortest_path
 
 
+def shortest_path_naive(matrix, start_vertex, target_vertex):
+    naive_results = []
+    global_shortest_naive_path = list(repeat(0, 9999))
+
+    for i in range(ant_count):
+        ant = Ant(start_vertex)
+
+        ant_at_target = False
+        while not ant_at_target:
+            if ant.current_vertex != target_vertex:
+                edge, ant.current_vertex = next_edge_and_vertex(matrix, ant)
+                ant.edges_travelled.append(edge)
+            else:
+                ant_at_target = True
+        shorter_path = is_shorter_path(ant.edges_travelled, global_shortest_naive_path)
+        global_shortest_naive_path = shorter_path
+
+        naive_results.append(ant.edges_travelled)
+
+    return naive_results, global_shortest_naive_path
+
+
 if __name__ == "__main__":
-    # TODO Ta gjennomsnittet av mange kjøringer, f.eks 100
     all_path_lengths = np.zeros((iteration_count, ant_count))
+    all_naive_path_lengths = np.zeros((iteration_count, ant_count))
 
     for i in range(iteration_count):
         mtrx = AcocMatrix(20, 20)
-        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), True)
+        ant_paths, _shortest_path = shortest_path(mtrx, (1, 1), (15, 15), False)
         path_lengths = [len(p) for p in ant_paths]
-        all_path_lengths[i,:]=path_lengths
+        all_path_lengths[i, :] = path_lengths
 
-    plotter.draw_all(all_path_lengths.mean(0), _shortest_path, mtrx)
+        if naive_data:
+            ntrx = AcocMatrix(20, 20)
+            ant_paths, _shortest_naive_path = shortest_path_naive(ntrx, (1, 1), (15, 15))
+            _path_lengths = [len(p) for p in ant_paths]
+            all_naive_path_lengths[i, :] = _path_lengths
+
+    plotter.draw_all(all_path_lengths.mean(0), _shortest_path, mtrx, naive_data, all_naive_path_lengths.mean(0))

@@ -25,6 +25,7 @@ class LivePheromonePlot:
         plt.draw()
         plt.pause(0.01)
 
+
 def plot_path_lengths(path_lengths):
     x_coord = range(len(path_lengths))
     y_coord = path_lengths
@@ -44,6 +45,7 @@ def plot_pheromone_values(matrix):
         plt.setp(line, linewidth=edge.pheromone_strength)
     plt.axis([-1, matrix.x_size, -1, matrix.y_size])
 
+
 def draw_all(all_paths, shortest_path, matrix):
     plt.figure(1)
     plt.subplot(211)
@@ -56,4 +58,15 @@ def draw_all(all_paths, shortest_path, matrix):
     plt.figure(2)
     plt.title("Path Lengths")
     plot_path_lengths(all_paths)
+    plt.show()
+
+
+def draw_random(all_paths, shortest_path, matrix):
+    plt.figure(1)
+    plt.subplot(211)
+    plt.title("Path Lengths")
+    plot_path_lengths(all_paths)
+    plt.subplot(212)
+    plt.title("Path")
+    plot_path(shortest_path, matrix)
     plt.show()

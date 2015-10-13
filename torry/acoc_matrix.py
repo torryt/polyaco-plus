@@ -70,12 +70,6 @@ class AcocEdge:
     def __repr__(self):
         return str((self.vertex_a, self.vertex_b, self.pheromone_strength))
 
-    def has_both_vertices(self, vertex_a, vertex_b):
-        if (self.vertex_a == vertex_a or self.vertex_a == vertex_b) and \
-                (self.vertex_b == vertex_a or self.vertex_b == vertex_b):
-            return True
-        return False
-
     def has_vertex(self, vertex):
         if self.vertex_a == vertex or self.vertex_b == vertex:
             return True

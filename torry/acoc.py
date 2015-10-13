@@ -56,10 +56,7 @@ def get_unique_edges(path):
 def put_pheromones(matrix, path, pheromone_constant):
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
-        for orig_edge in matrix.edges:
-            if orig_edge.has_both_vertices(edge.vertex_a, edge.vertex_b):
-                orig_edge.pheromone_strength += pheromone_constant / len(path)
-                break
+        edge.pheromone_strength += pheromone_constant / len(path)
 
 
 def pheromones_decay(matrix, pheromone_constant, decay_constant):
@@ -117,7 +114,7 @@ def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_consta
 
 def main():
     ant_count = 400
-    iteration_count = 1
+    iteration_count = 5
     pheromone_constant = 15.0
     decay_constant = 0.04
 
@@ -128,14 +125,13 @@ def main():
         print("\nIteration: {}/{}".format(i+1, iteration_count))
         mtrx = AcocMatrix(20, 20)
         path_lengths, s_path = \
-            shortest_path(mtrx, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, False)
+            shortest_path(mtrx, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, True)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
         if is_shorter_path(s_path, global_shortest_path):
             global_shortest_path = s_path
 
-    plotter.plot_pheromone_values(mtrx)
     plotter.plot_path(global_shortest_path, mtrx)
     plotter.plot_path_lengths(all_path_lengths.mean(0))
 

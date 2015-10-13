@@ -11,7 +11,7 @@ import torry.acoc_plotter as plotter
 from torry.acoc_plotter import LivePheromonePlot
 from torry.ant import Ant
 
-ant_count = 10
+ant_count = 100
 pheromone_constant = 10.0
 decay_constant = 0.05
 iteration_count = 1

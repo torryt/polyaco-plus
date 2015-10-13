@@ -52,7 +52,6 @@ def get_unique_edges(path):
     unique_edges = list(z)
     return unique_edges
 
-
 def put_pheromones(matrix, path, pheromone_constant):
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
@@ -104,6 +103,7 @@ def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_consta
         path_lengths.append(len(ant.edges_travelled))
         print_on_current_line("Ant: {}/{}".format(i+1, ant_count))
         if live_plot and i % 20 == 0:
+
             live_plot.update(matrix.edges)
 
     if live_plot:
@@ -132,8 +132,7 @@ def main():
         if is_shorter_path(s_path, global_shortest_path):
             global_shortest_path = s_path
 
-    plotter.plot_path(global_shortest_path, mtrx)
-    plotter.plot_path_lengths(all_path_lengths.mean(0))
+    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, mtrx)
 
 
 if __name__ == "__main__":

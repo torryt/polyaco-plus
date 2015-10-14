@@ -43,7 +43,7 @@ def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
 
 
 class AcocMatrix:
-    def __init__(self, x_size, y_size, blocked_edge_indexes):
+    def __init__(self, x_size, y_size, blocked_edge_indexes=None):
         self.x_size = x_size
         self.y_size = y_size
         coordinates = list(product(range(0, x_size), range(0, y_size)))

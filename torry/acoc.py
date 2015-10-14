@@ -112,20 +112,18 @@ def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_consta
     return path_lengths, current_shortest_path
 
 
-def main():
-    ant_count = 400
-    iteration_count = 100
-    pheromone_constant = 15.0
-    decay_constant = 0.04
-
-    all_path_lengths = np.zeros((iteration_count,ant_count))
+def acoc(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_dimensions=(30, 30), live_plot=False):
+    all_path_lengths = np.zeros((iteration_count, ant_count))
     global_shortest_path = list(repeat(0, 9999))
+
+    start = (1, 1)
+    target = (25, 25)
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i+1, iteration_count))
-        matrix = AcocMatrix(20, 20, range(80, 100, 2) + range(320, 340, 2))
+        matrix = AcocMatrix(matrix_dimensions[0], matrix_dimensions[1], range(80, 100, 2) + range(320, 340, 2))
         path_lengths, s_path = \
-            shortest_path(matrix, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, False)
+            shortest_path(matrix, start, target, ant_count, pheromone_constant, decay_constant, live_plot)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
@@ -137,4 +135,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    acoc(10, 10, 15.0, 0.04, (20, 20), False)

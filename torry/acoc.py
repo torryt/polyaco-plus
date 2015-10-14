@@ -114,8 +114,9 @@ def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_consta
 def shortest_path_naive(matrix, start_coord, target_coord, ant_count):
     naive_results = []
     global_shortest_naive_path = list(repeat(0, 9999))
-
+    print("\n")
     for i in range(ant_count):
+        print_on_current_line("Naive ant: {}/{}".format(i+1, ant_count))
         ant = Ant(start_coord)
 
         ant_at_target = False
@@ -126,17 +127,14 @@ def shortest_path_naive(matrix, start_coord, target_coord, ant_count):
                 pass
             else:
                 ant_at_target = True
-        if is_shorter_path(ant.edges_travelled, global_shortest_naive_path):
-            current_shortest_path = ant.edges_travelled
-
         naive_results.append(len(ant.edges_travelled))
 
     return naive_results, global_shortest_naive_path
 
 
 def main():
-    ant_count = 100
-    iteration_count = 1
+    ant_count = 400
+    iteration_count = 5
     pheromone_constant = 15.0
     decay_constant = 0.04
     naive_data = True
@@ -147,13 +145,13 @@ def main():
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i+1, iteration_count))
-        mtrx = AcocMatrix(20, 20)
+        matrix = AcocMatrix(20, 20)
         path_lengths, s_path = \
-            shortest_path(mtrx, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, True)
+            shortest_path(matrix, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, False)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
-        if is_shorter_path(s_path, global_shortest_path):
+        if len(s_path) < len(global_shortest_path):
             global_shortest_path = s_path
 
         if naive_data:
@@ -162,7 +160,8 @@ def main():
                 shortest_path_naive(ntrx, (1, 1), (15, 15), ant_count)
             all_naive_path_lengths[i, :] = naive_path_lengths
 
-    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, mtrx, naive_data, all_naive_path_lengths.mean(0))
+    print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
+    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, naive_data, all_naive_path_lengths.mean(0))
 
 if __name__ == "__main__":
     main()

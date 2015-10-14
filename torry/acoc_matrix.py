@@ -1,5 +1,6 @@
 from itertools import product
 import matplotlib.pyplot as plt
+from random import randint
 
 
 def edge_is_in_list(edge, ignore_list):
@@ -7,18 +8,6 @@ def edge_is_in_list(edge, ignore_list):
         if e == edge:
             return True
     return False
-
-
-def init_edges(x_size, y_size, coordinates):
-    edges = []
-    for x, y in coordinates:
-        if x != x_size - 1:
-            east_neighbor = Vertex(x + 1, y)
-            edges.append(AcocEdge(Vertex(x, y), east_neighbor))
-        if y != y_size - 1:
-            north_neighbor = Vertex(x, y + 1)
-            edges.append(AcocEdge(Vertex(x, y), north_neighbor))
-    return edges
 
 
 def connect_edges_to_vertex(vertex, edges):
@@ -29,21 +18,37 @@ def connect_edges_to_vertex(vertex, edges):
     vertex.connected_edges = connected_edges
 
 
-def init_matrix(x_size, y_size):
-    points = list(product(range(0, x_size), range(0, y_size)))
-    vertices = [Vertex(p[0], p[1]) for p in points]
-    edges = init_edges(x_size, y_size, points)
+def init_vertices(coordinates, edges):
+    vertices = [Vertex(p[0], p[1]) for p in coordinates]
 
     for v in vertices:
         connect_edges_to_vertex(v, edges)
-    return vertices, edges
+    return vertices
+
+
+def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
+    edges = []
+    for x, y in coordinates:
+        if x != x_size - 1:
+            east_neighbor = Vertex(x + 1, y)
+            edges.append(AcocEdge(Vertex(x, y), east_neighbor))
+        if y != y_size - 1:
+            north_neighbor = Vertex(x, y + 1)
+            edges.append(AcocEdge(Vertex(x, y), north_neighbor))
+    if blocked_edge_indexes:
+        blocked_edge_indexes.sort(reverse=True)
+        for i in blocked_edge_indexes:
+            edges.pop(i)
+    return edges
 
 
 class AcocMatrix:
-    def __init__(self, x_size, y_size):
+    def __init__(self, x_size, y_size, blocked_edge_indexes=None):
         self.x_size = x_size
         self.y_size = y_size
-        self.vertices, self.edges = init_matrix(self.x_size, self.y_size)
+        coordinates = list(product(range(0, x_size), range(0, y_size)))
+        self.edges = init_edges(x_size, y_size, coordinates, blocked_edge_indexes)
+        self.vertices = init_vertices(coordinates, self.edges)
 
     def show_plot(self):
         x_coord, y_coord = zip(*[(v.x, v.y) for v in self.vertices])
@@ -58,7 +63,6 @@ class AcocMatrix:
             if (v.x, v.y) == x_y:
                 return v
         return None
-        # return next((v for v in self.vertices if v.coordinates() == x_y), None)
 
 
 class AcocEdge:
@@ -87,7 +91,7 @@ class Vertex:
 
 
 def main():
-    matrix = AcocMatrix(5, 5)
+    matrix = AcocMatrix(20, 20, range(80, 110, 2) + range(320, 350, 2))
 
     v = matrix.vertices[0]
     e = v.connected_edges[0]

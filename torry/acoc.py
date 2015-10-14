@@ -5,10 +5,10 @@ from random import random
 from itertools import repeat
 import numpy as np
 
-from acoc_matrix import AcocMatrix
-import acoc_plotter as plotter
-from acoc_plotter import LivePheromonePlot
-from ant import Ant
+from torry.acoc_matrix import AcocMatrix
+import torry.acoc_plotter as plotter
+from torry.acoc_plotter import LivePheromonePlot
+from torry.ant import Ant
 
 
 def normalize_0_to_1(values):
@@ -56,7 +56,6 @@ def put_pheromones(matrix, path, pheromone_constant):
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
         edge.pheromone_strength += pheromone_constant / len(path)
-
 
 def pheromones_decay(matrix, pheromone_constant, decay_constant):
     for edge in matrix.edges:
@@ -112,16 +111,39 @@ def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_consta
     return path_lengths, current_shortest_path
 
 
-def acoc(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_dimensions=(30, 30), live_plot=False):
+def shortest_path_naive(matrix, start_coord, target_coord, ant_count):
+    naive_results = []
+    global_shortest_naive_path = list(repeat(0, 9999))
+    print("\n")
+    for i in range(ant_count):
+        print_on_current_line("Naive ant: {}/{}".format(i+1, ant_count))
+        ant = Ant(start_coord)
+
+        ant_at_target = False
+        while not ant_at_target:
+            if ant.current_coordinates != target_coord:
+                edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
+                ant.edges_travelled.append(edge)
+                pass
+            else:
+                ant_at_target = True
+        naive_results.append(len(ant.edges_travelled))
+
+    return naive_results, global_shortest_naive_path
+
+
+def acoc(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_dim=(20, 20), live_plot=False, naive_data=False):
     all_path_lengths = np.zeros((iteration_count, ant_count))
+    all_naive_path_lengths = np.zeros((iteration_count, ant_count))
     global_shortest_path = list(repeat(0, 9999))
 
     start = (1, 1)
-    target = (25, 25)
+    target = (15, 15)
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i+1, iteration_count))
-        matrix = AcocMatrix(matrix_dimensions[0], matrix_dimensions[1], range(80, 100, 2) + range(320, 340, 2))
+        matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
+
         path_lengths, s_path = \
             shortest_path(matrix, start, target, ant_count, pheromone_constant, decay_constant, live_plot)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
@@ -130,9 +152,14 @@ def acoc(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_
         if len(s_path) < len(global_shortest_path):
             global_shortest_path = s_path
 
-    print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
-    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix)
+        if naive_data:
+            matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
+            path_lengths, _ = \
+                shortest_path_naive(matrix, (1, 1), (15, 15), ant_count)
+            all_naive_path_lengths[i, :] = path_lengths
 
+    print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
+    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, naive_data, all_naive_path_lengths.mean(0))
 
 if __name__ == "__main__":
-    acoc(10, 10, 15.0, 0.04, (20, 20), False)
+    acoc(400, 10, 15.0, 0.04, (20, 20), False)

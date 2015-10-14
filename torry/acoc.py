@@ -114,7 +114,7 @@ def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_consta
 
 def main():
     ant_count = 400
-    iteration_count = 5
+    iteration_count = 100
     pheromone_constant = 15.0
     decay_constant = 0.04
 
@@ -123,16 +123,17 @@ def main():
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i+1, iteration_count))
-        mtrx = AcocMatrix(20, 20)
+        matrix = AcocMatrix(20, 20, range(80, 100, 2) + range(320, 340, 2))
         path_lengths, s_path = \
-            shortest_path(mtrx, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, True)
+            shortest_path(matrix, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, False)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
-        if is_shorter_path(s_path, global_shortest_path):
+        if len(s_path) < len(global_shortest_path):
             global_shortest_path = s_path
 
-    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, mtrx)
+    print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
+    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix)
 
 
 if __name__ == "__main__":

@@ -91,7 +91,7 @@ class Vertex:
 
 
 def main():
-    matrix = AcocMatrix(20, 20, range(80, 110, 2) + range(320, 350, 2))
+    matrix = AcocMatrix(30, 30, range(81, 110, 2) + range(321, 350, 2))
 
     v = matrix.vertices[0]
     e = v.connected_edges[0]

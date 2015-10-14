@@ -132,22 +132,20 @@ def shortest_path_naive(matrix, start_coord, target_coord, ant_count):
     return naive_results, global_shortest_naive_path
 
 
-def main():
-    ant_count = 400
-    iteration_count = 5
-    pheromone_constant = 15.0
-    decay_constant = 0.04
-    naive_data = True
-
-    all_path_lengths = np.zeros((iteration_count,ant_count))
-    global_shortest_path = list(repeat(0, 9999))
+def acoc(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_dim=(20, 20), live_plot=False, naive_data=False):
+    all_path_lengths = np.zeros((iteration_count, ant_count))
     all_naive_path_lengths = np.zeros((iteration_count, ant_count))
+    global_shortest_path = list(repeat(0, 9999))
+
+    start = (1, 1)
+    target = (15, 15)
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i+1, iteration_count))
-        matrix = AcocMatrix(20, 20)
+        matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
+
         path_lengths, s_path = \
-            shortest_path(matrix, (1, 1), (15, 15), ant_count, pheromone_constant, decay_constant, False)
+            shortest_path(matrix, start, target, ant_count, pheromone_constant, decay_constant, live_plot)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
@@ -155,14 +153,13 @@ def main():
             global_shortest_path = s_path
 
         if naive_data:
-            ntrx = AcocMatrix(20, 20)
-            naive_path_lengths, s_naive_path = \
-                shortest_path_naive(ntrx, (1, 1), (15, 15), ant_count)
-            all_naive_path_lengths[i, :] = naive_path_lengths
+            matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
+            path_lengths, _ = \
+                shortest_path_naive(matrix, (1, 1), (15, 15), ant_count)
+            all_naive_path_lengths[i, :] = path_lengths
 
     print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
     plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, naive_data, all_naive_path_lengths.mean(0))
 
 if __name__ == "__main__":
-    main()
-
+    acoc(400, 10, 15.0, 0.04, (20, 20), False)

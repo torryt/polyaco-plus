@@ -78,25 +78,22 @@ def print_on_current_line(in_string):
     sys.stdout.flush()
 
 
-def classify(matrix, ant_count, pheromone_constant, decay_constant, live_plot):
+def shortest_path(matrix, start_coord, target_coord, ant_count, pheromone_constant, decay_constant, live_plot):
     path_lengths = []
     current_shortest_path = list(repeat(0, 9999))
 
     if live_plot:
-        live_plot = LivePheromonePlot(matrix)
+        live_plot = LivePheromonePlot(matrix, start_coord, target_coord)
 
     for i in range(ant_count):
-        start_coordinates = (1, 1)
-        ant = Ant(start_coordinates)
+        ant = Ant(start_coord)
 
-        edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
-        ant.edges_travelled.append(edge)
         ant_at_target = False
-
         while not ant_at_target:
-            if ant.current_coordinates != start_coordinates:
+            if ant.current_coordinates != target_coord:
                 edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
                 ant.edges_travelled.append(edge)
+                pass
             else:
                 ant_at_target = True
         if is_shorter_path(ant.edges_travelled, current_shortest_path):
@@ -116,6 +113,27 @@ def classify(matrix, ant_count, pheromone_constant, decay_constant, live_plot):
     return path_lengths, current_shortest_path
 
 
+def shortest_path_naive(matrix, start_coord, target_coord, ant_count):
+    naive_results = []
+    global_shortest_naive_path = list(repeat(0, 9999))
+    print("\n")
+    for i in range(ant_count):
+        print_on_current_line("Naive ant: {}/{}".format(i + 1, ant_count))
+        ant = Ant(start_coord)
+
+        ant_at_target = False
+        while not ant_at_target:
+            if ant.current_coordinates != target_coord:
+                edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
+                ant.edges_travelled.append(edge)
+                pass
+            else:
+                ant_at_target = True
+        naive_results.append(len(ant.edges_travelled))
+
+    return naive_results, global_shortest_naive_path
+
+
 def run(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_dim=(20, 20), live_plot=False, naive_data=False):
     all_path_lengths = np.zeros((iteration_count, ant_count))
     all_naive_path_lengths = np.zeros((iteration_count, ant_count))
@@ -129,7 +147,7 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_d
         matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
 
         path_lengths, s_path = \
-            classify(matrix, start, target, ant_count, pheromone_constant, decay_constant, live_plot)
+            shortest_path(matrix, start, target, ant_count, pheromone_constant, decay_constant, live_plot)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
@@ -139,7 +157,7 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_d
         if naive_data:
             matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
             path_lengths, _ = \
-                shortest_path_naive(matrix, ant_count)
+                shortest_path_naive(matrix, (1, 1), (15, 15), ant_count)
             all_naive_path_lengths[i, :] = path_lengths
 
     print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))

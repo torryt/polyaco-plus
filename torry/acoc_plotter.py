@@ -2,14 +2,16 @@ from matplotlib import pyplot as plt
 
 
 class LivePheromonePlot:
-    def __init__(self, matrix, start_coordinates, target_coordinates):
+    def __init__(self, matrix, start_coordinates=None, target_coordinates=None):
         plt.ion()
         self.plot_lines = []
         for edge in matrix.edges:
             line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
             plt.setp(line, linewidth=edge.pheromone_strength)
             self.plot_lines.append(line)
-        plt.plot([start_coordinates[0], target_coordinates[0]], [start_coordinates[1], target_coordinates[1]], 'o')
+
+        if start_coordinates and target_coordinates:
+            plt.plot([start_coordinates[0], target_coordinates[0]], [start_coordinates[1], target_coordinates[1]], 'o')
 
         plt.axis([-1, matrix.x_size, -1, matrix.y_size])
         plt.draw()

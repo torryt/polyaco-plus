@@ -1,6 +1,5 @@
 from itertools import product
 import matplotlib.pyplot as plt
-from random import randint
 
 
 def edge_is_in_list(edge, ignore_list):

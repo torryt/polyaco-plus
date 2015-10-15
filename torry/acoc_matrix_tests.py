@@ -62,21 +62,5 @@ class TestVertex(unittest.TestCase):
             self.assertEqual(2, len(v1.connected_edges))
 
 
-class TestGetConnectedEdges(unittest.TestCase):
-    def test_connected_edges_returns_two_when_vertex_is_corner_vertex(self):
-        matrix = AcocMatrix(4, 4)
-        connected_edges_count = len(matrix.get_connected_edges((0, 0)))
-        self.assertEqual(2, connected_edges_count)
-
-    def test_connected_edges_returns_three_when_vertex_is_perimeter_vertex(self):
-        matrix = AcocMatrix(4, 4)
-        connected_edges_count = len(matrix.get_connected_edges((0, 1)))
-        self.assertEqual(3, connected_edges_count)
-
-    def test_connected_edges_returns_four_when_vertex_is_middle_vertex(self):
-        matrix = AcocMatrix(4, 4)
-        connected_edges_count = len(matrix.get_connected_edges((1, 1)))
-        self.assertEqual(4, connected_edges_count)
-
 if __name__ == '__main__':
     unittest.main()

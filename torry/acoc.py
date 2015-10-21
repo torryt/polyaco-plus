@@ -52,10 +52,12 @@ def get_unique_edges(path):
     unique_edges = list(z)
     return unique_edges
 
+
 def put_pheromones(matrix, path, pheromone_constant):
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
         edge.pheromone_strength += pheromone_constant / len(path)
+
 
 def pheromones_decay(matrix, pheromone_constant, decay_constant):
     for edge in matrix.edges:

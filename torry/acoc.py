@@ -164,4 +164,4 @@ def acoc(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_
     plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, naive_data, all_naive_path_lengths.mean(0))
 
 if __name__ == "__main__":
-    acoc(400, 10, 15.0, 0.04, (20, 20), False)
+    acoc(200, 10, 15.0, 0.04, (20, 20), False, False)

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+from random import Random
 from random import random
 from itertools import repeat
-import numpy as np
 from copy import copy
+
+import numpy as np
 
 from torry.acoc_matrix import AcocMatrix
 import torry.acoc_plotter as plotter
@@ -84,8 +86,12 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     if live_plot:
         live_plot = LivePheromonePlot(matrix)
 
+    rand = Random()
+    rand_x = rand.randint((np.amin(data[0]) - 1), np.amax(data[0]) + 1)
+    rand_y = rand.randint((np.amin(data[1]) - 1), np.amax(data[1]) + 1)
+
     for i in range(ant_count):
-        start_coordinates = (1, 1)
+        start_coordinates = (rand_x, rand_y)
         ant = Ant(start_coordinates)
 
         edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)

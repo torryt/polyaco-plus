@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-from random import random
+import random
 from itertools import repeat
-import numpy as np
 from copy import copy
+
+import numpy as np
 
 from torry.acoc_matrix import AcocMatrix
 import torry.acoc_plotter as plotter
@@ -30,7 +31,7 @@ def next_edge_and_vertex(matrix, ant):
             connected_edges.remove(prev_edge)
     probabilities = normalize_0_to_1(np.array([e.pheromone_strength for e in connected_edges]))
 
-    rand_num = random()
+    rand_num = random.random()
     cumulative_prob = 0
     for i, edge in enumerate(connected_edges):
         cumulative_prob += probabilities[i]
@@ -65,7 +66,7 @@ def put_pheromones(path, data, pheromone_constant):
 
 def pheromones_decay(matrix, pheromone_constant, decay_constant):
     for edge in matrix.edges:
-        rand_num = random()
+        rand_num = random.random()
         if rand_num < decay_constant:
             edge.pheromone_strength = pheromone_constant
 
@@ -91,8 +92,12 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     if live_plot:
         live_plot = LivePheromonePlot(matrix)
 
+    # rand = Random()
+    rand_x = random.randint((np.amin(data[0]) - 1), np.amax(data[0]) + 1)
+    rand_y = random.randint((np.amin(data[1]) - 1), np.amax(data[1]) + 1)
+
     for i in range(ant_count):
-        start_coordinates = (1, 1)
+        start_coordinates = (rand_x, rand_y)
         ant = Ant(start_coordinates)
 
         edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)

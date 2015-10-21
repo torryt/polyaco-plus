@@ -54,6 +54,7 @@ def plot_path(path, matrix):
 
 
 def plot_path_with_data(path, data):
+    plt.close()
     for edge in path:
         plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
     plt.plot(data[0], data[1], 'o')

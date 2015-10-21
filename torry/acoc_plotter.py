@@ -23,9 +23,19 @@ class LivePheromonePlot:
         plt.clf()
         plt.ioff()
 
-    def update(self, new_edges):
-        for j, edge in enumerate(new_edges):
-            plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength)
+    def update(self, new_edges, current_edge=None, connected_edges=None):
+        if current_edge:
+            for j, edge in enumerate(new_edges):
+                if edge in connected_edges:
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color='b')
+                elif edge == current_edge:
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color='r')
+                else:
+                    plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength, color='k')
+
+        else:
+            for j, edge in enumerate(new_edges):
+                plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength)
         plt.draw()
         plt.pause(0.01)
 
@@ -50,7 +60,7 @@ def plot_path_with_data(path, data):
     plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
 
 
-def plot_pheromone_values(matrix):
+def plot_pheromone_values(matrix, last_edge=None):
     for edge in matrix.edges:
         line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)

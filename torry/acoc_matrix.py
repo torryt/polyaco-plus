@@ -46,6 +46,9 @@ class Vertex:
         self.y = y
         self.connected_edges = []
 
+    def __repr__(self):
+        return str((self.x, self.y))
+
     def coordinates(self):
         return self.x, self.y
 
@@ -90,7 +93,7 @@ def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
 
 
 def main():
-    matrix = AcocMatrix((-5, 5), (-10, 10))
+    matrix = AcocMatrix((-1, 3), (-1, 3))
 
     v = matrix.vertices[0]
     e = v.connected_edges[0]

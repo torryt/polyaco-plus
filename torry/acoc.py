@@ -47,7 +47,7 @@ def get_unique_edges(path):
     return unique_edges
 
 
-def put_pheromones(matrix, path, pheromone_constant):
+def put_pheromones(path, pheromone_constant):
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
         edge.pheromone_strength += pheromone_constant / len(path)
@@ -100,7 +100,7 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
                 ant.edges_travelled.append(edge)
         if is_shorter_path(ant.edges_travelled, current_shortest_path):
             current_shortest_path = ant.edges_travelled
-        put_pheromones(matrix, current_shortest_path, pheromone_constant)
+        put_pheromones(current_shortest_path, pheromone_constant)
         pheromones_decay(matrix, 0.1, decay_constant)
 
         path_lengths.append(len(ant.edges_travelled))

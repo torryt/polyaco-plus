@@ -1,13 +1,16 @@
 from itertools import product
 import matplotlib.pyplot as plt
+import numpy as np
+import acoc_plotter
 
 
 class AcocMatrix:
-    def __init__(self, x_min_max, y_min_max, blocked_edge_indexes=None):
-        self.x_min_max = x_min_max
-        self.y_min_max = y_min_max
-        coordinates = list(product(range(*x_min_max), range(*y_min_max)))
-        self.edges = init_edges(x_min_max[1], y_min_max[1], coordinates, blocked_edge_indexes)
+    def __init__(self, data, blocked_edge_indexes=None):
+        self.x_min_max = np.amin(data[0]) - 1, np.amax(data[0]) + 1
+        self.y_min_max = np.amin(data[1]) - 1, np.amax(data[1]) + 1
+
+        coordinates = list(product(range(*self.x_min_max), range(*self.y_min_max)))
+        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, blocked_edge_indexes)
         self.vertices = init_vertices(coordinates, self.edges)
 
     def show_plot(self):
@@ -93,11 +96,12 @@ def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
 
 
 def main():
-    matrix = AcocMatrix((-1, 3), (-1, 3))
+    data = np.array([[0, 1, 2, 2, 2, 5, 1, 4, 8, 1, 4, 5, 4, 5, 10],
+                     [0, 6, 2, 4, 5, 6, 3, 7, 1, 3, 7, 6, 7, 8, 10]])
 
-    v = matrix.vertices[0]
-    e = v.connected_edges[0]
-    e.pheromone_strength = 0.2
+    matrix = AcocMatrix(data)
+    # acoc_plotter.plot_data(data)
+
     matrix.show_plot()
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from torry.acoc_matrix import AcocMatrix
 import torry.acoc_plotter as plotter
 from torry.acoc_plotter import LivePheromonePlot
 from torry.ant import Ant
+from torry.is_point_inside import is_point_inside
 
 
 def normalize_0_to_1(values):
@@ -47,10 +48,19 @@ def get_unique_edges(path):
     return unique_edges
 
 
-def put_pheromones(matrix, path, pheromone_constant):
+def put_pheromones(path, data, pheromone_constant):
+    points = data.T.tolist()
+
+    points_in_polygon = 0
+    for p in points:
+        if is_point_inside(p, path):
+            points_in_polygon += 1
+
+    plotter.plot_path_with_data(path, data)
+
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
-        edge.pheromone_strength += pheromone_constant / len(path)
+        edge.pheromone_strength += pheromone_constant * points_in_polygon
 
 
 def pheromones_decay(matrix, pheromone_constant, decay_constant):
@@ -76,10 +86,7 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     path_lengths = []
     current_shortest_path = list(repeat(0, 9999))
 
-    matrix_x_min_max = np.amin(data[0]) - 1, np.amax(data[0]) + 1
-    matrix_y_min_max = np.amin(data[1]) - 1, np.amax(data[1]) + 1
-
-    matrix = AcocMatrix(matrix_x_min_max, matrix_y_min_max)
+    matrix = AcocMatrix(data)
 
     if live_plot:
         live_plot = LivePheromonePlot(matrix)
@@ -100,14 +107,13 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
                 ant.edges_travelled.append(edge)
         if is_shorter_path(ant.edges_travelled, current_shortest_path):
             current_shortest_path = ant.edges_travelled
-        put_pheromones(matrix, current_shortest_path, pheromone_constant)
+        put_pheromones(current_shortest_path, data, pheromone_constant)
         pheromones_decay(matrix, 0.1, decay_constant)
 
         path_lengths.append(len(ant.edges_travelled))
         print_on_current_line("Ant: {}/{}".format(i + 1, ant_count))
         if live_plot and i % 50 == 0:
             live_plot.update(matrix.edges)
-            pass
 
     if live_plot:
         live_plot.close()
@@ -120,7 +126,7 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plo
     global_shortest_path = list(repeat(0, 9999))
 
     # Two-dimensional array with x-coordinates in first array, and y-coordinates in second array
-    data = np.array([[0, 10], [0, 10]])
+    data = np.array([[0, 1, 2, 2, 2, 4, 5, 10], [0, 6, 3, 7, 6, 7, 8, 10]])
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i + 1, iteration_count))

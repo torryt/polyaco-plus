@@ -126,7 +126,6 @@ def shortest_path_naive(matrix, start_coord, target_coord, ant_count):
             if ant.current_coordinates != target_coord:
                 edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
                 ant.edges_travelled.append(edge)
-                pass
             else:
                 ant_at_target = True
         naive_results.append(len(ant.edges_travelled))
@@ -161,7 +160,10 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_d
             all_naive_path_lengths[i, :] = path_lengths
 
     print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
-    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, naive_data, all_naive_path_lengths.mean(0))
+    if naive_data:
+        plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, all_naive_path_lengths.mean(0))
+    else:
+        plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix)
 
 if __name__ == "__main__":
     run(400, 1, 15.0, 0.04, (20, 20), False)

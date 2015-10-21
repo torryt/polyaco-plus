@@ -2,6 +2,6 @@ import shortest_path
 
 
 def main():
-    shortest_path.run(400, 50, 15.0, 0.04, (30, 30), False)
+    shortest_path.run(400, 5, 15.0, 0.04, live_plot=False)
 
 main()

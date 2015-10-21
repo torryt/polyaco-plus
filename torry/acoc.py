@@ -78,9 +78,14 @@ def print_on_current_line(in_string):
     sys.stdout.flush()
 
 
-def classify(matrix, ant_count, pheromone_constant, decay_constant, live_plot):
+def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     path_lengths = []
     current_shortest_path = list(repeat(0, 9999))
+
+    matrix_x_min_max = np.amin(data[0]) - 1, np.amax(data[0]) + 1
+    matrix_y_min_max = np.amin(data[1]) - 1, np.amax(data[1]) + 1
+
+    matrix = AcocMatrix(matrix_x_min_max, matrix_y_min_max)
 
     if live_plot:
         live_plot = LivePheromonePlot(matrix)
@@ -106,8 +111,7 @@ def classify(matrix, ant_count, pheromone_constant, decay_constant, live_plot):
 
         path_lengths.append(len(ant.edges_travelled))
         print_on_current_line("Ant: {}/{}".format(i + 1, ant_count))
-        if live_plot and i % 20 == 0:
-
+        if live_plot and i % 5 == 0:
             live_plot.update(matrix.edges)
 
     if live_plot:
@@ -116,34 +120,26 @@ def classify(matrix, ant_count, pheromone_constant, decay_constant, live_plot):
     return path_lengths, current_shortest_path
 
 
-def run(ant_count, iteration_count, pheromone_constant, decay_constant, matrix_dim=(20, 20), live_plot=False, naive_data=False):
+def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plot=False):
     all_path_lengths = np.zeros((iteration_count, ant_count))
-    all_naive_path_lengths = np.zeros((iteration_count, ant_count))
     global_shortest_path = list(repeat(0, 9999))
 
-    start = (1, 1)
-    target = (15, 15)
+    # Two-dimensional array with x-coordinates in first array, and y-coordinates in second array
+    data = np.array([[0, 2], [0, 2]])
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i + 1, iteration_count))
-        matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
 
         path_lengths, s_path = \
-            classify(matrix, start, target, ant_count, pheromone_constant, decay_constant, live_plot)
+            classify(data, ant_count, pheromone_constant, decay_constant, live_plot)
         print_on_current_line("Shortest path length: {}".format(len(s_path)))
 
         all_path_lengths[i, :] = path_lengths
         if len(s_path) < len(global_shortest_path):
             global_shortest_path = s_path
 
-        if naive_data:
-            matrix = AcocMatrix(matrix_dim[0], matrix_dim[1])
-            path_lengths, _ = \
-                shortest_path_naive(matrix, ant_count)
-            all_naive_path_lengths[i, :] = path_lengths
-
     print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
-    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, matrix, naive_data, all_naive_path_lengths.mean(0))
+    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, data)
 
 if __name__ == "__main__":
-    run(400, 1, 15.0, 0.04, (20, 20), False)
+    run(400, 10, 5.0, 0.04, True)

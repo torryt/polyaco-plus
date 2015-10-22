@@ -1,15 +1,15 @@
 from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
-import acoc_plotter
 
 
 class AcocMatrix:
     def __init__(self, data, blocked_edge_indexes=None):
-        self.x_min_max = np.amin(data[0]) - 1, np.amax(data[0]) + 1
-        self.y_min_max = np.amin(data[1]) - 1, np.amax(data[1]) + 1
+        self.x_min_max = np.amin(data[0]) - 1, np.amax(data[0]) + 2
+        self.y_min_max = np.amin(data[1]) - 1, np.amax(data[1]) + 2
 
-        coordinates = list(product(range(*self.x_min_max), range(*self.y_min_max)))
+        coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
+                                   range(self.y_min_max[0], self.y_min_max[1])))
         self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, blocked_edge_indexes)
         self.vertices = init_vertices(coordinates, self.edges)
 

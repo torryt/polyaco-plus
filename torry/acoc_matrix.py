@@ -1,12 +1,13 @@
 from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
+import acoc_plotter
 
 
 class AcocMatrix:
     def __init__(self, data, blocked_edge_indexes=None):
-        self.x_min_max = np.amin(data[0]) - 1, np.amax(data[0]) + 2
-        self.y_min_max = np.amin(data[1]) - 1, np.amax(data[1]) + 2
+        self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 3)
+        self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 3)
 
         coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
                                    range(self.y_min_max[0], self.y_min_max[1])))
@@ -96,11 +97,13 @@ def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
 
 
 def main():
-    data = np.array([[0, 1, 2, 2, 2, 5, 1, 4, 8, 1, 4, 5, 4, 5, 10],
-                     [0, 6, 2, 4, 5, 6, 3, 7, 1, 3, 7, 6, 7, 8, 10]])
+    from data_generator import uniform_rectangle
+    red = np.insert(uniform_rectangle((2, 4), (2, 4), 10), 2, 0, axis=0)
+    blue = np.insert(uniform_rectangle((6, 8), (2, 4), 10), 2, 1, axis=0)
+    data = np.concatenate((red, blue), axis=1)
 
     matrix = AcocMatrix(data)
-    # acoc_plotter.plot_data(data)
+    acoc_plotter.plot_data(data)
 
     matrix.show_plot()
 

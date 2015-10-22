@@ -3,7 +3,7 @@ import numpy as np
 
 
 class LivePheromonePlot:
-    def __init__(self, matrix, start_coordinates=None, target_coordinates=None):
+    def __init__(self, matrix, data=None):
         plt.ion()
         self.plot_lines = []
         for edge in matrix.edges:
@@ -11,8 +11,8 @@ class LivePheromonePlot:
             plt.setp(line, linewidth=edge.pheromone_strength)
             self.plot_lines.append(line)
 
-        if start_coordinates and target_coordinates:
-            plt.plot([start_coordinates[0], target_coordinates[0]], [start_coordinates[1], target_coordinates[1]], 'o')
+        if data is not None:
+            plot_data(data)
 
         plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1], matrix.y_min_max[0] - 1, matrix.y_min_max[1]])
         plt.draw()
@@ -105,8 +105,20 @@ def plot_aco_and_random(aco_path_lengths, random_path_lengths):
 
 def plot_data(data):
     if data.shape[0] > 2:
-        pass
+        temp = data.T
+        red = temp[temp[:, 2] == 0][:, :2].T
+        blue = temp[temp[:, 2] == 1][:, :2].T
+        plt.plot(red[0], red[1], 'o', color='r')
+        plt.plot(blue[0], blue[1], 'o', color='b')
     else:
         plt.plot(data[0], data[1], 'o')
     plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
     plt.show()
+
+if __name__ == "__main__":
+    def main():
+        from data_generator import uniform_rectangle
+        points = uniform_rectangle((2, 4), (2, 4), 500)
+        plot_data(points)
+
+    main()

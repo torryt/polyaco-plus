@@ -12,6 +12,7 @@ import torry.acoc_plotter as plotter
 from torry.acoc_plotter import LivePheromonePlot
 from torry.ant import Ant
 from torry.is_point_inside import is_point_inside
+import torry.data_generator as dg
 
 
 def normalize_0_to_1(values):
@@ -53,13 +54,18 @@ def get_unique_edges(path):
     return unique_edges
 
 
-def put_pheromones(path, data, pheromone_constant):
+def classification_score(polygon, data):
     points = data.T.tolist()
 
     reward = 0
     for p in points:
-        if is_point_inside(p, path):
+        if is_point_inside(p, polygon):
             reward += 1 if p[2] == 0 else -1
+    return reward
+
+
+def put_pheromones(path, data, pheromone_constant):
+    reward = classification_score(path, data)
 
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
@@ -74,12 +80,6 @@ def pheromones_decay(matrix, pheromone_constant, decay_constant):
             edge.pheromone_strength = pheromone_constant
 
 
-def is_shorter_path(path_a, path_b):
-    if len(path_a) < len(path_b):
-        return True
-    return False
-
-
 def print_on_current_line(in_string):
     out_string = "\r" + in_string
     sys.stdout.write(out_string)
@@ -88,19 +88,17 @@ def print_on_current_line(in_string):
 
 def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     path_lengths = []
-    current_shortest_path = list(repeat(0, 9999))
+    current_best_polygon = []
+    current_best_score = 0
 
     matrix = AcocMatrix(data)
 
     if live_plot:
-        live_plot = LivePheromonePlot(matrix)
-
-    # rand = Random()
-    rand_x = random.randint((np.amin(data[0]) - 1), np.amax(data[0]) + 1)
-    rand_y = random.randint((np.amin(data[1]) - 1), np.amax(data[1]) + 1)
+        live_plot = LivePheromonePlot(matrix, data)
 
     for i in range(ant_count):
-        start_coordinates = (rand_x, rand_y)
+        start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+        start_coordinates = (start_vertex.x, start_vertex.y)
         ant = Ant(start_coordinates)
 
         edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
@@ -113,9 +111,13 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
             else:
                 edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
                 ant.edges_travelled.append(edge)
-        if is_shorter_path(ant.edges_travelled, current_shortest_path):
-            current_shortest_path = ant.edges_travelled
-        put_pheromones(current_shortest_path, data, pheromone_constant)
+
+        ant_score = classification_score(ant.edges_travelled, data)
+        if ant_score > current_best_score:
+            current_best_polygon = ant.edges_travelled
+            current_best_score = ant_score
+
+        put_pheromones(current_best_polygon, data, pheromone_constant)
         pheromones_decay(matrix, 0.1, decay_constant)
 
         path_lengths.append(len(ant.edges_travelled))
@@ -126,18 +128,19 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     if live_plot:
         live_plot.close()
 
-    return path_lengths, current_shortest_path
+    return path_lengths, current_best_polygon
 
 
 def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plot=False):
     all_path_lengths = np.zeros((iteration_count, ant_count))
     global_shortest_path = list(repeat(0, 9999))
 
-    # Two-dimensional array with x-coordinates in first array, and y-coordinates in second array
-    data = np.array([[0, 1, 2, 2, 2, 4, 5, 10],
-                     [0, 6, 3, 7, 6, 7, 8, 10],
-                     [0, 0, 0, 0, 1, 1, 1, 1]])
+    red = np.insert(dg.uniform_rectangle((2, 4), (2, 4), 20), 2, 0, axis=0)
+    blue = np.insert(dg.uniform_rectangle((6, 8), (2, 4), 20), 2, 1, axis=0)
 
+    # Two-dimensional array with x-coordinates in first array and y-coordinates in second array
+    data = np.concatenate((red, blue), axis=1)
+    # plotter.plot_data(data)
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i + 1, iteration_count))
 
@@ -155,4 +158,4 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plo
 
 
 if __name__ == "__main__":
-    run(400, 20, 5.0, 0.1, True)
+    run(400, 5, 0.5, 0.1, True)

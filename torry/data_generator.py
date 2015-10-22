@@ -15,5 +15,5 @@ def uniform_rectangle(x_boundary, y_boundary, num_elements):
 
         y = random.random()
         y = (y * (y_b.max - y_b.min)) + y_b.min
-        points.append([x,y])
+        points.append([x, y])
     return np.array(points).T

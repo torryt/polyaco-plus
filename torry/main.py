@@ -1,4 +1,4 @@
-import shortest_path
+import torry.shortest_path as shortest_path
 
 
 def main():

@@ -63,7 +63,7 @@ def plot_path_with_data(path, data):
     plot_data(data)
 
 
-def plot_pheromone_values(matrix, last_edge=None):
+def plot_pheromone_values(matrix):
     for edge in matrix.edges:
         line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)

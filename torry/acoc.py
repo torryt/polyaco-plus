@@ -87,7 +87,7 @@ def print_on_current_line(in_string):
 
 
 def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
-    path_lengths = []
+    ant_scores = []
     current_best_polygon = []
     current_best_score = 0
 
@@ -120,7 +120,7 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
         put_pheromones(current_best_polygon, data, pheromone_constant)
         pheromones_decay(matrix, 0.1, decay_constant)
 
-        path_lengths.append(len(ant.edges_travelled))
+        ant_scores.append(ant_score)
         print_on_current_line("Ant: {}/{}".format(i + 1, ant_count))
         if live_plot and i % 50 == 0:
             live_plot.update(matrix.edges)
@@ -128,12 +128,13 @@ def classify(data, ant_count, pheromone_constant, decay_constant, live_plot):
     if live_plot:
         live_plot.close()
 
-    return path_lengths, current_best_polygon
+    return ant_scores, current_best_polygon
 
 
 def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plot=False):
-    all_path_lengths = np.zeros((iteration_count, ant_count))
-    global_shortest_path = list(repeat(0, 9999))
+    all_ant_scores = np.zeros((iteration_count, ant_count))
+    global_best_polygon = list(repeat(0, 9999))
+    global_best_score = 0
 
     red = np.insert(dg.uniform_rectangle((2, 4), (2, 4), 20), 2, 0, axis=0)
     blue = np.insert(dg.uniform_rectangle((6, 8), (2, 4), 20), 2, 1, axis=0)
@@ -144,17 +145,17 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plo
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i + 1, iteration_count))
 
-        path_lengths, s_path = \
+        ant_scores, path = \
             classify(data, ant_count, pheromone_constant, decay_constant, live_plot)
-        print_on_current_line("Shortest path length: {}".format(len(s_path)))
+        print_on_current_line("Best ant score: {}".format(max(ant_scores)))
 
-        all_path_lengths[i, :] = path_lengths
-        if len(s_path) < len(global_shortest_path):
-            global_shortest_path = s_path
+        all_ant_scores[i, :] = ant_scores
+        if max(ant_scores) > global_best_score:
+            global_best_polygon = path
 
-    print("\nGlobal shortest path length: {}".format(len(global_shortest_path)))
-    plotter.draw_all(all_path_lengths.mean(0), global_shortest_path, data)
-    plotter.plot_path_with_data(global_shortest_path, data)
+    print("\nGlobal best ant score: {}".format(global_best_score))
+    plotter.draw_all(all_ant_scores.mean(0), global_best_polygon, data)
+    plotter.plot_path_with_data(global_best_polygon, data)
 
 
 if __name__ == "__main__":

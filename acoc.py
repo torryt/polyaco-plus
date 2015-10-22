@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import division
 import sys
 import random
 from itertools import repeat
@@ -57,23 +58,24 @@ def get_unique_edges(path):
     return unique_edges
 
 
-def classification_score(polygon, data):
+def cost_function(polygon, data):
     points = data.T.tolist()
-
     score = 0
     for p in points:
         if is_point_inside(p, polygon):
-            score += 1 if p[2] == 0 else -1
-    return score
+            score += 1 if p[2] == 0 else 0
+        else:
+            score += 1 if p[2] == 1 else 0
+    return (score / data.shape[1]) / len(polygon)
 
 
-def put_pheromones(path, data, pheromone_constant):
-    reward = classification_score(path, data)
+def put_pheromones(path, data, pheromone_constant, pher_max):
+    score = cost_function(path, data)
 
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
-        if reward > 0:
-            edge.pheromone_strength += pheromone_constant * reward
+        new_pheromone_strength = edge.pheromone_strength + pheromone_constant * score
+        edge.pheromone_strength = new_pheromone_strength if new_pheromone_strength < pher_max else pher_max
 
 
 def pheromone_evaporation(matrix, pheromone_constant, evaporation_const):
@@ -89,7 +91,7 @@ def print_on_current_line(in_string):
     sys.stdout.flush()
 
 
-def classify(data, ant_count, pheromone_constant, evaporation_const, live_plot):
+def classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, live_plot):
     ant_scores = []
     current_best_polygon = []
     current_best_score = 0
@@ -115,12 +117,12 @@ def classify(data, ant_count, pheromone_constant, evaporation_const, live_plot):
                 edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
                 ant.edges_travelled.append(edge)
 
-        ant_score = classification_score(ant.edges_travelled, data)
+        ant_score = cost_function(ant.edges_travelled, data)
         if ant_score > current_best_score:
             current_best_polygon = ant.edges_travelled
             current_best_score = ant_score
 
-        put_pheromones(current_best_polygon, data, pheromone_constant)
+        put_pheromones(current_best_polygon, data, pheromone_constant, pher_max)
         pheromone_evaporation(matrix, 0.1, evaporation_const)
 
         ant_scores.append(ant_score)
@@ -134,13 +136,13 @@ def classify(data, ant_count, pheromone_constant, evaporation_const, live_plot):
     return ant_scores, current_best_polygon
 
 
-def run(ant_count, iteration_count, pheromone_constant, evaporation_const, live_plot=False):
+def run(ant_count, iteration_count, pheromone_constant, evaporation_const, pher_max, live_plot=False):
     all_ant_scores = np.zeros((iteration_count, ant_count))
     global_best_polygon = list(repeat(0, 9999))
     global_best_score = 0
 
-    red = np.insert(dg.uniform_rectangle((2, 4), (2, 4), 20), 2, 0, axis=0)
-    blue = np.insert(dg.uniform_rectangle((6, 8), (2, 4), 20), 2, 1, axis=0)
+    red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 200), 2, 0, axis=0)
+    blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 200), 2, 1, axis=0)
 
     # Two-dimensional array with x-coordinates in first array and y-coordinates in second array
     data = np.concatenate((red, blue), axis=1)
@@ -148,12 +150,13 @@ def run(ant_count, iteration_count, pheromone_constant, evaporation_const, live_
         print("\nIteration: {}/{}".format(i + 1, iteration_count))
 
         ant_scores, path = \
-            classify(data, ant_count, pheromone_constant, evaporation_const, live_plot)
+            classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, live_plot)
         print_on_current_line("Best ant score: {}".format(max(ant_scores)))
 
         all_ant_scores[i, :] = ant_scores
         if max(ant_scores) > global_best_score:
             global_best_polygon = path
+            global_best_score = max(ant_scores)
 
     print("\nGlobal best ant score: {}".format(global_best_score))
 
@@ -161,4 +164,4 @@ def run(ant_count, iteration_count, pheromone_constant, evaporation_const, live_
     plotter.plot_ant_scores(ant_scores)
 
 if __name__ == "__main__":
-    run(100, 5, 0.3, 0.01, False)
+    run(100, 1, 1.0, 0.01, 5.0, False)

@@ -159,4 +159,4 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plo
 
 
 if __name__ == "__main__":
-    run(400, 5, 0.5, 0.1, True)
+    run(100, 1, 0.5, 0.1, True)

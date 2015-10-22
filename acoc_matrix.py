@@ -99,7 +99,7 @@ def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
 
 
 def main():
-    from data_generator import uniform_rectangle
+    from torry.data_generator import uniform_rectangle
     red = np.insert(uniform_rectangle((2, 4), (2, 4), 10), 2, 0, axis=0)
     blue = np.insert(uniform_rectangle((6, 8), (2, 4), 10), 2, 1, axis=0)
     data = np.concatenate((red, blue), axis=1)

@@ -154,9 +154,9 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plo
             global_best_polygon = path
 
     print("\nGlobal best ant score: {}".format(global_best_score))
-    plotter.draw_all(all_ant_scores.mean(0), global_best_polygon, data)
-    plotter.plot_path_with_data(global_best_polygon, data)
 
+    plotter.plot_path_with_data(global_best_polygon, data)
+    plotter.plot_ant_scores(ant_scores)
 
 if __name__ == "__main__":
-    run(100, 1, 0.5, 0.1, True)
+    run(100, 5, 0.3, 0.1, False)

@@ -40,11 +40,14 @@ class LivePheromonePlot:
         plt.pause(0.01)
 
 
-def plot_path_lengths(path_lengths):
-    x_coord = range(len(path_lengths))
-    y_coord = path_lengths
+def plot_ant_scores(ant_scores):
+    plt.figure(2)
+    x_coord = range(len(ant_scores))
+    y_coord = ant_scores
     plt.plot(x_coord, y_coord, 'k-')
-    plt.axis([0, len(path_lengths), 0, max(path_lengths)])
+    plt.axis([0, len(ant_scores), 0, max(ant_scores)])
+    plt.title("Ant Scores")
+    plt.show()
 
 
 def plot_path(path, matrix):
@@ -57,11 +60,10 @@ def plot_path_with_data(path, data):
     plt.close()
     for edge in path:
         plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
-    plt.plot(data[0], data[1], 'o')
-    plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
+    plot_data(data)
 
 
-def plot_pheromone_values(matrix, last_edge=None):
+def plot_pheromone_values(matrix):
     for edge in matrix.edges:
         line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
@@ -79,6 +81,8 @@ def plot_two_path_lengths(path_length1, path_length2):
     plt.plot(x_coord2, y_coord2, 'r')
     plt.axis([0, len(path_length1), 0, max(path_length1)])
 
+# Used for displaying shortest path + random
+
 
 def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):
     plt.figure(1)
@@ -91,19 +95,19 @@ def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):
     if ran_path_lengths:
         plot_aco_and_random(ant_path_lengths, ran_path_lengths)
     else:
-        plt.figure(2)
+        plt.figure(1)
         plt.title("ACO Path Lengths")
-        plot_path_lengths(ant_path_lengths)
+        plot_ant_scores(ant_path_lengths)
     plt.show()
 
 
 def plot_aco_and_random(aco_path_lengths, random_path_lengths):
-    plt.figure(2)
+    plt.figure(1)
     plot_two_path_lengths(aco_path_lengths, random_path_lengths)
     plt.show()
 
 
-def plot_data(data):
+def plot_data(data, show=True):
     if data.shape[0] > 2:
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
@@ -113,11 +117,13 @@ def plot_data(data):
     else:
         plt.plot(data[0], data[1], 'o')
     plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
-    plt.show()
+
+    if show:
+        plt.show()
 
 if __name__ == "__main__":
     def main():
-        from data_generator import uniform_rectangle
+        from torry.data_generator import uniform_rectangle
         points = uniform_rectangle((2, 4), (2, 4), 500)
         plot_data(points)
 

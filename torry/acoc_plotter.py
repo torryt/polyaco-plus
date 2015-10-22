@@ -1,17 +1,20 @@
 from matplotlib import pyplot as plt
+import numpy as np
 
 
 class LivePheromonePlot:
-    def __init__(self, matrix, start_coordinates, target_coordinates):
+    def __init__(self, matrix, data=None):
         plt.ion()
         self.plot_lines = []
         for edge in matrix.edges:
             line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
             plt.setp(line, linewidth=edge.pheromone_strength)
             self.plot_lines.append(line)
-        plt.plot([start_coordinates[0], target_coordinates[0]], [start_coordinates[1], target_coordinates[1]], 'o')
 
-        plt.axis([-1, matrix.x_size, -1, matrix.y_size])
+        if data is not None:
+            plot_data(data)
+
+        plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1], matrix.y_min_max[0] - 1, matrix.y_min_max[1]])
         plt.draw()
         plt.pause(0.01)
 
@@ -20,9 +23,19 @@ class LivePheromonePlot:
         plt.clf()
         plt.ioff()
 
-    def update(self, new_edges):
-        for j, edge in enumerate(new_edges):
-            plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength)
+    def update(self, new_edges, current_edge=None, connected_edges=None):
+        if current_edge:
+            for j, edge in enumerate(new_edges):
+                if edge in connected_edges:
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color='b')
+                elif edge == current_edge:
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color='r')
+                else:
+                    plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength, color='k')
+
+        else:
+            for j, edge in enumerate(new_edges):
+                plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength)
         plt.draw()
         plt.pause(0.01)
 
@@ -40,7 +53,15 @@ def plot_path(path, matrix):
     plt.axis([-1, matrix.x_size, -1, matrix.y_size])
 
 
-def plot_pheromone_values(matrix):
+def plot_path_with_data(path, data):
+    plt.close()
+    for edge in path:
+        plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
+    plt.plot(data[0], data[1], 'o')
+    plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
+
+
+def plot_pheromone_values(matrix, last_edge=None):
     for edge in matrix.edges:
         line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
@@ -59,21 +80,20 @@ def plot_two_path_lengths(path_length1, path_length2):
     plt.axis([0, len(path_length1), 0, max(path_length1)])
 
 
-def draw_all(all_paths, shortest_path, matrix, random, ran_path_lengths=None):
+def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):
     plt.figure(1)
     plt.subplot(211)
     plt.title("Path")
-    plot_path(shortest_path, matrix)
+    plot_path_with_data(shortest_path, data)
     plt.subplot(212)
     plt.title("Pheromone Values")
-    plot_pheromone_values(matrix)
 
-    if not random:
+    if ran_path_lengths:
+        plot_aco_and_random(ant_path_lengths, ran_path_lengths)
+    else:
         plt.figure(2)
         plt.title("ACO Path Lengths")
-        plot_path_lengths(all_paths)
-    else:
-        plot_aco_and_random(all_paths, ran_path_lengths)
+        plot_path_lengths(ant_path_lengths)
     plt.show()
 
 
@@ -81,3 +101,24 @@ def plot_aco_and_random(aco_path_lengths, random_path_lengths):
     plt.figure(2)
     plot_two_path_lengths(aco_path_lengths, random_path_lengths)
     plt.show()
+
+
+def plot_data(data):
+    if data.shape[0] > 2:
+        temp = data.T
+        red = temp[temp[:, 2] == 0][:, :2].T
+        blue = temp[temp[:, 2] == 1][:, :2].T
+        plt.plot(red[0], red[1], 'o', color='r')
+        plt.plot(blue[0], blue[1], 'o', color='b')
+    else:
+        plt.plot(data[0], data[1], 'o')
+    plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
+    plt.show()
+
+if __name__ == "__main__":
+    def main():
+        from data_generator import uniform_rectangle
+        points = uniform_rectangle((2, 4), (2, 4), 500)
+        plot_data(points)
+
+    main()

@@ -57,7 +57,7 @@ def put_pheromones(path, data, pheromone_constant):
         if is_point_inside(p, path):
             points_in_polygon += 1
 
-    plotter.plot_path_with_data(path, data)
+    # plotter.plot_path_with_data(path, data)
 
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:

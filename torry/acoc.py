@@ -25,7 +25,11 @@ def normalize_0_to_1(values):
 def next_edge_and_vertex(matrix, ant):
     prev_edge = ant.edges_travelled[-1] if len(ant.edges_travelled) > 0 else None
 
-    connected_edges = copy(matrix.find_vertex(ant.current_coordinates).connected_edges)
+    v = matrix.find_vertex(ant.current_coordinates)
+    if not v:
+        pass
+    connected_edges = copy(v.connected_edges)
+
     if prev_edge:
         if prev_edge in connected_edges:
             connected_edges.remove(prev_edge)
@@ -52,16 +56,15 @@ def get_unique_edges(path):
 def put_pheromones(path, data, pheromone_constant):
     points = data.T.tolist()
 
-    points_in_polygon = 0
+    reward = 0
     for p in points:
         if is_point_inside(p, path):
-            points_in_polygon += 1
-
-    plotter.plot_path_with_data(path, data)
+            reward += 1 if p[2] == 0 else -1
 
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
-        edge.pheromone_strength += pheromone_constant * points_in_polygon
+        if reward > 0:
+            edge.pheromone_strength += pheromone_constant * reward
 
 
 def pheromones_decay(matrix, pheromone_constant, decay_constant):
@@ -131,7 +134,9 @@ def run(ant_count, iteration_count, pheromone_constant, decay_constant, live_plo
     global_shortest_path = list(repeat(0, 9999))
 
     # Two-dimensional array with x-coordinates in first array, and y-coordinates in second array
-    data = np.array([[0, 1, 2, 2, 2, 4, 5, 10], [0, 6, 3, 7, 6, 7, 8, 10]])
+    data = np.array([[0, 1, 2, 2, 2, 4, 5, 10],
+                     [0, 6, 3, 7, 6, 7, 8, 10],
+                     [0, 0, 0, 0, 1, 1, 1, 1]])
 
     for i in range(iteration_count):
         print("\nIteration: {}/{}".format(i + 1, iteration_count))

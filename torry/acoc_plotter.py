@@ -104,6 +104,9 @@ def plot_aco_and_random(aco_path_lengths, random_path_lengths):
 
 
 def plot_data(data):
-    plt.plot(data[0], data[1], 'o')
+    if data.shape[0] > 2:
+        pass
+    else:
+        plt.plot(data[0], data[1], 'o')
     plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
     plt.show()

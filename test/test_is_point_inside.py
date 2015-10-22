@@ -1,6 +1,7 @@
 import unittest
-import torry.is_point_inside as ipi
-from torry.acoc_matrix import AcocEdge, Vertex
+
+import is_point_inside as ipi
+from acoc_matrix import AcocEdge, Vertex
 
 
 class TestPointInside(unittest.TestCase):

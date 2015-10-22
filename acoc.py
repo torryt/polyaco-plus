@@ -7,12 +7,12 @@ from copy import copy
 
 import numpy as np
 
-from torry.acoc_matrix import AcocMatrix
-import torry.acoc_plotter as plotter
-from torry.acoc_plotter import LivePheromonePlot
-from torry.ant import Ant
-from torry.is_point_inside import is_point_inside
-import torry.data_generator as dg
+from acoc_matrix import AcocMatrix
+import acoc_plotter as plotter
+from acoc_plotter import LivePheromonePlot
+from ant import Ant
+from is_point_inside import is_point_inside
+import data_generator as dg
 
 
 def normalize_0_to_1(values):
@@ -57,11 +57,11 @@ def get_unique_edges(path):
 def classification_score(polygon, data):
     points = data.T.tolist()
 
-    reward = 0
+    score = 0
     for p in points:
         if is_point_inside(p, polygon):
-            reward += 1 if p[2] == 0 else -1
-    return reward
+            score += 1 if p[2] == 0 else -1
+    return score
 
 
 def put_pheromones(path, data, pheromone_constant):

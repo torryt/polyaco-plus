@@ -1,6 +1,8 @@
 from itertools import product
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 import acoc_plotter
 
 

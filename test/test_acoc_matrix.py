@@ -1,6 +1,7 @@
 import unittest
-from torry.acoc_matrix import AcocEdge, AcocMatrix, Vertex
-import torry.acoc_matrix as am
+
+from acoc_matrix import AcocEdge, AcocMatrix, Vertex
+import acoc_matrix as am
 
 
 class TestEdge(unittest.TestCase):
@@ -53,13 +54,13 @@ class TestVertex(unittest.TestCase):
         self.assertEqual(1, len(v1.connected_edges))
 
     def test_connect_edges_to_vertex_should_be_2(self):
-            v1 = Vertex(0, 0)
-            v2 = Vertex(1, 2)
-            v3 = Vertex(1, 1)
-            e1 = AcocEdge(v1, v2)
-            e2 = AcocEdge(v1, v3)
-            am.connect_edges_to_vertex(v1, [e1, e2])
-            self.assertEqual(2, len(v1.connected_edges))
+        v1 = Vertex(0, 0)
+        v2 = Vertex(1, 2)
+        v3 = Vertex(1, 1)
+        e1 = AcocEdge(v1, v2)
+        e2 = AcocEdge(v1, v3)
+        am.connect_edges_to_vertex(v1, [e1, e2])
+        self.assertEqual(2, len(v1.connected_edges))
 
 
 if __name__ == '__main__':

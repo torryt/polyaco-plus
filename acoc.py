@@ -173,4 +173,4 @@ def run(ant_count, iteration_count, pheromone_constant, evaporation_const, pher_
 
 
 if __name__ == "__main__":
-    run(100, 5, 1, 0.01, 5.0, False)
+    run(10, 2, 1, 0.01, 5.0, True)

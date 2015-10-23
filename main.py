@@ -3,8 +3,9 @@ import data_generator as dg
 import acoc_plotter as plotter
 import utils
 import numpy as np
+from is_point_inside import is_point_inside
 
-ant_count = 400
+ant_count = 100
 iterations = 1
 q = 5.0
 q_max = 20.0
@@ -19,8 +20,8 @@ def run():
 
     # red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 200), 2, 0, axis=0)
     # blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 200), 2, 1, axis=0)
-    red = dg.uniform_circle(2.0, 500, 1)
-    blue = dg.uniform_circle(1.0, 500, 0)
+    red = dg.uniform_circle(3.0, 500, 1)
+    blue = dg.uniform_circle(2.0, 500, 0)
     data = np.concatenate((red, blue), axis=1)
 
     for i in range(iterations):
@@ -35,6 +36,20 @@ def run():
             global_best_polygon = path
             global_best_score = max(ant_scores)
 
+    true_positives = 0
+    false_positives = 0
+    points = data.T.tolist()
+    for p in points:
+        if is_point_inside(p, global_best_polygon):
+            if p[2] == 0:
+                true_positives += 1
+            else:
+                false_positives += 1
+
+    total_red = len([p for p in points if p[2] == 0])
+    total_blue = len([p for p in points if p[2] == 0])
+    print("\nTrue positives: {}/{}\nFalse positives: {}/{}".format(true_positives, total_red,
+                                                                   false_positives, total_blue))
     print("\nGlobal best ant score: {}".format(global_best_score))
 
     plotter.plot_path_with_data(global_best_polygon, data)

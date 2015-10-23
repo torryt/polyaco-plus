@@ -9,7 +9,7 @@ iterations = 1
 p_const = 5.0
 p_max = 20.0
 evaporation_const = 0.01
-live_plot = False
+live_plot = True
 
 
 def run():
@@ -17,8 +17,10 @@ def run():
     global_best_polygon = []
     global_best_score = 0
 
-    red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 200), 2, 0, axis=0)
-    blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 200), 2, 1, axis=0)
+    # red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 200), 2, 0, axis=0)
+    # blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 200), 2, 1, axis=0)
+    red = dg.uniform_circle(2.0, 500, 1)
+    blue = dg.uniform_circle(1.0, 500, 0)
     data = np.concatenate((red, blue), axis=1)
 
     for i in range(iterations):

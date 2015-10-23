@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
+from data_generator import uniform_rectangle, uniform_circle
 
 
 class LivePheromonePlot:
@@ -124,8 +125,10 @@ def plot_data(data, show=True):
 
 if __name__ == "__main__":
     def main():
-        from torry.data_generator import uniform_rectangle
-        points = uniform_rectangle((2, 4), (2, 4), 500)
+        # points = uniform_rectangle((2, 4), (2, 4), 500)
+        points = uniform_circle(10.0, 500, 0)
+        points2 = uniform_circle(5.0, 500, 1)
+        points = np.concatenate((points, points2), axis=1)
         plot_data(points)
 
     main()

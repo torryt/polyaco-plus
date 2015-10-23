@@ -65,11 +65,13 @@ def plot_path_with_data(path, data):
     plt.show()
 
 
-def plot_pheromone_values(matrix):
+def plot_pheromone_values(matrix, show=False):
     for edge in matrix.edges:
         line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
     plt.axis([matrix.x_min_max[0], matrix.x_min_max[1], matrix.y_min_max[0], matrix.y_min_max[1]])
+    if show:
+        plt.show()
 
 
 def plot_two_path_lengths(path_length1, path_length2):

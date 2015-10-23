@@ -25,7 +25,7 @@ def normalize(values):
 
 def next_edge_and_vertex(matrix, ant):
     edges_travelled = ant.edges_travelled if len(ant.edges_travelled) > 0 else None
-    connected_edges = copy(matrix.find_vertex(ant.current_coordinates))
+    connected_edges = copy(matrix.find_vertex(ant.current_coordinates).connected_edges)
 
     if edges_travelled is not None:
         for e in edges_travelled:
@@ -61,7 +61,8 @@ def cost_function(polygon, data):
             score += 1 if p[2] == 0 else 0
         else:
             score += 1 if p[2] == 1 else 0
-    return score / data.shape[1]
+    length_factor = (1/len(polygon))
+    return (score / data.shape[1]) * length_factor
 
 
 def put_pheromones(path, data, q, q_max):
@@ -121,7 +122,7 @@ def classify(data, ant_count, q, q_max, rho, live_plot):
 
         ant_scores.append(ant_score)
         utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores) + 1, ant_count))
-        if live_plot and len(ant_scores) % 5 == 0:
+        if live_plot and len(ant_scores) % 20 == 0:
             live_plot.update(matrix.edges)
 
     if live_plot:

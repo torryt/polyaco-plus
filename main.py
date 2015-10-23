@@ -5,12 +5,16 @@ import utils
 import numpy as np
 from is_point_inside import is_point_inside
 
-ant_count = 100
-iterations = 1
+ant_count = 400
+iterations = 10
 q = 5.0
 q_max = 20.0
 rho = 0.01
+alpha = 1
+beta = 0.01
 live_plot = True
+
+classifier = acoc.Classifier(ant_count, q, q_max, rho, alpha, beta)
 
 
 def run():
@@ -18,17 +22,17 @@ def run():
     global_best_polygon = []
     global_best_score = 0
 
-    # red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 200), 2, 0, axis=0)
-    # blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 200), 2, 1, axis=0)
-    red = dg.uniform_circle(3.0, 500, 1)
-    blue = dg.uniform_circle(2.0, 500, 0)
+    red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 500), 2, 0, axis=0)
+    blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 500), 2, 1, axis=0)
+    # red = dg.uniform_circle(3.0, 500, 1)
+    # blue = dg.uniform_circle(2.0, 500, 0)
     data = np.concatenate((red, blue), axis=1)
 
     for i in range(iterations):
         print("\nIteration: {}/{}".format(i + 1, iterations))
 
         ant_scores, path = \
-            acoc.classify(data, ant_count, q, q_max, rho, live_plot)
+            classifier.classify(data, live_plot)
         utils.print_on_current_line("Best ant score: {}".format(max(ant_scores)))
 
         all_ant_scores[i, :] = ant_scores
@@ -48,9 +52,9 @@ def run():
 
     total_red = len([p for p in points if p[2] == 0])
     total_blue = len([p for p in points if p[2] == 0])
-    print("\nTrue positives: {}/{}\nFalse positives: {}/{}".format(true_positives, total_red,
+    print("\n\nTrue positives: {}/{}\nFalse positives: {}/{}".format(true_positives, total_red,
                                                                    false_positives, total_blue))
-    print("\nGlobal best ant score: {}".format(global_best_score))
+    print("Global best ant score: {}".format(global_best_score))
 
     plotter.plot_path_with_data(global_best_polygon, data)
     plotter.plot_ant_scores(ant_scores)

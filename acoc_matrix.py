@@ -7,13 +7,14 @@ import acoc_plotter
 
 
 class AcocMatrix:
-    def __init__(self, data, blocked_edge_indexes=None):
+    def __init__(self, data, initial_pheromone=0.1):
         self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 3)
         self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 3)
+        self.initial_pheromone = initial_pheromone
 
         coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
                                    range(self.y_min_max[0], self.y_min_max[1])))
-        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, blocked_edge_indexes)
+        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.initial_pheromone)
         self.vertices = init_vertices(coordinates, self.edges)
 
     def show_plot(self):
@@ -82,15 +83,15 @@ def init_vertices(coordinates, edges):
     return vertices
 
 
-def init_edges(x_size, y_size, coordinates, blocked_edge_indexes=None):
+def init_edges(x_size, y_size, coordinates, initial_pheromone, blocked_edge_indexes=None):
     edges = []
     for x, y in coordinates:
         if x != x_size - 1:
             east_neighbor = Vertex(x + 1, y)
-            edges.append(AcocEdge(Vertex(x, y), east_neighbor))
+            edges.append(AcocEdge(Vertex(x, y), east_neighbor, initial_pheromone))
         if y != y_size - 1:
             north_neighbor = Vertex(x, y + 1)
-            edges.append(AcocEdge(Vertex(x, y), north_neighbor))
+            edges.append(AcocEdge(Vertex(x, y), north_neighbor, initial_pheromone))
     if blocked_edge_indexes:
         blocked_edge_indexes.sort(reverse=True)
         for i in blocked_edge_indexes:

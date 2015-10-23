@@ -1,19 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import division
-import sys
 import random
-from itertools import repeat
 from copy import copy
-
 import numpy as np
 
 from acoc_matrix import AcocMatrix
-import acoc_plotter as plotter
 from acoc_plotter import LivePheromonePlot
 from ant import Ant
 from is_point_inside import is_point_inside
-import data_generator as dg
+import utils
 
 
 def normalize(values):
@@ -81,20 +77,14 @@ def put_pheromones(path, data, pheromone_constant, pher_max):
         edge.pheromone_strength = new_pheromone_strength if new_pheromone_strength < pher_max else pher_max
 
 
-def pheromone_evaporation(matrix, pheromone_constant, evaporation_const):
+def reset_at_random(matrix, evaporation_const, reset_value=0.1):
     for edge in matrix.edges:
         rand_num = random.random()
         if rand_num < evaporation_const:
-            edge.pheromone_strength = pheromone_constant
+            edge.pheromone_strength = reset_value
 
 
-def print_on_current_line(in_string):
-    out_string = "\r" + in_string
-    sys.stdout.write(out_string)
-    sys.stdout.flush()
-
-
-def classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, live_plot):
+def classify(data, ant_count, pheromone_constant, pher_max, evaporation_const, live_plot):
     ant_scores = []
     current_best_polygon = []
     current_best_score = 0
@@ -131,45 +121,14 @@ def classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, l
             current_best_score = ant_score
 
         put_pheromones(current_best_polygon, data, pheromone_constant, pher_max)
-        pheromone_evaporation(matrix, 0.1, evaporation_const)
+        reset_at_random(matrix, evaporation_const, matrix.initial_pheromone)
 
         ant_scores.append(ant_score)
-        print_on_current_line("Ant: {}/{}".format(len(ant_scores) + 1, ant_count))
-        if live_plot and len(ant_scores) % 50 == 0:
+        utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores) + 1, ant_count))
+        if live_plot and len(ant_scores) % 5 == 0:
             live_plot.update(matrix.edges)
 
     if live_plot:
         live_plot.close()
 
     return ant_scores, current_best_polygon
-
-
-def run(ant_count, iteration_count, pheromone_constant, evaporation_const, pher_max, live_plot=False):
-    all_ant_scores = np.zeros((iteration_count, ant_count))
-    global_best_polygon = list(repeat(0, 9999))
-    global_best_score = 0
-
-    red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 200), 2, 0, axis=0)
-    blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 200), 2, 1, axis=0)
-
-    # Two-dimensional array with x-coordinates in first array and y-coordinates in second array
-    data = np.concatenate((red, blue), axis=1)
-    for i in range(iteration_count):
-        print("\nIteration: {}/{}".format(i + 1, iteration_count))
-
-        ant_scores, path = \
-            classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, live_plot)
-        print_on_current_line("Best ant score: {}".format(max(ant_scores)))
-
-        all_ant_scores[i, :] = ant_scores
-        if max(ant_scores) > global_best_score:
-            global_best_polygon = path
-            global_best_score = max(ant_scores)
-
-    print("\nGlobal best ant score: {}".format(global_best_score))
-
-    plotter.plot_path_with_data(global_best_polygon, data)
-    plotter.plot_ant_scores(ant_scores)
-
-if __name__ == "__main__":
-    run(100, 1, 1.0, 0.01, 5.0, False)

@@ -4,7 +4,7 @@ import acoc_plotter as plotter
 import utils
 import numpy as np
 
-ant_count = 100
+ant_count = 400
 iterations = 1
 p_const = 5.0
 p_max = 20.0

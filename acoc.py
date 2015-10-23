@@ -65,7 +65,7 @@ def cost_function(polygon, data):
             score += 1 if p[2] == 0 else 0
         else:
             score += 1 if p[2] == 1 else 0
-    return (score / data.shape[1]) / len(polygon)
+    return (score / data.shape[1])
 
 
 def put_pheromones(path, data, pheromone_constant, pher_max):
@@ -73,7 +73,7 @@ def put_pheromones(path, data, pheromone_constant, pher_max):
 
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
-        new_pheromone_strength = edge.pheromone_strength + pheromone_constant * score
+        new_pheromone_strength = edge.pheromone_strength + (pheromone_constant * score)
         edge.pheromone_strength = new_pheromone_strength if new_pheromone_strength < pher_max else pher_max
 
 

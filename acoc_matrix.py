@@ -10,11 +10,11 @@ class AcocMatrix:
     def __init__(self, data, q_init=0.1):
         self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 3)
         self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 3)
-        self.initial_Q = q_init
+        self.initial_q = q_init
 
         coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
                                    range(self.y_min_max[0], self.y_min_max[1])))
-        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.initial_Q)
+        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.initial_q)
         self.vertices = init_vertices(coordinates, self.edges)
 
     def show_plot(self):

@@ -61,6 +61,7 @@ def plot_path_with_data(path, data):
     for edge in path:
         plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
     plot_data(data)
+    plt.show()
 
 
 def plot_pheromone_values(matrix, show=False):

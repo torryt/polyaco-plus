@@ -61,7 +61,7 @@ def cost_function(polygon, data):
             score += 1 if p[2] == 0 else 0
         else:
             score += 1 if p[2] == 1 else 0
-    return (score / data.shape[1])
+    return score / data.shape[1]
 
 
 def put_pheromones(path, data, q, q_max):

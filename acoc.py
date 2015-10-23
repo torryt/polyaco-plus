@@ -62,7 +62,7 @@ def cost_function(polygon, data):
         else:
             score += 1 if p[2] == 1 else 0
     length_factor = (1/len(polygon))
-    return (score / data.shape[1]) * length_factor
+    return (score / data.shape[1]) * (length_factor**0.01)
 
 
 def put_pheromones(path, data, q, q_max):

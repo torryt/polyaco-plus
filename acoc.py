@@ -28,16 +28,19 @@ def normalize(values):
 
 
 def next_edge_and_vertex(matrix, ant):
-    prev_edge = ant.edges_travelled[-1] if len(ant.edges_travelled) > 0 else None
+    edges_travelled = ant.edges_travelled if len(ant.edges_travelled) > 0 else None
 
     v = matrix.find_vertex(ant.current_coordinates)
     if not v:
         pass
     connected_edges = copy(v.connected_edges)
 
-    if prev_edge:
-        if prev_edge in connected_edges:
-            connected_edges.remove(prev_edge)
+    if edges_travelled is not None:
+        for e in edges_travelled:
+            if e in connected_edges:
+                connected_edges.remove(e)
+    if len(connected_edges) == 0:
+        return None, None
     probabilities = normalize(np.array([e.pheromone_strength for e in connected_edges]))
 
     rand_num = random.random()
@@ -101,22 +104,27 @@ def classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, l
     if live_plot:
         live_plot = LivePheromonePlot(matrix, data)
 
-    for i in range(ant_count):
+    while len(ant_scores) < ant_count:
         start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
         start_coordinates = (start_vertex.x, start_vertex.y)
         ant = Ant(start_coordinates)
 
         edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
         ant.edges_travelled.append(edge)
-        ant_at_target = False
+        ant_at_target = ant_is_stuck = False
 
-        while not ant_at_target:
+        while not ant_at_target and not ant_is_stuck:
             if ant.current_coordinates == start_coordinates or len(ant.edges_travelled) > 10000:
                 ant_at_target = True
             else:
                 edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
-                ant.edges_travelled.append(edge)
+                if edge is None:
+                    ant_is_stuck = True
+                else:
+                    ant.edges_travelled.append(edge)
 
+        if ant_is_stuck:
+            continue
         ant_score = cost_function(ant.edges_travelled, data)
         if ant_score > current_best_score:
             current_best_polygon = ant.edges_travelled
@@ -126,8 +134,8 @@ def classify(data, ant_count, pheromone_constant, evaporation_const, pher_max, l
         pheromone_evaporation(matrix, 0.1, evaporation_const)
 
         ant_scores.append(ant_score)
-        print_on_current_line("Ant: {}/{}".format(i + 1, ant_count))
-        if live_plot and i % 50 == 0:
+        print_on_current_line("Ant: {}/{}".format(len(ant_scores) + 1, ant_count))
+        if live_plot and len(ant_scores) % 50 == 0:
             live_plot.update(matrix.edges)
 
     if live_plot:

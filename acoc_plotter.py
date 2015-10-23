@@ -84,7 +84,7 @@ def plot_two_path_lengths(path_length1, path_length2):
 # Used for displaying shortest path + random
 
 
-def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):
+def draw_all(shortest_path, data, ran_path_lengths=None, ant_path_lengths=None,):
     plt.figure(1)
     plt.subplot(211)
     plt.title("Path")
@@ -92,12 +92,12 @@ def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):
     plt.subplot(212)
     plt.title("Pheromone Values")
 
-    if ran_path_lengths:
-        plot_aco_and_random(ant_path_lengths, ran_path_lengths)
-    else:
-        plt.figure(1)
-        plt.title("ACO Path Lengths")
-        plot_ant_scores(ant_path_lengths)
+  #  if ran_path_lengths:
+  #     plot_aco_and_random(ant_path_lengths, ran_path_lengths)
+  #  else:
+  #      plt.figure(1)
+  #       plt.title("ACO Path Lengths")
+  #       plot_ant_scores(ant_path_lengths)
     plt.show()
 
 

@@ -25,11 +25,7 @@ def normalize(values):
 
 def next_edge_and_vertex(matrix, ant):
     edges_travelled = ant.edges_travelled if len(ant.edges_travelled) > 0 else None
-
-    v = matrix.find_vertex(ant.current_coordinates)
-    if not v:
-        pass
-    connected_edges = copy(v.connected_edges)
+    connected_edges = copy(matrix.find_vertex(ant.current_coordinates))
 
     if edges_travelled is not None:
         for e in edges_travelled:
@@ -68,23 +64,23 @@ def cost_function(polygon, data):
     return (score / data.shape[1])
 
 
-def put_pheromones(path, data, pheromone_constant, pher_max):
+def put_pheromones(path, data, q, q_max):
     score = cost_function(path, data)
 
     unique_edges = get_unique_edges(path)
     for edge in unique_edges:
-        new_pheromone_strength = edge.pheromone_strength + (pheromone_constant * score)
-        edge.pheromone_strength = new_pheromone_strength if new_pheromone_strength < pher_max else pher_max
+        new_pheromone_strength = edge.pheromone_strength + (q * score)
+        edge.pheromone_strength = new_pheromone_strength if new_pheromone_strength < q_max else q_max
 
 
-def reset_at_random(matrix, evaporation_const, reset_value=0.1):
+def reset_at_random(matrix, rho, initial_value=0.1):
     for edge in matrix.edges:
         rand_num = random.random()
-        if rand_num < evaporation_const:
-            edge.pheromone_strength = reset_value
+        if rand_num < rho:
+            edge.pheromone_strength = initial_value
 
 
-def classify(data, ant_count, pheromone_constant, pher_max, evaporation_const, live_plot):
+def classify(data, ant_count, q, q_max, rho, live_plot):
     ant_scores = []
     current_best_polygon = []
     current_best_score = 0
@@ -120,8 +116,8 @@ def classify(data, ant_count, pheromone_constant, pher_max, evaporation_const, l
             current_best_polygon = ant.edges_travelled
             current_best_score = ant_score
 
-        put_pheromones(current_best_polygon, data, pheromone_constant, pher_max)
-        reset_at_random(matrix, evaporation_const, matrix.initial_pheromone)
+        put_pheromones(current_best_polygon, data, q, q_max)
+        reset_at_random(matrix, rho, matrix.initial_Q)
 
         ant_scores.append(ant_score)
         utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores) + 1, ant_count))
@@ -130,5 +126,7 @@ def classify(data, ant_count, pheromone_constant, pher_max, evaporation_const, l
 
     if live_plot:
         live_plot.close()
+
+    # acoc_plotter.plot_pheromone_values(matrix, True)
 
     return ant_scores, current_best_polygon

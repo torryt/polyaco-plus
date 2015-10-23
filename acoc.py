@@ -170,7 +170,7 @@ def run(ant_count, iteration_count, pheromone_constant, evaporation_const, pher_
 
     plotter.plot_path_with_data(global_best_polygon, data)
     plotter.plot_ant_scores(ant_scores)
-    plotter.draw_all(path, data)
+
 
 if __name__ == "__main__":
-    run(200, 3, 1, 0.01, 5.0, False)
+    run(100, 5, 1, 0.01, 5.0, False)

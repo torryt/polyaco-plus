@@ -14,7 +14,7 @@ import utils
 
 def normalize(values):
     """
-    Normalizes a range of values from 0 to 1
+    Normalizes a range of values to values from 0 to 1
     """
     if values.sum() == 0.0:
         return [1.0 / len(values)] * len(values)
@@ -51,6 +51,17 @@ def get_unique_edges(path):
     z = set(path)
     unique_edges = list(z)
     return unique_edges
+
+
+def polygon_score(polygon, data):
+    points = data.T.tolist()
+    score = 0
+    for p in points:
+        if is_point_inside(p, polygon):
+            score += 1 if p[2] == 0 else 0
+        else:
+            score += 1 if p[2] == 1 else 0
+    return score / data.shape[1]
 
 
 class Classifier:
@@ -109,8 +120,6 @@ class Classifier:
         if live_plot:
             live_plot.close()
 
-        # acoc_plotter.plot_pheromone_values(matrix, True)
-
         return ant_scores, current_best_polygon
 
     def reset_at_random(self, matrix):
@@ -120,15 +129,12 @@ class Classifier:
                 edge.pheromone_strength = matrix.initial_q
 
     def cost_function(self, polygon, data):
-        points = data.T.tolist()
-        score = 0
-        for p in points:
-            if is_point_inside(p, polygon):
-                score += 1 if p[2] == 0 else 0
-            else:
-                score += 1 if p[2] == 1 else 0
-        length_factor = (1/len(polygon))**self.beta
-        return ((score / data.shape[1])**self.alpha) * length_factor
+        score = polygon_score(polygon, data)
+        try:
+            length_factor = 1/len(polygon)
+        except ZeroDivisionError:
+            length_factor = self.beta
+        return (score**self.alpha) * (length_factor**self.beta)
 
     def put_pheromones(self, path, data):
         score = self.cost_function(path, data)

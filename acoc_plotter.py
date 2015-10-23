@@ -46,7 +46,7 @@ def plot_ant_scores(ant_scores):
     x_coord = range(len(ant_scores))
     y_coord = ant_scores
     plt.plot(x_coord, y_coord, 'k-')
-    plt.axis([0, len(ant_scores), 0, max(ant_scores)])
+    plt.axis([0, len(ant_scores), min(ant_scores), max(ant_scores)])
     plt.title("Ant Scores")
     plt.show()
 

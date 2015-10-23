@@ -4,8 +4,8 @@ import acoc_plotter as plotter
 import utils
 import numpy as np
 
-ant_count = 400
-iterations = 1
+ant_count = 200
+iterations = 2
 q = 5.0
 q_max = 20.0
 rho = 0.01

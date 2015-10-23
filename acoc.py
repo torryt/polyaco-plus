@@ -25,7 +25,7 @@ def normalize(values):
 
 def next_edge_and_vertex(matrix, ant):
     edges_travelled = ant.edges_travelled if len(ant.edges_travelled) > 0 else None
-    connected_edges = copy(matrix.find_vertex(ant.current_coordinates))
+    connected_edges = copy(matrix.find_vertex(ant.current_coordinates).connected_edges)
 
     if edges_travelled is not None:
         for e in edges_travelled:

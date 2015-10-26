@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from data_generator import uniform_rectangle, uniform_circle
+from scipy.interpolate import interp1d
 
 
 class LivePheromonePlot:
@@ -43,9 +44,9 @@ class LivePheromonePlot:
 
 def plot_ant_scores(ant_scores):
     plt.figure(2)
-    x_coord = range(len(ant_scores))
-    y_coord = ant_scores
-    plt.plot(x_coord, y_coord, 'k-')
+    x = range(len(ant_scores))
+    y = ant_scores
+    plt.plot(x, y, 'k-')
     plt.axis([0, len(ant_scores), min(ant_scores), max(ant_scores)])
     plt.title("Ant Scores")
     plt.show()
@@ -84,8 +85,6 @@ def plot_two_path_lengths(path_length1, path_length2):
     plt.plot(x_coord, y_coord, 'g')
     plt.plot(x_coord2, y_coord2, 'r')
     plt.axis([0, len(path_length1), 0, max(path_length1)])
-
-# Used for displaying shortest path + random
 
 
 def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):

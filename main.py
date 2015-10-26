@@ -4,14 +4,14 @@ import acoc_plotter as plotter
 import utils
 import numpy as np
 
-ant_count = 500
-iterations = 30
+ant_count = 400
+iterations = 1
 q = 5.0
 q_max = 20.0
 rho = 0.01
 alpha = 1
-beta = 0.01
-live_plot = False
+beta = 0.1
+live_plot = True
 
 classifier = acoc.Classifier(ant_count, q, q_max, rho, alpha, beta)
 

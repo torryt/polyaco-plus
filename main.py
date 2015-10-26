@@ -3,18 +3,18 @@ import data_generator as dg
 import acoc_plotter as plotter
 import utils
 import numpy as np
-from is_point_inside import is_point_inside
 
-ant_count = 200
-iterations = 2
+ant_count = 400
+iterations = 1
 q = 5.0
+q_min = 0.1
 q_max = 20.0
 rho = 0.01
 alpha = 1
 beta = 0.01
 live_plot = True
 
-classifier = acoc.Classifier(ant_count, q, q_max, rho, alpha, beta)
+classifier = acoc.Classifier(ant_count, q, q_min, q_max, rho, alpha, beta)
 
 
 def run():
@@ -40,24 +40,12 @@ def run():
             global_best_polygon = path
             global_best_score = max(ant_scores)
 
-    true_positives = 0
-    false_positives = 0
-    points = data.T.tolist()
-    for p in points:
-        if is_point_inside(p, global_best_polygon):
-            if p[2] == 0:
-                true_positives += 1
-            else:
-                false_positives += 1
-
-    total_red = len([p for p in points if p[2] == 0])
-    total_blue = len([p for p in points if p[2] == 0])
-    print("\n\nTrue positives: {}/{}\nFalse positives: {}/{}".format(true_positives, total_red,
-                                                                   false_positives, total_blue))
-    print("Global best ant score: {}".format(global_best_score))
+    score = acoc.polygon_score(global_best_polygon, data)
+    print("\n\nGlobal best score(points) {}".format(score))
+    print("Global best score(|solution| and points): {}".format(global_best_score))
 
     plotter.plot_path_with_data(global_best_polygon, data)
-    plotter.plot_ant_scores(ant_scores)
+    plotter.plot_ant_scores(all_ant_scores.mean(0))
 
 
 run()

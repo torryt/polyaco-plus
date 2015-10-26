@@ -14,7 +14,7 @@ import utils
 
 def normalize(values):
     """
-    Normalizes a range of values from 0 to 1
+    Normalizes a range of values to values from 0 to 1
     """
     if values.sum() == 0.0:
         return [1.0 / len(values)] * len(values)
@@ -53,10 +53,22 @@ def get_unique_edges(path):
     return unique_edges
 
 
+def polygon_score(polygon, data):
+    points = data.T.tolist()
+    score = 0
+    for p in points:
+        if is_point_inside(p, polygon):
+            score += 1 if p[2] == 0 else 0
+        else:
+            score += 1 if p[2] == 1 else 0
+    return score / data.shape[1]
+
+
 class Classifier:
-    def __init__(self, ant_count, q, q_max, rho, alpha, beta):
+    def __init__(self, ant_count, q, q_min, q_max, rho, alpha, beta):
         self.ant_count = ant_count
         self.q = q
+        self.q_min = q_min
         self.q_max = q_max
         self.rho = rho
         self.alpha = alpha
@@ -67,7 +79,7 @@ class Classifier:
         current_best_polygon = []
         current_best_score = 0
 
-        matrix = AcocMatrix(data)
+        matrix = AcocMatrix(data, q_min=self.q_min)
 
         if live_plot:
             live_plot = LivePheromonePlot(matrix, data)
@@ -102,14 +114,12 @@ class Classifier:
             self.reset_at_random(matrix)
 
             ant_scores.append(ant_score)
-            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores) + 1, self.ant_count))
             if live_plot and len(ant_scores) % 20 == 0:
+                utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
                 live_plot.update(matrix.edges)
 
         if live_plot:
             live_plot.close()
-
-        # acoc_plotter.plot_pheromone_values(matrix, True)
 
         return ant_scores, current_best_polygon
 
@@ -117,18 +127,15 @@ class Classifier:
         for edge in matrix.edges:
             rand_num = random.random()
             if rand_num < self.rho:
-                edge.pheromone_strength = matrix.initial_q
+                edge.pheromone_strength = self.q_min
 
     def cost_function(self, polygon, data):
-        points = data.T.tolist()
-        score = 0
-        for p in points:
-            if is_point_inside(p, polygon):
-                score += 1 if p[2] == 0 else 0
-            else:
-                score += 1 if p[2] == 1 else 0
-        length_factor = (1/len(polygon))**self.beta
-        return ((score / data.shape[1])**self.alpha) * length_factor
+        score = polygon_score(polygon, data)
+        try:
+            length_factor = 1/len(polygon)
+        except ZeroDivisionError:
+            length_factor = self.beta
+        return (score**self.alpha) * (length_factor**self.beta)
 
     def put_pheromones(self, path, data):
         score = self.cost_function(path, data)

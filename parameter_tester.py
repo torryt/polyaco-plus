@@ -7,7 +7,7 @@ import numpy as np
 from time import gmtime, strftime
 import os
 
-ant_count = 400
+ant_count = 10
 iterations = 1
 q = 5.0
 q_min = 0.1
@@ -49,7 +49,7 @@ for index, v in enumerate(values):
 plt.legend()
 plt.axis([0, len(scores), 0, 1])
 
-directory = 'experiments/' + strftime("%Y-%m-%d %H:%M:%S/", gmtime())
+directory = 'experiments/' + strftime("%Y-%m-%d %H%M%S/", gmtime())
 if not os.path.exists(directory):
     os.makedirs(directory)
     plt.savefig(os.path.join(directory, 'result.png'))

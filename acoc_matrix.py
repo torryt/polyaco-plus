@@ -7,14 +7,14 @@ import acoc_plotter
 
 
 class AcocMatrix:
-    def __init__(self, data, q_init=0.1):
+    def __init__(self, data, q_min=0.1):
         self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 3)
         self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 3)
-        self.initial_q = q_init
+        self.q_min = q_min
 
         coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
                                    range(self.y_min_max[0], self.y_min_max[1])))
-        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.initial_q)
+        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.q_min)
         self.vertices = init_vertices(coordinates, self.edges)
 
     def show_plot(self):

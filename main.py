@@ -7,13 +7,14 @@ import numpy as np
 ant_count = 400
 iterations = 1
 q = 5.0
+q_min = 0.1
 q_max = 20.0
 rho = 0.01
 alpha = 1
-beta = 0.1
+beta = 0.01
 live_plot = True
 
-classifier = acoc.Classifier(ant_count, q, q_max, rho, alpha, beta)
+classifier = acoc.Classifier(ant_count, q, q_min, q_max, rho, alpha, beta)
 
 
 def run():

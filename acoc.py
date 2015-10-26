@@ -65,9 +65,10 @@ def polygon_score(polygon, data):
 
 
 class Classifier:
-    def __init__(self, ant_count, q, q_max, rho, alpha, beta):
+    def __init__(self, ant_count, q, q_min, q_max, rho, alpha, beta):
         self.ant_count = ant_count
         self.q = q
+        self.q_min = q_min
         self.q_max = q_max
         self.rho = rho
         self.alpha = alpha
@@ -78,7 +79,7 @@ class Classifier:
         current_best_polygon = []
         current_best_score = 0
 
-        matrix = AcocMatrix(data)
+        matrix = AcocMatrix(data, q_min=self.q_min)
 
         if live_plot:
             live_plot = LivePheromonePlot(matrix, data)
@@ -113,8 +114,8 @@ class Classifier:
             self.reset_at_random(matrix)
 
             ant_scores.append(ant_score)
-            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
             if live_plot and len(ant_scores) % 20 == 0:
+                utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
                 live_plot.update(matrix.edges)
 
         if live_plot:
@@ -126,7 +127,7 @@ class Classifier:
         for edge in matrix.edges:
             rand_num = random.random()
             if rand_num < self.rho:
-                edge.pheromone_strength = matrix.initial_q
+                edge.pheromone_strength = self.q_min
 
     def cost_function(self, polygon, data):
         score = polygon_score(polygon, data)

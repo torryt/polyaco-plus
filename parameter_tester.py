@@ -49,7 +49,7 @@ for index, v in enumerate(values):
 plt.legend()
 plt.axis([0, len(scores), 0, 1])
 
-directory = 'experiments/' + strftime("%Y-%m-%d %H%M%S/", gmtime())
+directory = 'experiments/' + strftime("%Y-%m-%d_%H%M%S/", gmtime())
 if not os.path.exists(directory):
     os.makedirs(directory)
     plt.savefig(os.path.join(directory, 'result.png'))

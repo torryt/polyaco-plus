@@ -17,13 +17,14 @@ class AcocMatrix:
         self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.q_min)
         self.vertices = init_vertices(coordinates, self.edges)
 
-    def show_plot(self):
+    def plot_matrix(self, show=True):
         x_coord, y_coord = zip(*[(v.x, v.y) for v in self.vertices])
         for edge in self.edges:
-            plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
-        plt.plot(x_coord, y_coord, 'o')
+            plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
+        plt.plot(x_coord, y_coord, 'o', color='#FFFFFF')
         plt.axis([self.x_min_max[0] - 1, self.x_min_max[1], self.y_min_max[0] - 1, self.y_min_max[1]])
-        plt.show()
+        if show:
+            plt.show()
 
     def find_vertex(self, x_y):
         for v in self.vertices:
@@ -106,9 +107,10 @@ def main():
     data = np.concatenate((red, blue), axis=1)
 
     matrix = AcocMatrix(data)
-    acoc_plotter.plot_data(data)
-
-    matrix.show_plot()
+    matrix.plot_matrix(show=False)
+    acoc_plotter.plot_data(data, show=False)
+    plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1], matrix.y_min_max[0] - 1, matrix.y_min_max[1]])
+    plt.show()
 
 if __name__ == "__main__":
     main()

@@ -26,6 +26,7 @@ class AcocMatrix:
         for edge in self.edges:
             plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
 
+        # plt.plot(x_coord, y_coord, 'o', color='w')
         for i, v in enumerate(self.vertices):
             if i % 2 == 0:
                 plt.plot(v.x, v.y, 'o', color='w')
@@ -124,6 +125,7 @@ def main():
     matrix.plot_matrix(show=False)
     acoc_plotter.plot_data(data, show=False)
     plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1] + 1, matrix.y_min_max[0] - 1, matrix.y_min_max[1] + 1])
+    # plt.axis('off')
     plt.show()
 
 if __name__ == "__main__":

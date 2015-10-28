@@ -1,5 +1,4 @@
 from itertools import product
-
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -13,13 +12,11 @@ class AcocMatrix:
         self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 2)
         self.q_initial = q_initial
 
-        grid_x_size = math.ceil(self.x_min_max[1]) - int(self.x_min_max[0]) + 1
-        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=grid_x_size*granularity, endpoint=True)
-        grid_y_size = math.ceil(self.y_min_max[1]) - int(self.y_min_max[0]) + 1
-        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=grid_y_size*granularity, endpoint=True)
+        grid_width = math.ceil(self.x_min_max[1]) - int(self.x_min_max[0]) + 1
+        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=grid_width*granularity, endpoint=True)
+        grid_height = math.ceil(self.y_min_max[1]) - int(self.y_min_max[0]) + 1
+        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=grid_height*granularity, endpoint=True)
 
-        # coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1], step),
-        #                            range(self.y_min_max[0], self.y_min_max[1], step)))
         coordinates = list(product(x_coord, y_coord))
         self.edges = init_edges(coordinates, self.q_initial)
         self.vertices = init_vertices(coordinates, self.edges)
@@ -28,7 +25,13 @@ class AcocMatrix:
         x_coord, y_coord = zip(*[(v.x, v.y) for v in self.vertices])
         for edge in self.edges:
             plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
-        plt.plot(x_coord, y_coord, 'o', color='#FFFFFF')
+
+        for i, v in enumerate(self.vertices):
+            if i % 2 == 0:
+                plt.plot(v.x, v.y, 'o', color='w')
+            else:
+                plt.plot(v.x, v.y, 'o', color='k')
+
         plt.axis([self.x_min_max[0] - 1, self.x_min_max[1], self.y_min_max[0] - 1, self.y_min_max[1]])
         if show:
             plt.show()
@@ -91,7 +94,7 @@ def init_vertices(coordinates, edges):
     return vertices
 
 
-def init_edges(coordinates, q_initial, blocked_edge_indexes=None):
+def init_edges(coordinates, q_initial):
     edges = []
 
     for x, y in coordinates:
@@ -107,10 +110,6 @@ def init_edges(coordinates, q_initial, blocked_edge_indexes=None):
             north_neighbor = Vertex(x, next_north[1])
             edges.append(AcocEdge(Vertex(x, y), north_neighbor, q_initial))
 
-    if blocked_edge_indexes:
-        blocked_edge_indexes.sort(reverse=True)
-        for i in blocked_edge_indexes:
-            edges.pop(i)
     return edges
 
 

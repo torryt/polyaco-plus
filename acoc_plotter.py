@@ -115,14 +115,15 @@ def plot_data(data, show=True):
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
         blue = temp[temp[:, 2] == 1][:, :2].T
-        plt.plot(red[0], red[1], 'o', color='r')
-        plt.plot(blue[0], blue[1], 'o', color='b')
+        plt.scatter(red[0], red[1], color='r', s=100, edgecolor='k')
+        plt.scatter(blue[0], blue[1], color='b', s=100, edgecolor='k')
     else:
         plt.plot(data[0], data[1], 'o')
     plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
 
     if show:
         plt.show()
+
 
 if __name__ == "__main__":
     def main():

@@ -2,19 +2,26 @@ from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 import acoc_plotter
 
 
 class AcocMatrix:
-    def __init__(self, data, q_min=0.1):
-        self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 3)
-        self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 3)
-        self.q_min = q_min
+    def __init__(self, data, q_initial=0.1, granularity=1.0):
+        self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 2)
+        self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 2)
+        self.q_initial = q_initial
 
-        coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
-                                   range(self.y_min_max[0], self.y_min_max[1])))
-        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.q_min)
+        grid_x_size = math.ceil(self.x_min_max[1]) - int(self.x_min_max[0]) + 1
+        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=grid_x_size*granularity, endpoint=True)
+        grid_y_size = math.ceil(self.y_min_max[1]) - int(self.y_min_max[0]) + 1
+        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=grid_y_size*granularity, endpoint=True)
+
+        # coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1], step),
+        #                            range(self.y_min_max[0], self.y_min_max[1], step)))
+        coordinates = list(product(x_coord, y_coord))
+        self.edges = init_edges(coordinates, self.q_initial)
         self.vertices = init_vertices(coordinates, self.edges)
 
     def plot_matrix(self, show=True):
@@ -84,15 +91,22 @@ def init_vertices(coordinates, edges):
     return vertices
 
 
-def init_edges(x_size, y_size, coordinates, initial_pheromone, blocked_edge_indexes=None):
+def init_edges(coordinates, q_initial, blocked_edge_indexes=None):
     edges = []
+
     for x, y in coordinates:
-        if x != x_size - 1:
-            east_neighbor = Vertex(x + 1, y)
-            edges.append(AcocEdge(Vertex(x, y), east_neighbor, initial_pheromone))
-        if y != y_size - 1:
-            north_neighbor = Vertex(x, y + 1)
-            edges.append(AcocEdge(Vertex(x, y), north_neighbor, initial_pheromone))
+        points_in_row = [p for p in coordinates if p[0] > x]
+        if len(points_in_row) > 0:
+            next_east = min(points_in_row, key=lambda pos: pos[0])
+            east_neighbor = Vertex(next_east[0], y)
+            edges.append(AcocEdge(Vertex(x, y), east_neighbor, q_initial))
+
+        points_in_column = [p for p in coordinates if p[1] > y]
+        if len(points_in_column) > 0:
+            next_north = min(points_in_column, key=lambda pos: pos[1])
+            north_neighbor = Vertex(x, next_north[1])
+            edges.append(AcocEdge(Vertex(x, y), north_neighbor, q_initial))
+
     if blocked_edge_indexes:
         blocked_edge_indexes.sort(reverse=True)
         for i in blocked_edge_indexes:
@@ -102,14 +116,15 @@ def init_edges(x_size, y_size, coordinates, initial_pheromone, blocked_edge_inde
 
 def main():
     from data_generator import uniform_rectangle
+
     red = np.insert(uniform_rectangle((1, 3), (2, 4), 500), 2, 0, axis=0)
     blue = np.insert(uniform_rectangle((4, 6), (2, 4), 500), 2, 1, axis=0)
     data = np.concatenate((red, blue), axis=1)
 
-    matrix = AcocMatrix(data)
+    matrix = AcocMatrix(data, granularity=1.0)
     matrix.plot_matrix(show=False)
     acoc_plotter.plot_data(data, show=False)
-    plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1], matrix.y_min_max[0] - 1, matrix.y_min_max[1]])
+    plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1] + 1, matrix.y_min_max[0] - 1, matrix.y_min_max[1] + 1])
     plt.show()
 
 if __name__ == "__main__":

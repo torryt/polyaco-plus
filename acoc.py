@@ -79,7 +79,7 @@ class Classifier:
         current_best_polygon = []
         current_best_score = 0
 
-        matrix = AcocMatrix(data, q_min=self.q_min)
+        matrix = AcocMatrix(data, q_initial=self.q_min)
 
         if live_plot:
             live_plot = LivePheromonePlot(matrix, data)

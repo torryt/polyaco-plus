@@ -115,8 +115,8 @@ class Classifier:
 
             ant_scores.append(ant_score)
             if live_plot and len(ant_scores) % 20 == 0:
-                utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
                 live_plot.update(matrix.edges)
+            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
 
         if live_plot:
             live_plot.close()

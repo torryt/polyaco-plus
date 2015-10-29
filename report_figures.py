@@ -12,11 +12,12 @@ def plot_points():
     data = np.concatenate((red, blue), axis=1)
 
     matrix = AcocMatrix(data, granularity=0.5)
-    matrix.plot_matrix(show=False)
-    acoc_plotter.plot_data(data, show=False)
+
+    ax = plt.subplot(111)
+    acoc_plotter.plot_data(data, ax)
     plt.axis('off')
-    plt.savefig('points.png', transparent=True)
-    plt.savefig('points.svg')
-    plt.show()
+    acoc_plotter.save_plot()
+    plt.savefig('points.eps', bbox_inches='tight')
+    # plt.show()
 
 plot_points()

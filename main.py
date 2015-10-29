@@ -4,15 +4,15 @@ import acoc_plotter as plotter
 import utils
 import numpy as np
 
-ant_count = 400
-iterations = 1
+ant_count = 1000
+iterations = 5
 q = 5.0
 q_min = 0.1
 q_max = 20.0
 rho = 0.01
 alpha = 1
 beta = 0.01
-live_plot = True
+live_plot = False
 
 classifier = acoc.Classifier(ant_count, q, q_min, q_max, rho, alpha, beta)
 
@@ -22,10 +22,8 @@ def run():
     global_best_polygon = []
     global_best_score = 0
 
-    red = np.insert(dg.uniform_rectangle((1, 3), (2, 4), 500), 2, 0, axis=0)
-    blue = np.insert(dg.uniform_rectangle((4, 6), (2, 4), 500), 2, 1, axis=0)
-    # red = dg.uniform_circle(3.0, 500, 1)
-    # blue = dg.uniform_circle(2.0, 500, 0)
+    red = dg.uniform_circle(3.0, 500, 1)
+    blue = dg.uniform_circle(2.0, 500, 0)
     data = np.concatenate((red, blue), axis=1)
 
     for i in range(iterations):
@@ -44,8 +42,8 @@ def run():
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))
 
-    plotter.plot_path_with_data(global_best_polygon, data)
-    plotter.plot_ant_scores(all_ant_scores.mean(0))
+    plotter.plot_path_with_data(global_best_polygon, data, save=True, show=True)
+    plotter.plot_ant_scores(all_ant_scores.mean(0), save=True, show=True)
 
 
 run()

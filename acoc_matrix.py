@@ -4,18 +4,19 @@ import numpy as np
 import math
 
 import acoc_plotter
+import data_generator as dg
 
 
 class AcocMatrix:
     def __init__(self, data, q_initial=0.1, granularity=1.0):
-        self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 2)
-        self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 2)
+        self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
+        self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
         self.q_initial = q_initial
 
-        grid_width = math.ceil(self.x_min_max[1]) - int(self.x_min_max[0]) + 1
-        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=grid_width*granularity, endpoint=True)
-        grid_height = math.ceil(self.y_min_max[1]) - int(self.y_min_max[0]) + 1
-        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=grid_height*granularity, endpoint=True)
+        # grid_width = math.ceil(self.x_min_max[1]) - int(self.x_min_max[0]) + 1
+        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=int(10*granularity), endpoint=True)
+        # grid_height = math.ceil(self.y_min_max[1]) - int(self.y_min_max[0]) + 1
+        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=int(10*granularity), endpoint=True)
 
         coordinates = list(product(x_coord, y_coord))
         self.edges = init_edges(coordinates, self.q_initial)
@@ -26,16 +27,22 @@ class AcocMatrix:
         for edge in self.edges:
             plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
 
-        # plt.plot(x_coord, y_coord, 'o', color='w')
-        for i, v in enumerate(self.vertices):
-            if i % 2 == 0:
-                plt.plot(v.x, v.y, 'o', color='w')
-            else:
-                plt.plot(v.x, v.y, 'o', color='k')
-
-        plt.axis([self.x_min_max[0] - 1, self.x_min_max[1], self.y_min_max[0] - 1, self.y_min_max[1]])
+        plt.plot(x_coord, y_coord, 'o', color='w')
+        plt.axis([self.x_min_max[0] - 1, self.x_min_max[1] + 1, self.y_min_max[0] - 1, self.y_min_max[1] + 1])
         if show:
             plt.show()
+
+    def add_to_plot(self, ax):
+        for edge in self.edges:
+            ax.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
+
+        for i, v in enumerate(self.vertices):
+            if i % 2 == 0:
+                ax.plot(v.x, v.y, 'o', color='w')
+            else:
+                ax.plot(v.x, v.y, 'o', color='k')
+
+        ax.axis([self.x_min_max[0] - 1, self.x_min_max[1] + 1, self.y_min_max[0] - 1, self.y_min_max[1] + 1])
 
     def find_vertex(self, x_y):
         for v in self.vertices:
@@ -115,17 +122,22 @@ def init_edges(coordinates, q_initial):
 
 
 def main():
-    from data_generator import uniform_rectangle
+    # red = dg.uniform_circle(3.0, 500, 1)
+    # blue = dg.uniform_circle(2.0, 500, 0)
+    # data = np.concatenate((red, blue), axis=1)
+    data = dg.uniform_rectangle((0, 10), (0, 10), 7, 0)
+    matrix = AcocMatrix(data, granularity=.5)
 
-    red = np.insert(uniform_rectangle((1, 3), (2, 4), 500), 2, 0, axis=0)
-    blue = np.insert(uniform_rectangle((4, 6), (2, 4), 500), 2, 1, axis=0)
-    data = np.concatenate((red, blue), axis=1)
+    ax = plt.subplot(111)
+    acoc_plotter.plot_data(data, ax)
+    matrix.add_to_plot(ax)
+    ax.axis([matrix.x_min_max[0] - .1, matrix.x_min_max[1] + .1, matrix.y_min_max[0] - .1, matrix.y_min_max[1] + .1])
 
-    matrix = AcocMatrix(data, granularity=1.0)
-    matrix.plot_matrix(show=False)
-    acoc_plotter.plot_data(data, show=False)
-    plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1] + 1, matrix.y_min_max[0] - 1, matrix.y_min_max[1] + 1])
-    # plt.axis('off')
+    # plt.axis("off")
+    # plt.savefig("p.eps", bbox_inches='tight')
+
+    acoc_plotter.hide_top_and_right_axis(ax)
+    # acoc_plotter.save_plot()
     plt.show()
 
 if __name__ == "__main__":

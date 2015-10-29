@@ -24,7 +24,7 @@ def uniform_circle(radius, num_elements, value):
     points = []
 
     for e in range(num_elements):
-        rad_diff = radius * 0.05
+        rad_diff = radius * 0.1
         r = (random.random()*2*rad_diff) - rad_diff
         o = random.random()*(2*math.pi)
 
@@ -32,3 +32,40 @@ def uniform_circle(radius, num_elements, value):
         y = (radius + r) * math.sin(o)
         points.append([x, y, value])
     return np.array(points).T
+
+
+def semi_circle(radius, circle_range, num_elements, value, center=(0, 0)):
+    points = []
+
+    for e in range(num_elements):
+        rad_diff = radius * 0.1
+        r = (random.random()*2*rad_diff) - rad_diff
+        o = random.random() * (circle_range.max - circle_range.min) + circle_range.min
+
+        x = (radius + r) * math.cos(o)
+        y = (radius + r) * math.sin(o)
+        points.append([x, y, value])
+
+    array = np.array(points).T
+    array[0] = array[0] + center[0]
+    array[1] = array[1] + center[1]
+    return array
+
+
+def main():
+    import acoc_plotter
+    from matplotlib import pyplot as plt
+
+    r = MinMax(math.pi, 2*math.pi)
+    red = semi_circle(1.0, r, 500, 0)
+    acoc_plotter.plot_data(red)
+
+    r = MinMax(0, math.pi)
+    blue = semi_circle(1.0, r, 500, 1, center=(1, -.5))
+    acoc_plotter.plot_data(blue)
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

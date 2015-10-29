@@ -129,8 +129,8 @@ def plot_data(data, subplot=None, show=False):
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
         blue = temp[temp[:, 2] == 1][:, :2].T
-        ax.scatter(red[0], red[1], color=RED_COLOR, s=300, edgecolor=EDGE_COLOR)
-        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=300, edgecolor=EDGE_COLOR)
+        ax.scatter(red[0], red[1], color=RED_COLOR, s=80, edgecolor=EDGE_COLOR)
+        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=80, edgecolor=EDGE_COLOR)
     else:
         ax.plot(data[0], data[1], 'o')
     ax.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])

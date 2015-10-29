@@ -1,14 +1,12 @@
 import acoc
 import data_generator as dg
-import acoc_plotter as plotter
+import acoc_plotter
 from matplotlib import pyplot as plt
 import utils
 import numpy as np
-from time import gmtime, strftime
-import os
-import uuid
-ant_count = 10
-iterations = 1
+
+ant_count = 1500
+iterations = 4
 q = 5.0
 q_min = 0.1
 q_max = 20.0
@@ -38,7 +36,7 @@ def run(new_rho=rho, new_beta=beta):
 
 plots = []
 value_tag = 'beta'
-values = [0.005, 0.01, 0.02, 0.04]
+values = [0.005, 0.01, 0.05, 0.1]
 line_shapes = ['b-', 'g-', 'r-', 'c-']
 for index, v in enumerate(values):
     print("\nRun {} with value {}".format(index+1, v))
@@ -48,10 +46,4 @@ for index, v in enumerate(values):
 
 plt.legend()
 plt.axis([0, len(scores), 0, 1])
-
-directory = 'experiments/' + strftime("%Y-%m-%d_%H%M/", gmtime())
-if not os.path.exists(directory):
-    os.makedirs(directory)
-file_name = str(uuid.uuid4())
-plt.savefig(os.path.join(directory, file_name + '.png'))
-plt.savefig(os.path.join(directory, file_name + '.svg'))
+acoc_plotter.save_plot()

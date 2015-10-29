@@ -17,7 +17,7 @@ def plot_points():
     acoc_plotter.plot_data(data, ax)
     plt.axis('off')
     acoc_plotter.save_plot()
-    plt.savefig('points.eps', bbox_inches='tight')
+    plt.savefig('points.svg', bbox_inches='tight')
     # plt.show()
 
 plot_points()

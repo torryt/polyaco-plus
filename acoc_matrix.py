@@ -122,10 +122,10 @@ def init_edges(coordinates, q_initial):
 
 
 def main():
-    # red = dg.uniform_circle(3.0, 500, 1)
-    # blue = dg.uniform_circle(2.0, 500, 0)
-    # data = np.concatenate((red, blue), axis=1)
-    data = dg.uniform_rectangle((0, 10), (0, 10), 7, 0)
+    red = dg.uniform_circle(3.0, 500, 1)
+    blue = dg.uniform_circle(2.0, 500, 0)
+    data = np.concatenate((red, blue), axis=1)
+    # data = dg.uniform_rectangle((0, 10), (0, 10), 7, 0)
     matrix = AcocMatrix(data, granularity=.5)
 
     ax = plt.subplot(111)

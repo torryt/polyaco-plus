@@ -6,7 +6,7 @@ import utils
 import numpy as np
 from time import gmtime, strftime
 import os
-
+import uuid
 ant_count = 10
 iterations = 1
 q = 5.0
@@ -49,10 +49,9 @@ for index, v in enumerate(values):
 plt.legend()
 plt.axis([0, len(scores), 0, 1])
 
-directory = 'experiments/' + strftime("%Y-%m-%d %H%M%S/", gmtime())
+directory = 'experiments/' + strftime("%Y-%m-%d_%H%M/", gmtime())
 if not os.path.exists(directory):
     os.makedirs(directory)
-    plt.savefig(os.path.join(directory, 'result.png'))
-    plt.savefig(os.path.join(directory, 'result.svg'))
-else:
-    print("Could not create directory. Directory '{}' already exists".format(directory))
+file_name = str(uuid.uuid4())
+plt.savefig(os.path.join(directory, file_name + '.png'))
+plt.savefig(os.path.join(directory, file_name + '.svg'))

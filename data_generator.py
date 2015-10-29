@@ -6,7 +6,7 @@ import math
 MinMax = namedtuple('MinMax', ['min', 'max'])
 
 
-def uniform_rectangle(x_boundary, y_boundary, num_elements):
+def uniform_rectangle(x_boundary, y_boundary, num_elements, value=0):
     points = []
     x_b = MinMax(*x_boundary)
     y_b = MinMax(*y_boundary)
@@ -16,7 +16,7 @@ def uniform_rectangle(x_boundary, y_boundary, num_elements):
 
         y = random.random()
         y = (y * (y_b.max - y_b.min)) + y_b.min
-        points.append([x, y])
+        points.append([x, y, value])
     return np.array(points).T
 
 

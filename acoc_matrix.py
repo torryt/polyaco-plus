@@ -1,29 +1,48 @@
 from itertools import product
-
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 import acoc_plotter
+import data_generator as dg
 
 
 class AcocMatrix:
-    def __init__(self, data, q_min=0.1):
-        self.x_min_max = int(np.amin(data[0]) - 1), int(np.amax(data[0]) + 3)
-        self.y_min_max = int(np.amin(data[1]) - 1), int(np.amax(data[1]) + 3)
-        self.q_min = q_min
+    def __init__(self, data, q_initial=0.1, granularity=1.0):
+        self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
+        self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
+        self.q_initial = q_initial
 
-        coordinates = list(product(range(self.x_min_max[0], self.x_min_max[1]),
-                                   range(self.y_min_max[0], self.y_min_max[1])))
-        self.edges = init_edges(self.x_min_max[1], self.y_min_max[1], coordinates, self.q_min)
+        # grid_width = math.ceil(self.x_min_max[1]) - int(self.x_min_max[0]) + 1
+        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=int(10*granularity), endpoint=True)
+        # grid_height = math.ceil(self.y_min_max[1]) - int(self.y_min_max[0]) + 1
+        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=int(10*granularity), endpoint=True)
+
+        coordinates = list(product(x_coord, y_coord))
+        self.edges = init_edges(coordinates, self.q_initial)
         self.vertices = init_vertices(coordinates, self.edges)
 
-    def show_plot(self):
+    def plot_matrix(self, show=True):
         x_coord, y_coord = zip(*[(v.x, v.y) for v in self.vertices])
         for edge in self.edges:
-            plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
-        plt.plot(x_coord, y_coord, 'o')
-        plt.axis([self.x_min_max[0] - 1, self.x_min_max[1], self.y_min_max[0] - 1, self.y_min_max[1]])
-        plt.show()
+            plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
+
+        plt.plot(x_coord, y_coord, 'o', color='w')
+        plt.axis([self.x_min_max[0] - 1, self.x_min_max[1] + 1, self.y_min_max[0] - 1, self.y_min_max[1] + 1])
+        if show:
+            plt.show()
+
+    def add_to_plot(self, ax):
+        for edge in self.edges:
+            ax.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], '--', color='#CFCFCF')
+
+        for i, v in enumerate(self.vertices):
+            if i % 2 == 0:
+                ax.plot(v.x, v.y, 'o', color='w')
+            else:
+                ax.plot(v.x, v.y, 'o', color='k')
+
+        ax.axis([self.x_min_max[0] - 1, self.x_min_max[1] + 1, self.y_min_max[0] - 1, self.y_min_max[1] + 1])
 
     def find_vertex(self, x_y):
         for v in self.vertices:
@@ -83,32 +102,43 @@ def init_vertices(coordinates, edges):
     return vertices
 
 
-def init_edges(x_size, y_size, coordinates, initial_pheromone, blocked_edge_indexes=None):
+def init_edges(coordinates, q_initial):
     edges = []
+
     for x, y in coordinates:
-        if x != x_size - 1:
-            east_neighbor = Vertex(x + 1, y)
-            edges.append(AcocEdge(Vertex(x, y), east_neighbor, initial_pheromone))
-        if y != y_size - 1:
-            north_neighbor = Vertex(x, y + 1)
-            edges.append(AcocEdge(Vertex(x, y), north_neighbor, initial_pheromone))
-    if blocked_edge_indexes:
-        blocked_edge_indexes.sort(reverse=True)
-        for i in blocked_edge_indexes:
-            edges.pop(i)
+        points_in_row = [p for p in coordinates if p[0] > x]
+        if len(points_in_row) > 0:
+            next_east = min(points_in_row, key=lambda pos: pos[0])
+            east_neighbor = Vertex(next_east[0], y)
+            edges.append(AcocEdge(Vertex(x, y), east_neighbor, q_initial))
+
+        points_in_column = [p for p in coordinates if p[1] > y]
+        if len(points_in_column) > 0:
+            next_north = min(points_in_column, key=lambda pos: pos[1])
+            north_neighbor = Vertex(x, next_north[1])
+            edges.append(AcocEdge(Vertex(x, y), north_neighbor, q_initial))
+
     return edges
 
 
 def main():
-    from data_generator import uniform_rectangle
-    red = np.insert(uniform_rectangle((1, 3), (2, 4), 500), 2, 0, axis=0)
-    blue = np.insert(uniform_rectangle((4, 6), (2, 4), 500), 2, 1, axis=0)
-    data = np.concatenate((red, blue), axis=1)
+    # red = dg.uniform_circle(3.0, 500, 1)
+    # blue = dg.uniform_circle(2.0, 500, 0)
+    # data = np.concatenate((red, blue), axis=1)
+    data = dg.uniform_rectangle((0, 10), (0, 10), 7, 0)
+    matrix = AcocMatrix(data, granularity=.5)
 
-    matrix = AcocMatrix(data)
-    acoc_plotter.plot_data(data)
+    ax = plt.subplot(111)
+    acoc_plotter.plot_data(data, ax)
+    matrix.add_to_plot(ax)
+    ax.axis([matrix.x_min_max[0] - .1, matrix.x_min_max[1] + .1, matrix.y_min_max[0] - .1, matrix.y_min_max[1] + .1])
 
-    matrix.show_plot()
+    # plt.axis("off")
+    # plt.savefig("p.eps", bbox_inches='tight')
+
+    acoc_plotter.hide_top_and_right_axis(ax)
+    # acoc_plotter.save_plot()
+    plt.show()
 
 if __name__ == "__main__":
     main()

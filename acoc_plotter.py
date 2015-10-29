@@ -1,7 +1,16 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from data_generator import uniform_rectangle, uniform_circle
-from scipy.interpolate import interp1d
+from time import gmtime, strftime
+import uuid
+import os
+
+BLUE_COLOR = '#0097E8'
+RED_COLOR = '#F03A3A'
+EDGE_COLOR = '#1A1A1A'
+
+# SAVE_DIR = os.getcwd() + '/experiments/'
+SAVE_DIR = os.path.expanduser('~') + '/Drive/Felles/ACOC/experiments/'
 
 
 class LivePheromonePlot:
@@ -29,9 +38,9 @@ class LivePheromonePlot:
         if current_edge:
             for j, edge in enumerate(new_edges):
                 if edge in connected_edges:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color='b')
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color=BLUE_COLOR)
                 elif edge == current_edge:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color='r')
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color=RED_COLOR)
                 else:
                     plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength, color='k')
 
@@ -42,28 +51,29 @@ class LivePheromonePlot:
         plt.pause(0.01)
 
 
-def plot_ant_scores(ant_scores):
-    plt.figure(2)
+def plot_ant_scores(ant_scores, save=False, show=False):
+    plt.close()
     x = range(len(ant_scores))
     y = ant_scores
     plt.plot(x, y, 'k-')
     plt.axis([0, len(ant_scores), min(ant_scores), max(ant_scores)])
     plt.title("Ant Scores")
-    plt.show()
+    if save:
+        save_plot()
+    if show:
+        plt.show()
 
 
-def plot_path(path, matrix):
-    for edge in path:
-        plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
-    plt.axis([-1, matrix.x_size, -1, matrix.y_size])
-
-
-def plot_path_with_data(path, data):
-    plt.close()
-    for edge in path:
-        plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
-    plot_data(data)
-    plt.show()
+def plot_path_with_data(path, data, save=False, show=False):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    hide_top_and_right_axis(ax)
+    plot_data(data, ax)
+    plot_path(path, ax)
+    if save:
+        save_plot(fig)
+    if show:
+        plt.show()
 
 
 def plot_pheromone_values(matrix, show=False):
@@ -83,7 +93,7 @@ def plot_two_path_lengths(path_length1, path_length2):
     y_coord2 = path_length2
 
     plt.plot(x_coord, y_coord, 'g')
-    plt.plot(x_coord2, y_coord2, 'r')
+    plt.plot(x_coord2, y_coord2, RED_COLOR)
     plt.axis([0, len(path_length1), 0, max(path_length1)])
 
 
@@ -110,19 +120,50 @@ def plot_aco_and_random(aco_path_lengths, random_path_lengths):
     plt.show()
 
 
-def plot_data(data, show=True):
+def plot_data(data, subplot=None, show=False):
+    if subplot is not None:
+        ax = subplot
+    else:
+        ax = plt
     if data.shape[0] > 2:
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
         blue = temp[temp[:, 2] == 1][:, :2].T
-        plt.plot(red[0], red[1], 'o', color='r')
-        plt.plot(blue[0], blue[1], 'o', color='b')
+        ax.scatter(red[0], red[1], color=RED_COLOR, s=300, edgecolor=EDGE_COLOR)
+        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=300, edgecolor=EDGE_COLOR)
     else:
-        plt.plot(data[0], data[1], 'o')
-    plt.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
+        ax.plot(data[0], data[1], 'o')
+    ax.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
 
     if show:
         plt.show()
+
+
+def plot_path(path, subplot):
+    for edge in path:
+        subplot.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
+
+
+def save_plot(fig=None, save_dir=SAVE_DIR,):
+    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    file_name = str(uuid.uuid4())
+    if fig is None:
+        plt.savefig(os.path.join(directory, file_name + '.eps'))
+    else:
+        fig.savefig(os.path.join(directory, file_name + '.eps'))
+
+
+def hide_top_and_right_axis(ax):
+    # Hide the right and top spines
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+
+    # Only show ticks on the left and bottom spines
+    ax.yaxis.set_ticks_position('left')
+    ax.xaxis.set_ticks_position('bottom')
+
 
 if __name__ == "__main__":
     def main():

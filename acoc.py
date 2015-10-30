@@ -129,6 +129,7 @@ class Classifier:
         score = polygon_score(polygon, data)
         try:
             length_factor = 1/len(polygon)
+        # Handles very rare and weird error
         except ZeroDivisionError:
             length_factor = self.beta
         return (score**self.alpha) * (length_factor**self.beta)

@@ -1,5 +1,6 @@
 from collections import namedtuple
 import sys
+from itertools import groupby
 
 _eps = 0.00001
 _huge = sys.float_info.max
@@ -11,10 +12,10 @@ def _odd(x):
     return x % 2 == 1
 
 
-def ray_intersect_segment(p, edge):
+def ray_intersect_segment(p, e):
 
-    a = Pt(edge.vertex_a.x, edge.vertex_a.y)
-    b = Pt(edge.vertex_b.x, edge.vertex_b.y)
+    a = e.vertex_a
+    b = e.vertex_b
 
     if a.y > b.y:
         a, b = b, a
@@ -22,11 +23,13 @@ def ray_intersect_segment(p, edge):
     if p.y == a.y or p.y == b.y:
         p = Pt(p.x, p.y + _eps)
 
-    if (p.y > b.y or p.y < a.y) or (p.x > max(a.x, b.x)):
+    if p.y > b.y or p.y < a.y:
+        return False
+    if p.x > max(a.x, b.x):
         return False
 
     if p.x < min(a.x, b.x):
-        intersect = True
+        return True
     else:
         if abs(a.x - b.x) > _tiny:
             m_red = (b.y - a.y) / float(b.x - a.x)
@@ -36,11 +39,14 @@ def ray_intersect_segment(p, edge):
             m_blue = (p.y - a.y) / float(p.x - a.x)
         else:
             m_blue = _huge
-        intersect = m_blue >= m_red
-    return intersect
+        return m_blue >= m_red
 
 
 def is_point_inside(p, poly):
     p_copy = Pt(p[0], p[1])
+    # a = sorted([ray_intersect_segment(p_copy, edge)[1] for edge in poly])
+    # b = [len(list(group)) for key, group in groupby(a)]
+    # print("a: {}".format(b))
+
     return _odd(sum(ray_intersect_segment(p_copy, edge)
                     for edge in poly))

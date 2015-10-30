@@ -25,7 +25,10 @@ class LivePheromonePlot:
         if data is not None:
             plot_data(data)
 
-        plt.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1], matrix.y_min_max[0] - 1, matrix.y_min_max[1]])
+        plt.axis([matrix.x_min_max[0] - .1,
+                  matrix.x_min_max[1] + .1,
+                  matrix.y_min_max[0] - .1,
+                  matrix.y_min_max[1] + .1])
         plt.draw()
         plt.pause(0.01)
 

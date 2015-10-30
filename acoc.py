@@ -4,6 +4,7 @@ from __future__ import division
 import random
 from copy import copy
 import numpy as np
+from numpy.random import choice
 
 from acoc_matrix import AcocMatrix
 from acoc_plotter import LivePheromonePlot
@@ -33,18 +34,13 @@ def next_edge_and_vertex(matrix, ant):
                 connected_edges.remove(e)
     if len(connected_edges) == 0:
         return None, None
-    probabilities = normalize(np.array([e.pheromone_strength for e in connected_edges]))
 
-    rand_num = random.random()
-    cumulative_prob = 0
-    for i, edge in enumerate(connected_edges):
-        cumulative_prob += probabilities[i]
-        if rand_num <= cumulative_prob:
-            if edge.vertex_a.coordinates() != ant.current_coordinates:
-                return edge, edge.vertex_a.coordinates()
-            else:
-                return edge, edge.vertex_b.coordinates()
-    return None
+    weights = normalize(np.array([e.pheromone_strength for e in connected_edges]))
+    selected = choice(connected_edges, p=weights)
+    if selected.vertex_a.coordinates() != ant.current_coordinates:
+        return selected, selected.vertex_a.coordinates()
+    else:
+        return selected, selected.vertex_b.coordinates()
 
 
 def get_unique_edges(path):

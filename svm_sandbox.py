@@ -17,10 +17,10 @@ def run():
 
     red = dg.uniform_circle(3.0, 500, 0)
     blue = dg.uniform_circle(2.0, 500, 1)
-    green = dg.uniform_circle(1.0, 500, 2)
+    # green = dg.uniform_circle(1.0, 500, 2)
 
     data = np.concatenate((red, blue), axis=1)
-    data = np.concatenate((data, green), axis=1)
+    # data = np.concatenate((data, green), axis=1)
     X = data[:2].T
     y = data[2]
 
@@ -31,7 +31,7 @@ def run():
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
 
-    clf = svm.SVC()
+    clf = svm.SVC(kernel='linear')
     clf.fit(X, y)
 
     plt.subplot(111)

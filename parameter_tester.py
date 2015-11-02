@@ -10,6 +10,7 @@ iterations = 5
 q = 5.0
 q_min = 0.1
 q_max = 20.0
+q_init = q_max
 rho = 0.02
 alpha = 1
 beta = 0.05
@@ -20,11 +21,11 @@ blue = np.insert(dg.uniform_rectangle((5, 8), (2, 5), 500), 2, 1, axis=0)
 data = np.concatenate((red, blue), axis=1)
 
 
-def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min):
-    classifier = acoc.Classifier(ant_count, new_q, q_max, new_q_min, new_rho, alpha, new_beta)
+def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iterations, new_q_init=q_init):
+    classifier = acoc.Classifier(ant_count, new_q, q_max, new_q_min, new_q_init, new_rho, alpha, new_beta)
     all_ant_scores = np.zeros((iterations, ant_count))
 
-    for i in range(iterations):
+    for i in range(new_iter):
         utils.print_on_current_line("Iteration: {}/{}".format(i + 1, iterations))
 
         ant_scores, path = \

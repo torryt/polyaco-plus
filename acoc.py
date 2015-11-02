@@ -61,11 +61,12 @@ def polygon_score(polygon, data):
 
 
 class Classifier:
-    def __init__(self, ant_count, q, q_min, q_max, rho, alpha, beta):
+    def __init__(self, ant_count, q, q_min, q_max, q_init, rho, alpha, beta):
         self.ant_count = ant_count
         self.q = q
         self.q_min = q_min
         self.q_max = q_max
+        self.q_init = q_init
         self.rho = rho
         self.alpha = alpha
         self.beta = beta
@@ -74,8 +75,7 @@ class Classifier:
         ant_scores = []
         current_best_polygon = []
         current_best_score = 0
-
-        matrix = AcocMatrix(data, q_initial=self.q_min)
+        matrix = AcocMatrix(data, q_initial=self.q_init)
 
         if live_plot:
             live_plot = LivePheromonePlot(matrix, data)

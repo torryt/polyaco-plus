@@ -9,6 +9,7 @@ iterations = 1
 q = 0.1
 q_min = 0.1
 q_max = 10.0
+q_init = q_max
 rho = 0.01
 alpha = 1
 beta = 0.05
@@ -16,7 +17,7 @@ live_plot = False
 save_plot = True
 show_plot = True
 
-classifier = acoc.Classifier(ant_count, q, q_min, q_max, rho, alpha, beta)
+classifier = acoc.Classifier(ant_count, q, q_min, q_max, q_init, rho, alpha, beta)
 
 
 def run():

@@ -19,6 +19,7 @@ live_plot = False
 red = np.insert(dg.uniform_rectangle((1, 4), (2, 5), 500), 2, 0, axis=0)
 blue = np.insert(dg.uniform_rectangle((5, 8), (2, 5), 500), 2, 1, axis=0)
 data = np.concatenate((red, blue), axis=1)
+line_shapes = ['b-', 'g-', 'r-', 'c-', 'm-', 'y-']
 
 
 def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iterations, new_q_init=q_init):
@@ -35,16 +36,36 @@ def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iteration
 
     return all_ant_scores.mean(0)
 
-plots = []
-value_tag = 'rho'
-values = [0.001, 0.01, 0.02, 0.1, 0.3]
-line_shapes = ['b-', 'g-', 'r-', 'c-', 'm-', 'y-']
-for index, v in enumerate(values):
-    print("\nRun {} with value {}".format(index+1, v))
-    scores = run(new_rho=v)
-    line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
-    plots.append(line)
 
-plt.legend()
-plt.axis([0, len(scores), 0, 1])
-acoc_plotter.save_plot()
+def test_ant_init():
+    plt.clf()
+    plots = []
+    value_tag = 'ant_init'
+    values = ['random', 'weighted']
+    for index, v in enumerate(values):
+        print("\nRun {} with value {}".format(index+1, v))
+        scores = run(new_ant_init=v)
+        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
+        plots.append(line)
+
+    plt.legend()
+    plt.axis([0, len(scores), 0, 1])
+    acoc_plotter.save_plot()
+
+
+def test_rho():
+    plt.clf()
+    plots = []
+    value_tag = 'rho'
+    values = [0.001, 0.01, 0.02, 0.1, 0.3]
+    for index, v in enumerate(values):
+        print("\nRun {} with value {}".format(index+1, v))
+        scores = run(new_rho=v)
+        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
+        plots.append(line)
+
+    plt.legend()
+    plt.axis([0, len(scores), 0, 1])
+    acoc_plotter.save_plot()
+
+test_rho()

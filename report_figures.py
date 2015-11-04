@@ -2,6 +2,8 @@ import acoc_plotter
 import numpy as np
 from acoc_matrix import AcocMatrix
 from matplotlib import pyplot as plt
+from scipy.interpolate import interp1d
+import pickle
 
 
 def plot_points():
@@ -20,4 +22,18 @@ def plot_points():
     plt.savefig('points.svg', bbox_inches='tight')
     # plt.show()
 
-plot_points()
+
+def smooth_line_data(curve):
+    x = np.linspace(0, 10, num=11, endpoint=True)
+    y = np.cos(-x**2/9.0)
+    f = interp1d(curve[0], y)
+    # f2 = interp1d(x, y, kind='cubic')
+    xnew = np.linspace(0, 10, num=curve.shape[0]*4, endpoint=True)
+    plt.plot(xnew, f(xnew), '-')
+
+curves = pickle.load(open("save.pickle", "rb"))
+
+[smooth_line_data(c) for c in curves]
+plt.show()
+
+#plot_points()

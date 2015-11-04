@@ -4,7 +4,7 @@ import acoc_plotter as plotter
 import utils
 import numpy as np
 
-ant_count = 1000
+ant_count = 200
 iterations = 1
 q = 0.1
 q_min = 0.1
@@ -16,7 +16,7 @@ beta = 0.05
 live_plot = True
 save_plot = False
 show_plot = True
-ant_init = 'weighted'
+ant_init = 'random'
 
 classifier = acoc.Classifier(ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init)
 

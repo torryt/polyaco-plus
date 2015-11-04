@@ -14,7 +14,7 @@ rho = 0.01
 alpha = 1
 beta = 0.05
 live_plot = True
-save = True
+save = False
 show_plot = True
 ant_init = 'random'
 

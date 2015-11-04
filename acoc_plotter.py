@@ -69,7 +69,7 @@ def plot_ant_scores(ant_scores, save=False, show=False):
 
 
 def plot_path_with_data(path, data, save=False, show=False):
-    fig = plt.figure()
+    fig = plt.figure(1)
     ax = fig.add_subplot(111)
     hide_top_and_right_axis(ax)
     plot_data(data, ax)

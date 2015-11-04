@@ -5,7 +5,7 @@ from time import gmtime, strftime
 import uuid
 import os
 from scipy.interpolate import interp1d
-
+import pickle
 
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
@@ -70,7 +70,7 @@ def plot_ant_scores(ant_scores, save=False, show=False):
 
 
 def plot_path_with_data(path, data, save=False, show=False):
-    fig = plt.figure()
+    fig = plt.figure(1)
     ax = fig.add_subplot(111)
     hide_top_and_right_axis(ax)
     plot_data(data, ax)
@@ -168,6 +168,15 @@ def save_plot(fig=None, save_dir=SAVE_DIR,):
     else:
         fig.savefig(os.path.join(directory, file_name + '.eps'))
         fig.savefig(os.path.join(directory, file_name + '.png'))
+
+
+def save_object(all_scores, save_dir=SAVE_DIR):
+    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    file_name = str(uuid.uuid4())
+    name = directory + file_name
+    pickle.dump(all_scores, open(name + ".pickle", "wb"))
 
 
 def hide_top_and_right_axis(ax):

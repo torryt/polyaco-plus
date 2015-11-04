@@ -14,7 +14,7 @@ rho = 0.01
 alpha = 1
 beta = 0.05
 live_plot = True
-save_plot = False
+save = True
 show_plot = True
 ant_init = 'random'
 
@@ -45,11 +45,13 @@ def run():
             global_best_score = max(ant_scores)
 
     score = acoc.polygon_score(global_best_polygon, data)
+    if save:
+        plotter.save_object(all_ant_scores.mean(0))
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))
 
-    plotter.plot_path_with_data(global_best_polygon, data, save=save_plot, show=show_plot)
-    plotter.plot_ant_scores(all_ant_scores.mean(0), save=save_plot, show=show_plot)
+    plotter.plot_path_with_data(global_best_polygon, data, save=save, show=show_plot)
+    plotter.plot_ant_scores(all_ant_scores.mean(0), save=save, show=show_plot)
 
 
 run()

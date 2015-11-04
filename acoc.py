@@ -69,7 +69,7 @@ def get_random_weighted(edges):
 
 def get_static_start(matrix):
     start_point = matrix.vertices[0]
-    plt.plot(start_point.x, start_point.y, 'g^', color='#00B200')
+    plt.plot(start_point.x, start_point.y, '^', color='#00B200')
     return start_point
 
 
@@ -100,11 +100,9 @@ class Classifier:
 
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
-                plt.plot(start_vertex.x, start_vertex.y, 'g^', color='#00B200')
 
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
-                plt.plot(start_vertex.x, start_vertex.y, 'g^', color='#00B200')
             start_coordinates = (start_vertex.x, start_vertex.y)
             ant = Ant(start_coordinates)
 
@@ -133,6 +131,7 @@ class Classifier:
             self.reset_at_random(matrix)
 
             ant_scores.append(ant_score)
+
             if live_plot and len(ant_scores) % 20 == 0:
                 live_plot.update(matrix.edges)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))

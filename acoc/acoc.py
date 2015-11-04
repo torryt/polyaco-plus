@@ -11,7 +11,7 @@ from acoc_matrix import AcocMatrix
 from acoc_plotter import LivePheromonePlot
 from ant import Ant
 from is_point_inside import is_point_inside
-import utils
+from utils import utils
 
 
 def normalize(values):

@@ -4,7 +4,7 @@ import sys
 import uuid
 from time import strftime, gmtime
 
-from acoc_plotter import SAVE_DIR
+from config import SAVE_DIR
 
 
 def print_on_current_line(in_string):
@@ -20,4 +20,4 @@ def save_object(object, file_name=None, save_dir=SAVE_DIR):
     if file_name is None:
         file_name = str(uuid.uuid4())
     name = directory + file_name
-    pickle.dump(object, open(name + ".pickle", "wb"))
+    pickle.dump(object, open(name + ".pickle", "wb"), 2)

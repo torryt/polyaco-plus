@@ -1,5 +1,4 @@
 import pickle
-
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -35,6 +34,7 @@ def plot_smooth_curves():
     ax1.legend()
     ax2.legend()
     plt.show()
+
 
 plot_smooth_curves()
 #plot_points()

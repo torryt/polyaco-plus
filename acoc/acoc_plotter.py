@@ -12,8 +12,7 @@ BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
 EDGE_COLOR = '#1A1A1A'
 
-# SAVE_DIR = os.getcwd() + '/experiments/'
-SAVE_DIR = os.path.expanduser('~') + '/experiments/'
+from config import SAVE_DIR
 
 
 class LivePheromonePlot:

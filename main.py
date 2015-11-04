@@ -1,25 +1,27 @@
 import numpy as np
 
-import acoc
-import utils
-from acoc import acoc_plotter as plotter
-from utils import data_generator as dg
+from acoc import acoc
+from utils import utils
+import acoc.acoc_plotter as plotter
+import utils.data_generator as dg
+import pickle
 
-ant_count = 200
+ant_count = 1000
 iterations = 1
-q = 0.1
+q = 0.2
 q_min = 0.1
-q_max = 10.0
-q_init = q_max
+q_max = 5.0
+q_init = q_min
 rho = 0.01
 alpha = 1
 beta = 0.05
 live_plot = True
-save = False
+save = True
 show_plot = True
 ant_init = 'random'
 
 classifier = acoc.Classifier(ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init)
+data_sets = pickle.load(open('data_sets.pickle', 'rb'))
 
 
 def run():

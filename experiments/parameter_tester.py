@@ -3,7 +3,7 @@ import pickle as pick
 import numpy as np
 from matplotlib import pyplot as plt
 
-import acoc
+import acoc.acoc
 import utils
 from acoc import acoc_plotter
 from utils import data_generator as dg

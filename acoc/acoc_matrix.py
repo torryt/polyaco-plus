@@ -1,10 +1,10 @@
 from itertools import product
+
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 
 import acoc_plotter
-import data_generator as dg
+from utils import data_generator as dg
 
 
 class AcocMatrix:

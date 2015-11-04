@@ -1,7 +1,7 @@
 import unittest
 
-from acoc_matrix import AcocEdge, AcocMatrix, Vertex
-import acoc_matrix as am
+from acoc import acoc_matrix as am
+from acoc.acoc_matrix import AcocEdge, AcocMatrix, Vertex
 
 
 class TestEdge(unittest.TestCase):

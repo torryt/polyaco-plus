@@ -1,7 +1,7 @@
 import unittest
 
-import is_point_inside as ipi
-from acoc_matrix import AcocEdge, Vertex
+from acoc import is_point_inside as ipi
+from acoc.acoc_matrix import AcocEdge, Vertex
 
 
 class TestPointInside(unittest.TestCase):

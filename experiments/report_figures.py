@@ -1,8 +1,10 @@
-import acoc_plotter
+import pickle
+
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
-import pickle
+
+from acoc import acoc_plotter
 
 
 def plot_points():

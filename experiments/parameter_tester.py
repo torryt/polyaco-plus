@@ -1,10 +1,12 @@
-import acoc
-import data_generator as dg
-import acoc_plotter
-from matplotlib import pyplot as plt
-import utils
-import numpy as np
 import pickle as pick
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+import acoc
+import utils
+from acoc import acoc_plotter
+from utils import data_generator as dg
 
 ant_count = 100
 iterations = 1

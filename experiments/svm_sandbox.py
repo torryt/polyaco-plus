@@ -1,9 +1,10 @@
-import data_generator as dg
-from sklearn import svm
-import numpy as np
-from matplotlib import pyplot as plt
 from collections import namedtuple
 
+import numpy as np
+from matplotlib import pyplot as plt
+from sklearn import svm
+
+from utils import data_generator as dg
 
 MinMax = namedtuple('MinMax', ['min', 'max'])
 

@@ -1,8 +1,9 @@
-import acoc
-import data_generator as dg
-import acoc_plotter as plotter
-import utils
 import numpy as np
+
+import acoc
+import utils
+from acoc import acoc_plotter as plotter
+from utils import data_generator as dg
 
 ant_count = 200
 iterations = 1

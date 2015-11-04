@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
-from data_generator import uniform_circle
+from utils.data_generator import uniform_circle
 
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'

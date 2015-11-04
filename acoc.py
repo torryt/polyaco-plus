@@ -5,6 +5,7 @@ import random
 from copy import copy
 import numpy as np
 from numpy.random import choice
+import matplotlib.pyplot as plt
 
 from acoc_matrix import AcocMatrix
 from acoc_plotter import LivePheromonePlot
@@ -66,6 +67,12 @@ def get_random_weighted(edges):
     return random.choice([random_weighted_edge.vertex_a, random_weighted_edge.vertex_b])
 
 
+def get_static_start(matrix):
+    start_point = matrix.vertices[0]
+    plt.plot(start_point.x, start_point.y, 'g^', color='#00B200')
+    return start_point
+
+
 class Classifier:
     def __init__(self, ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init):
         self.ant_count = ant_count
@@ -88,10 +95,16 @@ class Classifier:
             live_plot = LivePheromonePlot(matrix, data)
 
         while len(ant_scores) < self.ant_count:
-            if self.ant_init == 'weighted':
+            if self.ant_init == 'static':
+                start_vertex = get_static_start(matrix)
+
+            elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
-            else:
+                plt.plot(start_vertex.x, start_vertex.y, 'g^', color='#00B200')
+
+            else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+                plt.plot(start_vertex.x, start_vertex.y, 'g^', color='#00B200')
             start_coordinates = (start_vertex.x, start_vertex.y)
             ant = Ant(start_coordinates)
 

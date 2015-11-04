@@ -4,9 +4,10 @@ import acoc_plotter
 from matplotlib import pyplot as plt
 import utils
 import numpy as np
+import pickle as pick
 
-ant_count = 1000
-iterations = 5
+ant_count = 100
+iterations = 1
 q = 5.0
 q_min = 0.1
 q_max = 20.0
@@ -43,13 +44,16 @@ def test_ant_init():
     plt.clf()
     plots = []
     value_tag = 'ant_init'
-    values = ['random', 'weighted']
+    values = ['random', 'weighted', 'static']
+    all_scores = []
     for index, v in enumerate(values):
         print("\nRun {} with value {}".format(index+1, v))
         scores = run(new_ant_init=v)
         line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
         plots.append(line)
+        all_scores.append(scores)
 
+    pick.dump(all_scores, open("results\save.pickle", "wb"))
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()
@@ -88,4 +92,4 @@ def test_iterations():
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()
 
-
+test_ant_init()

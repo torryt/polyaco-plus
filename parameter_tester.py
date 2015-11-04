@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 import utils
 import numpy as np
 
-ant_count = 200
+ant_count = 1000
 iterations = 5
 q = 5.0
 q_min = 0.1
@@ -14,16 +14,18 @@ q_init = q_max
 rho = 0.02
 alpha = 1
 beta = 0.05
+ant_init = 'random'
 live_plot = False
 
 red = np.insert(dg.uniform_rectangle((1, 4), (2, 5), 500), 2, 0, axis=0)
 blue = np.insert(dg.uniform_rectangle((5, 8), (2, 5), 500), 2, 1, axis=0)
 data = np.concatenate((red, blue), axis=1)
-line_shapes = ['b-', 'g-', 'r-', 'c-', 'm-', 'y-']
+line_shapes = ['b-', 'g^', 'r-', 'c-', 'm-', 'y-']
 
 
-def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iterations, new_q_init=q_init):
-    classifier = acoc.Classifier(ant_count, new_q, q_max, new_q_min, new_q_init, new_rho, alpha, new_beta)
+def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iterations,
+        new_q_init=q_init, new_ant_init=ant_init):
+    classifier = acoc.Classifier(ant_count, new_q, q_max, new_q_min, new_q_init, new_rho, alpha, new_beta, new_ant_init)
     all_ant_scores = np.zeros((iterations, ant_count))
 
     for i in range(new_iter):
@@ -86,4 +88,4 @@ def test_iterations():
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()
 
-test_iterations()
+

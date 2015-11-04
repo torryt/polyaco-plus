@@ -1,8 +1,7 @@
 import acoc_plotter
 import numpy as np
-from acoc_matrix import AcocMatrix
 from matplotlib import pyplot as plt
-from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
 import pickle
 
 
@@ -13,8 +12,6 @@ def plot_points():
     red = np.array([[2.26, 1.8, 2.3], [1.38, 1.15, 0.8], [1, 1, 1]])
     data = np.concatenate((red, blue), axis=1)
 
-    matrix = AcocMatrix(data, granularity=0.5)
-
     ax = plt.subplot(111)
     acoc_plotter.plot_data(data, ax)
     plt.axis('off')
@@ -23,17 +20,19 @@ def plot_points():
     # plt.show()
 
 
-def smooth_line_data(curve):
-    x = np.linspace(0, 10, num=11, endpoint=True)
-    y = np.cos(-x**2/9.0)
-    f = interp1d(curve[0], y)
-    # f2 = interp1d(x, y, kind='cubic')
-    xnew = np.linspace(0, 10, num=curve.shape[0]*4, endpoint=True)
-    plt.plot(xnew, f(xnew), '-')
+def plot_smooth_curves():
+    curves = pickle.load(open("save.pickle", "rb"))
+    f = plt.figure()
+    ax1 = f.add_subplot(211)
+    ax2 = f.add_subplot(212)
+    values = ['random', 'weighted', 'static']
+    for i, c in enumerate(curves):
+        y = savgol_filter(c, 51, 2)
+        ax1.plot(range(y.shape[0]), y, label=values[i])
+        ax2.plot(np.arange(c.shape[0]), c, label=values[i])
+    ax1.legend()
+    ax2.legend()
+    plt.show()
 
-curves = pickle.load(open("save.pickle", "rb"))
-
-[smooth_line_data(c) for c in curves]
-plt.show()
-
+plot_smooth_curves()
 #plot_points()

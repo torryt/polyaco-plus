@@ -4,6 +4,8 @@ from data_generator import uniform_rectangle, uniform_circle
 from time import gmtime, strftime
 import uuid
 import os
+from scipy.interpolate import interp1d
+
 
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
@@ -145,6 +147,14 @@ def plot_data(data, subplot=None, show=False):
 def plot_path(path, subplot):
     for edge in path:
         subplot.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
+
+
+def smooth_line_data(curve):
+    x = np.arange(curve.shape[0])
+    y = curve
+    f = interp1d(x, y, kind='cubic')
+    xnew = np.linspace(0, 10, num=curve.shape[0]*4, endpoint=True)
+    plt.plot(xnew, f(xnew), '-')
 
 
 def save_plot(fig=None, save_dir=SAVE_DIR,):

@@ -60,6 +60,7 @@ def test_rho():
     plots = []
     value_tag = 'rho'
     values = [0.001, 0.01, 0.02, 0.1, 0.3]
+    print("Testing parameter " + value_tag)
     for index, v in enumerate(values):
         print("\nRun {} with value {}".format(index+1, v))
         scores = run(new_rho=v)
@@ -70,5 +71,21 @@ def test_rho():
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()
 
-# test_rho()
-test_ant_init()
+
+def test_iterations():
+    plt.clf()
+    plots = []
+    value_tag = 'iterations'
+    values = [1, 2, 5, 10]
+    print("Testing parameter " + value_tag)
+    for index, v in enumerate(values):
+        print("\nRun {} with value {}".format(index+1, v))
+        scores = run(new_iter=v)
+        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
+        plots.append(line)
+
+    plt.legend()
+    plt.axis([0, len(scores), 0, 1])
+    acoc_plotter.save_plot()
+
+

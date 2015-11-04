@@ -1,7 +1,8 @@
+import math
 import random
 from collections import namedtuple
 import numpy as np
-import math
+import utils
 
 MinMax = namedtuple('MinMax', ['min', 'max'])
 
@@ -52,19 +53,27 @@ def semi_circle(radius, circle_range, num_elements, value, center=(0, 0)):
     return array
 
 
-def main():
-    import acoc_plotter
-    from matplotlib import pyplot as plt
-
+def generate_data_sets(size=500):
+    sets = np.zeros([3, 3, size*2])
     r = MinMax(math.pi, 2*math.pi)
-    red = semi_circle(1.0, r, 500, 0)
-    acoc_plotter.plot_data(red)
-
+    red = semi_circle(1.0, r, size, 0)
     r = MinMax(0, math.pi)
-    blue = semi_circle(1.0, r, 500, 1, center=(1, -.5))
-    acoc_plotter.plot_data(blue)
+    blue = semi_circle(1.0, r, size, 1, center=(1, -.5))
+    sets[0] = np.concatenate((red, blue), axis=1)
 
-    plt.show()
+    red = uniform_circle(1.0, size, 0)
+    blue = uniform_circle(1.0, size, 1)
+    sets[1] = np.concatenate((red, blue), axis=1)
+
+    red = uniform_rectangle((1, 3), (2, 4), size, 0)
+    blue = uniform_rectangle((4, 6), (2, 4), size, 1)
+    sets[2] = np.concatenate((red, blue), axis=1)
+    return sets
+
+
+def main():
+    sets = generate_data_sets()
+    utils.save_object(sets, 'data_sets')
 
 
 if __name__ == "__main__":

@@ -46,7 +46,8 @@ def run():
 
     score = acoc.polygon_score(global_best_polygon, data)
     if save:
-        plotter.save_object(all_ant_scores.mean(0))
+        utils.save_object(all_ant_scores.mean(0), file_name='scores')
+        utils.save_object(global_best_polygon, file_name='best_path')
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))
 

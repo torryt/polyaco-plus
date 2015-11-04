@@ -1,11 +1,12 @@
-from matplotlib import pyplot as plt
-import numpy as np
-from data_generator import uniform_rectangle, uniform_circle
-from time import gmtime, strftime
-import uuid
 import os
+import uuid
+from time import gmtime, strftime
+
+import numpy as np
+from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
-import pickle
+
+from data_generator import uniform_circle
 
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
@@ -168,15 +169,6 @@ def save_plot(fig=None, save_dir=SAVE_DIR,):
     else:
         fig.savefig(os.path.join(directory, file_name + '.eps'))
         fig.savefig(os.path.join(directory, file_name + '.png'))
-
-
-def save_object(all_scores, save_dir=SAVE_DIR):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    file_name = str(uuid.uuid4())
-    name = directory + file_name
-    pickle.dump(all_scores, open(name + ".pickle", "wb"))
 
 
 def hide_top_and_right_axis(ax):

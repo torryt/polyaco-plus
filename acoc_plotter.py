@@ -10,7 +10,7 @@ RED_COLOR = '#F03A3A'
 EDGE_COLOR = '#1A1A1A'
 
 # SAVE_DIR = os.getcwd() + '/experiments/'
-SAVE_DIR = os.path.expanduser('~') + '/Drive/Felles/ACOC/experiments/'
+SAVE_DIR = os.path.expanduser('~') + '/experiments/'
 
 
 class LivePheromonePlot:
@@ -154,8 +154,10 @@ def save_plot(fig=None, save_dir=SAVE_DIR,):
     file_name = str(uuid.uuid4())
     if fig is None:
         plt.savefig(os.path.join(directory, file_name + '.eps'))
+        plt.savefig(os.path.join(directory, file_name + '.png'))
     else:
         fig.savefig(os.path.join(directory, file_name + '.eps'))
+        fig.savefig(os.path.join(directory, file_name + '.png'))
 
 
 def hide_top_and_right_axis(ax):

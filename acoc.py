@@ -60,8 +60,14 @@ def polygon_score(polygon, data):
     return score / data.shape[1]
 
 
+def get_random_weighted(edges):
+    weights = normalize(np.array([e.pheromone_strength for e in edges]))
+    random_weighted_edge = choice(edges, p=weights)
+    return random.choice([random_weighted_edge.vertex_a, random_weighted_edge.vertex_b])
+
+
 class Classifier:
-    def __init__(self, ant_count, q, q_min, q_max, q_init, rho, alpha, beta):
+    def __init__(self, ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init):
         self.ant_count = ant_count
         self.q = q
         self.q_min = q_min
@@ -70,6 +76,7 @@ class Classifier:
         self.rho = rho
         self.alpha = alpha
         self.beta = beta
+        self.ant_init = ant_init
 
     def classify(self, data, live_plot):
         ant_scores = []
@@ -81,7 +88,10 @@ class Classifier:
             live_plot = LivePheromonePlot(matrix, data)
 
         while len(ant_scores) < self.ant_count:
-            start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+            if self.ant_init == 'weighted':
+                start_vertex = get_random_weighted(matrix.edges)
+            else:
+                start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
             start_coordinates = (start_vertex.x, start_vertex.y)
             ant = Ant(start_coordinates)
 

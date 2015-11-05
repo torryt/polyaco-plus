@@ -13,7 +13,7 @@ show_plot = True
 iterations = 10
 
 clf_config = {
-    'ant_count':    10,
+    'ant_count':    200,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -23,7 +23,7 @@ clf_config = {
     'beta':         0.05,
     'ant_init':     'random',
     'live_plot':    False,
-    'save':         True,
+    'save':         False,
     'show_plot':    True
 }
 

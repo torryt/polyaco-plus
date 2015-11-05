@@ -7,10 +7,11 @@ import numpy as np
 from numpy.random import choice
 import matplotlib.pyplot as plt
 
-from acoc_matrix import AcocMatrix
-from acoc_plotter import LivePheromonePlot
-from ant import Ant
-from is_point_inside import is_point_inside
+from acoc.acoc_matrix import AcocMatrix
+from acoc.acoc_plotter import LivePheromonePlot
+from acoc.ant import Ant
+from acoc.is_point_inside import is_point_inside
+from acoc.old_is_point_inside import old_is_point_inside
 from utils import utils
 
 
@@ -54,7 +55,7 @@ def polygon_score(polygon, data):
     points = data.T.tolist()
     score = 0
     for p in points:
-        if is_point_inside(p, polygon):
+        if old_is_point_inside(p, polygon):
             score += 1 if p[2] == 0 else 0
         else:
             score += 1 if p[2] == 1 else 0

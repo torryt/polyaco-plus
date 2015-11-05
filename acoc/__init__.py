@@ -75,6 +75,15 @@ def get_static_start(matrix):
     return start_point
 
 
+def get_global(matrix, current_best_polygon):
+    if len(current_best_polygon) != 0:
+        select_edge = random.choice(current_best_polygon)
+        return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+    else:
+        start_point = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+    return start_point
+
+
 class Classifier:
     def __init__(self, config):
         self.ant_count = config['ant_count']
@@ -103,8 +112,12 @@ class Classifier:
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
 
+            elif self.ant_init == 'on_global_best':
+                start_vertex = get_global(matrix, current_best_polygon)
+
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+
             start_coordinates = (start_vertex.x, start_vertex.y)
             ant = Ant(start_coordinates)
 

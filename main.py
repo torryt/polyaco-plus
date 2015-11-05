@@ -23,7 +23,7 @@ clf_config = {
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'global'
+    'ant_init':     'on_global_best'
 }
 
 

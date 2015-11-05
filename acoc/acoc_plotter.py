@@ -1,10 +1,12 @@
+from __future__ import division
 import os
 import uuid
-from time import gmtime, strftime
+from time import strftime
 
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
 
 from utils.data_generator import uniform_circle
 
@@ -149,12 +151,19 @@ def plot_path(path, subplot):
         subplot.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
 
 
-def smooth_line_data(curve):
-    x = np.arange(curve.shape[0])
-    y = curve
-    f = interp1d(x, y, kind='cubic')
-    xnew = np.linspace(0, 10, num=curve.shape[0]*4, endpoint=True)
-    plt.plot(xnew, f(xnew), '-')
+def plot_smooth_curves(curves, labels, show=False):
+    f = plt.figure()
+    ax = f.add_subplot(111)
+    for i, c in enumerate(curves):
+        window_size = c.size // 4
+        if window_size % 2 == 0:
+            window_size += 1
+        y = savgol_filter(c, window_size, 2)
+        ax.plot(range(y.shape[0]), y, label=labels[i])
+    ax.legend()
+    if show:
+        plt.show()
+    return f
 
 
 def save_plot(fig=None, save_dir=SAVE_DIR):

@@ -1,9 +1,8 @@
-import pickle
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.signal import savgol_filter
-
+import pickle
 from acoc import acoc_plotter
+from acoc.acoc_plotter import plot_smooth_curves
 
 
 def plot_points():
@@ -20,21 +19,8 @@ def plot_points():
     plt.savefig('points.svg', bbox_inches='tight')
     # plt.show()
 
-
-def plot_smooth_curves():
-    curves = pickle.load(open("save.pickle", "rb"))
-    f = plt.figure()
-    ax1 = f.add_subplot(211)
-    ax2 = f.add_subplot(212)
-    values = ['random', 'weighted', 'static']
-    for i, c in enumerate(curves):
-        y = savgol_filter(c, 51, 2)
-        ax1.plot(range(y.shape[0]), y, label=values[i])
-        ax2.plot(np.arange(c.shape[0]), c, label=values[i])
-    ax1.legend()
-    ax2.legend()
-    plt.show()
-
-
-plot_smooth_curves()
+labels = ['q_init=20.0', 'q_init=0.1']
+curves = pickle.load(open('/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/q_init.pickle', 'rb'))
+f = plot_smooth_curves(curves, labels)
+acoc_plotter.save_plot(f)
 #plot_points()

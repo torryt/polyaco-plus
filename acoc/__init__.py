@@ -3,15 +3,17 @@
 from __future__ import division
 import random
 from copy import copy
-import numpy as np
-from numpy.random import choice
-import matplotlib.pyplot as plt
 
-from acoc_matrix import AcocMatrix
-from acoc_plotter import LivePheromonePlot
-from ant import Ant
-from is_point_inside import is_point_inside
-import utils
+import numpy as np
+from matplotlib import pyplot as plt
+from numpy.random.mtrand import choice
+
+from acoc.acoc_matrix import AcocMatrix
+from acoc.acoc_plotter import LivePheromonePlot
+from acoc.ant import Ant
+from acoc.is_point_inside import is_point_inside
+# from acoc.old_is_point_inside import old_is_point_inside
+from utils import utils
 
 
 def normalize(values):
@@ -74,18 +76,18 @@ def get_static_start(matrix):
 
 
 class Classifier:
-    def __init__(self, ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init):
-        self.ant_count = ant_count
-        self.q = q
-        self.q_min = q_min
-        self.q_max = q_max
-        self.q_init = q_init
-        self.rho = rho
-        self.alpha = alpha
-        self.beta = beta
-        self.ant_init = ant_init
+    def __init__(self, config):
+        self.ant_count = config['ant_count']
+        self.q = config['q']
+        self.q_min = config['q_min']
+        self.q_max = config['q_max']
+        self.q_init = config['q_init']
+        self.rho = config['rho']
+        self.alpha = config['alpha']
+        self.beta = config['beta']
+        self.ant_init = config['ant_init']
 
-    def classify(self, data, live_plot):
+    def classify(self, data, live_plot, print_string=''):
         ant_scores = []
         current_best_polygon = []
         current_best_score = 0
@@ -134,7 +136,7 @@ class Classifier:
 
             if live_plot and len(ant_scores) % 20 == 0:
                 live_plot.update(matrix.edges)
-            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
+            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
         if live_plot:
             live_plot.close()

@@ -1,11 +1,10 @@
 import acoc
-import data_generator as dg
-import acoc_plotter
+import utils.data_generator as dg
+import acoc.acoc_plotter as plotter
 from matplotlib import pyplot as plt
 import utils
 import numpy as np
 import pickle as pick
-import acoc_plotter as plotter
 
 ant_count = 1500
 iterations = 20
@@ -57,7 +56,7 @@ def test_ant_init():
         plotter.save_object(all_scores)
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot()
+    acoc.acoc_plotter.save_plot()
 
 
 def test_rho():
@@ -74,7 +73,7 @@ def test_rho():
 
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot()
+    acoc.acoc_plotter.save_plot()
 
 
 def test_iterations():
@@ -91,6 +90,6 @@ def test_iterations():
 
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot()
+    acoc.acoc_plotter.save_plot()
 
 test_ant_init()

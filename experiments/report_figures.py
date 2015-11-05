@@ -1,7 +1,8 @@
-import acoc_plotter
 import numpy as np
-from acoc_matrix import AcocMatrix
 from matplotlib import pyplot as plt
+import pickle
+from acoc import acoc_plotter
+from acoc.acoc_plotter import plot_smooth_curves
 
 
 def plot_points():
@@ -11,8 +12,6 @@ def plot_points():
     red = np.array([[2.26, 1.8, 2.3], [1.38, 1.15, 0.8], [1, 1, 1]])
     data = np.concatenate((red, blue), axis=1)
 
-    matrix = AcocMatrix(data, granularity=0.5)
-
     ax = plt.subplot(111)
     acoc_plotter.plot_data(data, ax)
     plt.axis('off')
@@ -20,4 +19,8 @@ def plot_points():
     plt.savefig('points.svg', bbox_inches='tight')
     # plt.show()
 
-plot_points()
+labels = ['q_init=20.0', 'q_init=0.1']
+curves = pickle.load(open('/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/q_init.pickle', 'rb'))
+f = plot_smooth_curves(curves, labels)
+acoc_plotter.save_plot(f)
+#plot_points()

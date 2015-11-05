@@ -1,17 +1,18 @@
-from matplotlib import pyplot as plt
-import numpy as np
-from data_generator import uniform_rectangle, uniform_circle
-from time import gmtime, strftime
-import uuid
+from __future__ import division
 import os
-import pickle
+import uuid
+from time import strftime
+import numpy as np
+from matplotlib import pyplot as plt
+from scipy.signal import savgol_filter
 
+from utils.data_generator import uniform_circle
+
+from config import SAVE_DIR
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
 EDGE_COLOR = '#1A1A1A'
 
-# SAVE_DIR = os.getcwd() + '/experiments/'
-SAVE_DIR = os.path.expanduser('~') + '/experiments/'
 
 
 class LivePheromonePlot:
@@ -148,8 +149,23 @@ def plot_path(path, subplot):
         subplot.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
 
 
-def save_plot(fig=None, save_dir=SAVE_DIR,):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
+def plot_smooth_curves(curves, labels, show=False):
+    f = plt.figure()
+    ax = f.add_subplot(111)
+    for i, c in enumerate(curves):
+        window_size = c.size // 4
+        if window_size % 2 == 0:
+            window_size += 1
+        y = savgol_filter(c, window_size, 2)
+        ax.plot(range(y.shape[0]), y, label=labels[i])
+    ax.legend()
+    if show:
+        plt.show()
+    return f
+
+
+def save_plot(fig=None, parent_folder=''):
+    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + parent_folder + '/'
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_name = str(uuid.uuid4())
@@ -159,15 +175,6 @@ def save_plot(fig=None, save_dir=SAVE_DIR,):
     else:
         fig.savefig(os.path.join(directory, file_name + '.eps'))
         fig.savefig(os.path.join(directory, file_name + '.png'))
-
-
-def save_object(all_scores, save_dir=SAVE_DIR):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    file_name = str(uuid.uuid4())
-    name = directory + file_name
-    pickle.dump(all_scores, open(name + ".pickle", "wb"))
 
 
 def hide_top_and_right_axis(ax):

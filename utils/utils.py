@@ -24,7 +24,7 @@ def save_object(object, file_name=None):
     pickle.dump(object, open(name + ".pickle", "wb"), 2)
 
 
-def save_json(dict, file_name=None):
+def save_dict(dict, file_name=None):
     directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M/")
     if not os.path.exists(directory):
         os.makedirs(directory)

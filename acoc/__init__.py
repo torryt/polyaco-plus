@@ -86,7 +86,7 @@ class Classifier:
         self.beta = config['beta']
         self.ant_init = config['ant_init']
 
-    def classify(self, data, live_plot):
+    def classify(self, data, live_plot, print_string=''):
         ant_scores = []
         current_best_polygon = []
         current_best_score = 0
@@ -135,7 +135,7 @@ class Classifier:
 
             if live_plot and len(ant_scores) % 20 == 0:
                 live_plot.update(matrix.edges)
-            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count))
+            utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
         if live_plot:
             live_plot.close()

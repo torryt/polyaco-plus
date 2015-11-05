@@ -10,10 +10,10 @@ import pickle
 live_plot = False
 save = True
 show_plot = False
-iterations = 1
+iterations = 15
 
 clf_config = {
-    'ant_count':    100,
+    'ant_count':    20,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -41,11 +41,11 @@ def run():
     data = np.concatenate((red, blue), axis=1)
 
     for i in range(iterations):
-        print("\nIteration: {}/{}".format(i + 1, iterations))
-
+        iter_string = "Iteration: {}/{}".format(i + 1, iterations)
         ant_scores, path = \
-            clf.classify(data, live_plot)
-        utils.print_on_current_line("Best ant score: {}".format(max(ant_scores)))
+            clf.classify(data, live_plot, ', ' + iter_string)
+        utils.print_on_current_line(iter_string)
+        print(", Best ant score: {}".format(max(ant_scores)))
 
         all_ant_scores[i, :] = ant_scores
         if max(ant_scores) > global_best_score:
@@ -56,7 +56,7 @@ def run():
     if save:
         utils.save_object(all_ant_scores.mean(0), file_name='scores')
         utils.save_object(global_best_polygon, file_name='best_path')
-        utils.save_json(clf_config, 'config.txt')
+        utils.save_dict(clf_config, 'config.txt')
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))
 

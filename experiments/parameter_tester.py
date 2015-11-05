@@ -6,9 +6,10 @@ from acoc import acoc_plotter
 from utils import data_generator as dg
 from utils import utils
 
+
 default_config = {
-    'ant_count': 100,
-    'iterations': 1,
+    'ant_count': 1500,
+    'iterations': 10,
     'q': 5.0,
     'q_min': 0.1,
     'q_max': 20.0,
@@ -31,13 +32,14 @@ def run(*args):
     for arg in args:
         config[arg[0]] = arg[1]
     iterations = config['iterations']
-    classifier = acoc.Classifier(config)
+    clf = acoc.Classifier(config)
     all_ant_scores = np.zeros((iterations, config['ant_count']))
 
     for i in range(iterations):
-        utils.print_on_current_line("Iteration: {}/{}".format(i + 1, iterations))
+        iter_string = "Iteration: {}/{}".format(i + 1, iterations)
         ant_scores, path = \
-            classifier.classify(data, config['live_plot'])
+            clf.classify(data, config['live_plot'], ', ' + iter_string)
+        utils.print_on_current_line(iter_string)
         all_ant_scores[i, :] = ant_scores
 
     return all_ant_scores.mean(0)
@@ -48,12 +50,13 @@ def parameter_tester(parameter_name, values):
     plots = []
     all_scores = []
     for index, v in enumerate(values):
-        print("\nRun {} with value {}".format(index+1, v))
+        print("\n\nRun {} with value {}".format(index+1, v))
         scores = run((parameter_name, v))
         line = plt.plot(range(len(scores)), scores, line_shapes[index], label=parameter_name + '=' + str(v))
         plots.append(line)
         all_scores.append(scores)
 
+    utils.save_dict(default_config, 'config.txt')
     utils.save_object(all_scores, parameter_name)
     plt.legend()
     plt.axis([0, len(scores), 0, 1])

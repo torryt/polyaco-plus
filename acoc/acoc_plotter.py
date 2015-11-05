@@ -2,19 +2,17 @@ from __future__ import division
 import os
 import uuid
 from time import strftime
-
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 
 from utils.data_generator import uniform_circle
 
+from config import SAVE_DIR
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
 EDGE_COLOR = '#1A1A1A'
 
-from config import SAVE_DIR
 
 
 class LivePheromonePlot:
@@ -166,8 +164,8 @@ def plot_smooth_curves(curves, labels, show=False):
     return f
 
 
-def save_plot(fig=None, save_dir=SAVE_DIR):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/")
+def save_plot(fig=None, parent_folder=''):
+    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + parent_folder + '/'
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_name = str(uuid.uuid4())

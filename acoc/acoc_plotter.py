@@ -157,8 +157,8 @@ def smooth_line_data(curve):
     plt.plot(xnew, f(xnew), '-')
 
 
-def save_plot(fig=None, save_dir=SAVE_DIR,):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
+def save_plot(fig=None, save_dir=SAVE_DIR):
+    directory = save_dir + strftime("%Y-%m-%d_%H%M/")
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_name = str(uuid.uuid4())

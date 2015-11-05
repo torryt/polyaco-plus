@@ -125,19 +125,12 @@ def main():
     red = dg.uniform_circle(3.0, 500, 1)
     blue = dg.uniform_circle(2.0, 500, 0)
     data = np.concatenate((red, blue), axis=1)
-    # data = dg.uniform_rectangle((0, 10), (0, 10), 7, 0)
     matrix = AcocMatrix(data, granularity=.5)
-
     ax = plt.subplot(111)
     acoc_plotter.plot_data(data, ax)
     matrix.add_to_plot(ax)
     ax.axis([matrix.x_min_max[0] - .1, matrix.x_min_max[1] + .1, matrix.y_min_max[0] - .1, matrix.y_min_max[1] + .1])
-
-    # plt.axis("off")
-    # plt.savefig("p.eps", bbox_inches='tight')
-
     acoc_plotter.hide_top_and_right_axis(ax)
-    # acoc_plotter.save_plot()
     plt.show()
 
 if __name__ == "__main__":

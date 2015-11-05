@@ -42,7 +42,7 @@ def ray_intersect_segment(p, edge):
     return intersect
 
 
-def is_point_inside(p, poly):
+def old_is_point_inside(p, poly):
     p_copy = Pt(p[0], p[1])
     return _odd(sum(ray_intersect_segment(p_copy, edge)
                     for edge in poly))

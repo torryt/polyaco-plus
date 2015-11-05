@@ -62,7 +62,7 @@ def parameter_tester(parameter_name, values, config=CONFIG):
     utils.save_object(all_scores, 'data', parameter_name)
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot()
+    acoc_plotter.save_plot(parent_folder=parameter_name)
     f = acoc_plotter.plot_smooth_curves(all_scores, [parameter_name + '=' + str(v) for v in values])
     acoc_plotter.save_plot(f, parameter_name)
 

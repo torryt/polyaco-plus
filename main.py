@@ -6,9 +6,9 @@ import acoc.acoc_plotter as plotter
 import utils.data_generator as dg
 import pickle
 
-ant_count = 1000
-iterations = 1
-q = 0.2
+ant_count = 1500
+iterations = 10
+q = 0.1
 q_min = 0.1
 q_max = 5.0
 q_init = q_min

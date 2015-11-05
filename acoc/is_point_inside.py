@@ -14,8 +14,8 @@ def _odd(x):
 
 def ray_intersect_segment(p, e):
 
-    a = e.vertex_a
-    b = e.vertex_b
+    a = e.start
+    b = e.target
 
     if a.y > b.y:
         a, b = b, a

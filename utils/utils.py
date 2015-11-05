@@ -2,7 +2,8 @@ import os
 import pickle
 import sys
 import uuid
-from time import strftime, gmtime
+import json
+from time import strftime
 
 from config import SAVE_DIR
 
@@ -13,11 +14,22 @@ def print_on_current_line(in_string):
     sys.stdout.flush()
 
 
-def save_object(object, file_name=None, save_dir=SAVE_DIR):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/")
+def save_object(object, file_name=None):
+    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M/")
     if not os.path.exists(directory):
         os.makedirs(directory)
     if file_name is None:
         file_name = str(uuid.uuid4())
     name = directory + file_name
     pickle.dump(object, open(name + ".pickle", "wb"), 2)
+
+
+def save_json(dict, file_name=None):
+    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M/")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    if file_name is None:
+        file_name = str(uuid.uuid4())
+    name = directory + file_name
+    with open(name, "w") as json_file:
+        json_file.write(json.dumps(dict, sort_keys=True, indent=2, separators=(',', ': ')))

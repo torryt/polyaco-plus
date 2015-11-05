@@ -7,13 +7,13 @@ import utils.data_generator as dg
 import pickle
 
 
-live_plot = True
+live_plot = False
 save = True
-show_plot = True
-iterations = 10
+show_plot = False
+iterations = 1
 
 clf_config = {
-    'ant_count':    10,
+    'ant_count':    100,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -21,10 +21,7 @@ clf_config = {
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'random',
-    'live_plot':    False,
-    'save':         True,
-    'show_plot':    True
+    'ant_init':     'random'
 }
 
 
@@ -59,6 +56,7 @@ def run():
     if save:
         utils.save_object(all_ant_scores.mean(0), file_name='scores')
         utils.save_object(global_best_polygon, file_name='best_path')
+        utils.save_json(clf_config, 'config.txt')
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))
 

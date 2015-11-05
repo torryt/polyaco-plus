@@ -5,9 +5,10 @@ from matplotlib import pyplot as plt
 import utils
 import numpy as np
 import pickle as pick
+import acoc_plotter as plotter
 
-ant_count = 100
-iterations = 1
+ant_count = 1500
+iterations = 20
 q = 5.0
 q_min = 0.1
 q_max = 20.0
@@ -21,7 +22,7 @@ live_plot = False
 red = np.insert(dg.uniform_rectangle((1, 4), (2, 5), 500), 2, 0, axis=0)
 blue = np.insert(dg.uniform_rectangle((5, 8), (2, 5), 500), 2, 1, axis=0)
 data = np.concatenate((red, blue), axis=1)
-line_shapes = ['b-', 'g^', 'r-', 'c-', 'm-', 'y-']
+line_shapes = ['b-', 'g^', 'r*', 'c-', 'm-', 'y-']
 
 
 def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iterations,
@@ -53,7 +54,7 @@ def test_ant_init():
         plots.append(line)
         all_scores.append(scores)
 
-    pick.dump(all_scores, open("results\save.pickle", "wb"))
+        plotter.save_object(all_scores)
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()

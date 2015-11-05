@@ -8,8 +8,8 @@ from utils import utils
 
 
 default_config = {
-    'ant_count': 1500,
-    'iterations': 10,
+    'ant_count': 100,
+    'iterations': 2,
     'q': 5.0,
     'q_min': 0.1,
     'q_max': 20.0,
@@ -46,22 +46,25 @@ def run(*args):
 
 
 def parameter_tester(parameter_name, values):
+    print("\n\nExperiment for parameter '{}' with values {}".format(parameter_name, values))
     plt.clf()
     plots = []
     all_scores = []
     for index, v in enumerate(values):
-        print("\n\nRun {} with value {}".format(index+1, v))
+        print("Run {} with value {}".format(index+1, v))
         scores = run((parameter_name, v))
         line = plt.plot(range(len(scores)), scores, line_shapes[index], label=parameter_name + '=' + str(v))
         plots.append(line)
         all_scores.append(scores)
+        utils.print_on_current_line('')
 
-    utils.save_dict(default_config, 'config.txt')
-    utils.save_object(all_scores, parameter_name)
+    utils.save_dict(default_config, 'config_' + parameter_name + '.txt')
+    utils.save_object(all_scores, 'data')
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()
-
+    f = acoc_plotter.plot_smooth_curves(all_scores, [parameter_name + '=' + str(v) for v in values])
+    acoc_plotter.save_plot(f)
 
 # parameter_tester('ant_init', ['random', 'weighted', 'static'])
 parameter_tester('q_init', [default_config['q_max'], default_config['q_min']])

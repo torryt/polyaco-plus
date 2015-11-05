@@ -1,6 +1,6 @@
 import numpy as np
 
-from acoc import acoc
+import acoc
 from utils import utils
 import acoc.acoc_plotter as plotter
 import utils.data_generator as dg

@@ -1,9 +1,7 @@
-import pickle as pick
-
 import numpy as np
 from matplotlib import pyplot as plt
 
-from acoc import acoc
+import acoc
 from acoc import acoc_plotter
 from utils import data_generator as dg
 from utils import utils

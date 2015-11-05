@@ -14,7 +14,7 @@ def print_on_current_line(in_string):
 
 
 def save_object(object, file_name=None, save_dir=SAVE_DIR):
-    directory = save_dir + strftime("%Y-%m-%d_%H%M/", gmtime())
+    directory = save_dir + strftime("%Y-%m-%d_%H%M/")
     if not os.path.exists(directory):
         os.makedirs(directory)
     if file_name is None:

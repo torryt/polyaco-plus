@@ -74,16 +74,16 @@ def get_static_start(matrix):
 
 
 class Classifier:
-    def __init__(self, ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init):
-        self.ant_count = ant_count
-        self.q = q
-        self.q_min = q_min
-        self.q_max = q_max
-        self.q_init = q_init
-        self.rho = rho
-        self.alpha = alpha
-        self.beta = beta
-        self.ant_init = ant_init
+    def __init__(self, config):
+        self.ant_count = config['ant_count']
+        self.q = config['q']
+        self.q_min = config['q_min']
+        self.q_max = config['q_max']
+        self.q_init = config['q_init']
+        self.rho = config['rho']
+        self.alpha = config['alpha']
+        self.beta = config['beta']
+        self.ant_init = config['ant_init']
 
     def classify(self, data, live_plot):
         ant_scores = []

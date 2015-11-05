@@ -3,95 +3,66 @@ import pickle as pick
 import numpy as np
 from matplotlib import pyplot as plt
 
-import acoc.acoc
-import utils
+from acoc import acoc
 from acoc import acoc_plotter
 from utils import data_generator as dg
+from utils import utils
 
-ant_count = 100
-iterations = 1
-q = 5.0
-q_min = 0.1
-q_max = 20.0
-q_init = q_max
-rho = 0.02
-alpha = 1
-beta = 0.05
-ant_init = 'random'
-live_plot = False
+default_config = {
+    'ant_count': 100,
+    'iterations': 1,
+    'q': 5.0,
+    'q_min': 0.1,
+    'q_max': 20.0,
+    'q_init': 20.0,
+    'rho': 0.02,
+    'alpha': 1,
+    'beta': 0.05,
+    'ant_init': 'random',
+    'live_plot': False
+}
 
-red = np.insert(dg.uniform_rectangle((1, 4), (2, 5), 500), 2, 0, axis=0)
-blue = np.insert(dg.uniform_rectangle((5, 8), (2, 5), 500), 2, 1, axis=0)
+red = dg.uniform_rectangle((1, 4), (2, 5), 500, 0)
+blue = dg.uniform_rectangle((5, 8), (2, 5), 500, 1)
 data = np.concatenate((red, blue), axis=1)
 line_shapes = ['b-', 'g^', 'r-', 'c-', 'm-', 'y-']
 
 
-def run(new_rho=rho, new_beta=beta, new_q=q, new_q_min=q_min, new_iter=iterations,
-        new_q_init=q_init, new_ant_init=ant_init):
-    classifier = acoc.Classifier(ant_count, new_q, q_max, new_q_min, new_q_init, new_rho, alpha, new_beta, new_ant_init)
-    all_ant_scores = np.zeros((iterations, ant_count))
+def run(*args):
+    config = dict(default_config)
+    for arg in args:
+        config[arg[0]] = arg[1]
+    iterations = config['iterations']
+    classifier = acoc.Classifier(config)
+    all_ant_scores = np.zeros((iterations, config['ant_count']))
 
-    for i in range(new_iter):
+    for i in range(iterations):
         utils.print_on_current_line("Iteration: {}/{}".format(i + 1, iterations))
-
         ant_scores, path = \
-            classifier.classify(data, live_plot)
-
+            classifier.classify(data, config['live_plot'])
         all_ant_scores[i, :] = ant_scores
 
     return all_ant_scores.mean(0)
 
 
-def test_ant_init():
+def parameter_tester(parameter_name, values):
     plt.clf()
     plots = []
-    value_tag = 'ant_init'
-    values = ['random', 'weighted', 'static']
     all_scores = []
     for index, v in enumerate(values):
         print("\nRun {} with value {}".format(index+1, v))
-        scores = run(new_ant_init=v)
-        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
+        scores = run((parameter_name, v))
+        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=parameter_name + '=' + str(v))
         plots.append(line)
         all_scores.append(scores)
 
-    pick.dump(all_scores, open("results\save.pickle", "wb"))
+    utils.save_object(all_scores, parameter_name)
     plt.legend()
     plt.axis([0, len(scores), 0, 1])
     acoc_plotter.save_plot()
 
 
-def test_rho():
-    plt.clf()
-    plots = []
-    value_tag = 'rho'
-    values = [0.001, 0.01, 0.02, 0.1, 0.3]
-    print("Testing parameter " + value_tag)
-    for index, v in enumerate(values):
-        print("\nRun {} with value {}".format(index+1, v))
-        scores = run(new_rho=v)
-        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
-        plots.append(line)
-
-    plt.legend()
-    plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot()
-
-
-def test_iterations():
-    plt.clf()
-    plots = []
-    value_tag = 'iterations'
-    values = [1, 2, 5, 10]
-    print("Testing parameter " + value_tag)
-    for index, v in enumerate(values):
-        print("\nRun {} with value {}".format(index+1, v))
-        scores = run(new_iter=v)
-        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=value_tag+'='+str(v))
-        plots.append(line)
-
-    plt.legend()
-    plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot()
-
-test_ant_init()
+# parameter_tester('ant_init', ['random', 'weighted', 'static'])
+parameter_tester('q_init', [default_config['q_max'], default_config['q_min']])
+# parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
+# parameter_tester('iterations', [1, 2, 5, 10])

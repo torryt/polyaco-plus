@@ -6,26 +6,34 @@ import acoc.acoc_plotter as plotter
 import utils.data_generator as dg
 import pickle
 
-ant_count = 1000
-iterations = 1
-q = 0.2
-q_min = 0.1
-q_max = 5.0
-q_init = q_min
-rho = 0.01
-alpha = 1
-beta = 0.05
+
 live_plot = True
 save = True
 show_plot = True
-ant_init = 'random'
+iterations = 10
 
-classifier = acoc.Classifier(ant_count, q, q_min, q_max, q_init, rho, alpha, beta, ant_init)
+clf_config = {
+    'ant_count':    10,
+    'q':            5.0,
+    'q_min':        0.1,
+    'q_max':        20.0,
+    'q_init':       20.0,
+    'rho':          0.02,
+    'alpha':        1,
+    'beta':         0.05,
+    'ant_init':     'random',
+    'live_plot':    False,
+    'save':         True,
+    'show_plot':    True
+}
+
+
+clf = acoc.Classifier(clf_config)
 data_sets = pickle.load(open('data_sets.pickle', 'rb'))
 
 
 def run():
-    all_ant_scores = np.zeros((iterations, ant_count))
+    all_ant_scores = np.zeros((iterations, clf.ant_count))
     global_best_polygon = []
     global_best_score = 0
 
@@ -39,7 +47,7 @@ def run():
         print("\nIteration: {}/{}".format(i + 1, iterations))
 
         ant_scores, path = \
-            classifier.classify(data, live_plot)
+            clf.classify(data, live_plot)
         utils.print_on_current_line("Best ant score: {}".format(max(ant_scores)))
 
         all_ant_scores[i, :] = ant_scores

@@ -12,6 +12,7 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_plotter import LivePheromonePlot
 from acoc.ant import Ant
 from acoc.is_point_inside import is_point_inside
+# from acoc.old_is_point_inside import old_is_point_inside
 from utils import utils
 
 

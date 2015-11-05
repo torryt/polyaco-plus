@@ -1,8 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import numpy as np
 
 import acoc
 from utils import utils
-import acoc.acoc_plotter as plotter
+from acoc import acoc_plotter as plotter
 import utils.data_generator as dg
 import pickle
 

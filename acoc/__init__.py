@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import division
+
 import random
 from copy import copy
 
@@ -11,38 +12,9 @@ from numpy.random.mtrand import choice
 from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_plotter import LivePheromonePlot
 from acoc.ant import Ant
+from utils.utils import normalize
 from acoc.is_point_inside import is_point_inside
 from utils import utils
-
-
-def normalize(values):
-    """
-    Normalizes a range of values to values from 0 to 1
-    """
-    if values.sum() == 0.0:
-        return [1.0 / len(values)] * len(values)
-
-    normalize_const = 1.0 / values.sum()
-    return values * normalize_const
-
-
-def move_ant(matrix, _ant):
-    edges_travelled = _ant.edges_travelled if len(_ant.edges_travelled) > 0 else None
-    if _ant.current_edge is None:
-        connected_edges = _ant.start_vertex.connected_edges
-    else:
-        connected_edges = copy(_ant.current_edge.target.connected_edges)
-        connected_edges.remove(_ant.current_edge.twin)
-    if edges_travelled is not None:
-        for e in edges_travelled:
-            if e in connected_edges:
-                connected_edges.remove(e)
-    if len(connected_edges) == 0:
-        return None
-    weights = normalize(np.array([e.pheromone_strength for e in connected_edges]))
-    edge = choice(connected_edges, p=weights)
-    _ant.current_edge = edge
-    return edge
 
 
 def get_unique_edges(path):
@@ -66,16 +38,10 @@ def polygon_score(polygon, data):
     return score / data.shape[1]
 
 
-def f7(seq):
-    seen = set()
-    seen_add = seen.add
-    return [x for x in seq if not (x.edge_index in seen or seen_add(x.edge_index))]
-
-
 def get_random_weighted(edges):
     weights = normalize(np.array([e.pheromone_strength for e in edges]))
     random_weighted_edge = choice(edges, p=weights)
-    return random.choice(random_weighted_edge.target)
+    return random_weighted_edge.start
 
 
 def get_static_start(matrix):
@@ -108,14 +74,12 @@ class Classifier:
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
                 start_vertex = get_static_start(matrix)
-
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
-
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
             _ant = Ant(start_vertex)
-            edge = move_ant(matrix, _ant)
+            edge = _ant.move_ant()
             _ant.edges_travelled.append(edge)
             ant_at_target = ant_is_stuck = False
 
@@ -123,7 +87,7 @@ class Classifier:
                 if _ant.current_edge.target == start_vertex or len(_ant.edges_travelled) > 10000:
                     ant_at_target = True
                 else:
-                    edge = move_ant(matrix, _ant)
+                    edge = _ant.move_ant()
                     if edge is None:
                         ant_is_stuck = True
                     else:

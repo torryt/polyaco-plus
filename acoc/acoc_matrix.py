@@ -3,7 +3,7 @@ from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 
-import acoc_plotter
+from acoc import acoc_plotter
 from utils import data_generator as dg
 
 

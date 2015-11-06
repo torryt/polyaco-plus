@@ -149,7 +149,7 @@ def plot_path(path, subplot):
         subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
 
 
-def plot_smooth_curves(curves, labels, show=False):
+def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
     f = plt.figure()
     ax = f.add_subplot(111)
     for i, c in enumerate(curves):
@@ -158,7 +158,18 @@ def plot_smooth_curves(curves, labels, show=False):
             window_size += 1
         y = savgol_filter(c, window_size, 2)
         ax.plot(range(y.shape[0]), y, label=labels[i])
-    ax.legend()
+    ax.legend(loc=loc)
+    if show:
+        plt.show()
+    return f
+
+
+def plot_curves(curves, labels, show=False, loc='upper right'):
+    f = plt.figure()
+    ax = f.add_subplot(111)
+    for i, c in enumerate(curves):
+        ax.plot(range(c.shape[0]), c, label=labels[i])
+    ax.legend(loc=loc)
     if show:
         plt.show()
     return f
@@ -196,3 +207,5 @@ if __name__ == "__main__":
         plot_data(points)
 
     main()
+
+

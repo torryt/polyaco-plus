@@ -10,13 +10,13 @@ import pickle
 
 
 live_plot = True
+save = True
 show_plot = True
-save = False
-iterations = 1
+iterations = 5
 
 clf_config = {
-    'ant_count':    500,
-    'q':            1.0,
+    'ant_count':    200,
+    'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
     'q_init':       0.1,

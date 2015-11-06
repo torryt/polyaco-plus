@@ -14,7 +14,6 @@ from acoc.acoc_plotter import LivePheromonePlot
 from acoc.ant import Ant
 from utils.utils import normalize
 from acoc.is_point_inside import is_point_inside
-# from acoc.old_is_point_inside import old_is_point_inside
 from utils import utils
 
 
@@ -46,9 +45,28 @@ def get_random_weighted(edges):
 
 
 def get_static_start(matrix):
-    start_point = matrix.vertices[0]
-    plt.plot(start_point.x, start_point.y, '^', color='#00B200')
-    return start_point
+    return matrix.vertices[0]
+    # plt.plot(start_point.x, start_point.y, '^', color='#00B200')
+
+
+def get_global(matrix, current_best_polygon):
+    if len(current_best_polygon) != 0:
+        select_edge = random.choice(current_best_polygon)
+        return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+    else:
+        return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+
+
+def get_chance_of_global(matrix, current_best_polygon):
+    if len(current_best_polygon) != 0:
+        # 50% probability for selecting a point from current best path
+        if random.randint(0, 1) == 0:
+            select_edge = random.choice(current_best_polygon)
+            return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+        else:
+            return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+    else:
+        return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
 
 class Classifier:
@@ -77,6 +95,13 @@ class Classifier:
                 start_vertex = get_static_start(matrix)
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
+
+            elif self.ant_init == 'on_global_best':
+                start_vertex = get_global(matrix, current_best_polygon)
+
+            elif self.ant_init == 'chance_of_global_best':
+                start_vertex = get_chance_of_global(matrix, current_best_polygon)
+
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
             _ant = Ant(start_vertex)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import division
+
 import random
 from copy import copy
 
@@ -11,38 +12,9 @@ from numpy.random.mtrand import choice
 from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_plotter import LivePheromonePlot
 from acoc.ant import Ant
+from utils.utils import normalize
 from acoc.is_point_inside import is_point_inside
 from utils import utils
-
-
-def normalize(values):
-    """
-    Normalizes a range of values to values from 0 to 1
-    """
-    if values.sum() == 0.0:
-        return [1.0 / len(values)] * len(values)
-
-    normalize_const = 1.0 / values.sum()
-    return values * normalize_const
-
-
-def next_edge_and_vertex(matrix, ant):
-    edges_travelled = ant.edges_travelled if len(ant.edges_travelled) > 0 else None
-    connected_edges = copy(matrix.find_vertex(ant.current_coordinates).connected_edges)
-
-    if edges_travelled is not None:
-        for e in edges_travelled:
-            if e in connected_edges:
-                connected_edges.remove(e)
-    if len(connected_edges) == 0:
-        return None, None
-
-    weights = normalize(np.array([e.pheromone_strength for e in connected_edges]))
-    selected = choice(connected_edges, p=weights)
-    if selected.vertex_a.coordinates() != ant.current_coordinates:
-        return selected, selected.vertex_a.coordinates()
-    else:
-        return selected, selected.vertex_b.coordinates()
 
 
 def get_unique_edges(path):
@@ -54,8 +26,12 @@ def get_unique_edges(path):
 def polygon_score(polygon, data):
     points = data.T.tolist()
     score = 0
+    unique_polygon = copy(polygon)
+    for p in unique_polygon:
+        if p.twin in unique_polygon:
+            unique_polygon.remove(p.twin)
     for p in points:
-        if is_point_inside(p, polygon):
+        if is_point_inside(p, unique_polygon):
             score += 1 if p[2] == 0 else 0
         else:
             score += 1 if p[2] == 1 else 0
@@ -65,7 +41,7 @@ def polygon_score(polygon, data):
 def get_random_weighted(edges):
     weights = normalize(np.array([e.pheromone_strength for e in edges]))
     random_weighted_edge = choice(edges, p=weights)
-    return random.choice([random_weighted_edge.vertex_a, random_weighted_edge.vertex_b])
+    return random_weighted_edge.start
 
 
 def get_static_start(matrix):
@@ -117,7 +93,6 @@ class Classifier:
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
                 start_vertex = get_static_start(matrix)
-
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
 
@@ -129,29 +104,26 @@ class Classifier:
 
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
-
-            start_coordinates = (start_vertex.x, start_vertex.y)
-            ant = Ant(start_coordinates)
-
-            edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
-            ant.edges_travelled.append(edge)
+            _ant = Ant(start_vertex)
+            edge = _ant.move_ant()
+            _ant.edges_travelled.append(edge)
             ant_at_target = ant_is_stuck = False
 
             while not ant_at_target and not ant_is_stuck:
-                if ant.current_coordinates == start_coordinates or len(ant.edges_travelled) > 10000:
+                if _ant.current_edge.target == start_vertex or len(_ant.edges_travelled) > 10000:
                     ant_at_target = True
                 else:
-                    edge, ant.current_coordinates = next_edge_and_vertex(matrix, ant)
+                    edge = _ant.move_ant()
                     if edge is None:
                         ant_is_stuck = True
                     else:
-                        ant.edges_travelled.append(edge)
+                        _ant.edges_travelled.append(edge)
 
             if ant_is_stuck:
                 continue
-            ant_score = self.cost_function(ant.edges_travelled, data)
+            ant_score = self.cost_function(_ant.edges_travelled, data)
             if ant_score > current_best_score:
-                current_best_polygon = ant.edges_travelled
+                current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
 
             self.put_pheromones(current_best_polygon, data)

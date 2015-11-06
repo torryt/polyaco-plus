@@ -48,23 +48,20 @@ def run(*args):
 def parameter_tester(parameter_name, values, config=CONFIG):
     print("\n\nExperiment for parameter '{}' with values {}".format(parameter_name, values))
     plt.clf()
-    plots = []
     all_scores = []
     for index, v in enumerate(values):
         print("Run {} with value {}".format(index+1, v))
         scores = run((parameter_name, v))
-        line = plt.plot(range(len(scores)), scores, line_shapes[index], label=parameter_name + '=' + str(v))
-        plots.append(line)
         all_scores.append(scores)
         utils.print_on_current_line('')
 
     utils.save_dict(config, 'config_' + parameter_name + '.txt', parameter_name)
     utils.save_object(all_scores, 'data', parameter_name)
-    plt.legend()
-    plt.axis([0, len(scores), 0, 1])
-    acoc_plotter.save_plot(parent_folder=parameter_name)
-    f = acoc_plotter.plot_smooth_curves(all_scores, [parameter_name + '=' + str(v) for v in values])
-    acoc_plotter.save_plot(f, parameter_name)
+    labels = [parameter_name + '=' + str(v) for v in values]
+    f1 = acoc_plotter.plot_curves(all_scores, labels)
+    acoc_plotter.save_plot(f1, parameter_name)
+    f2 = acoc_plotter.plot_smooth_curves(all_scores, labels)
+    acoc_plotter.save_plot(f2, parameter_name)
 
 if __name__ == "__main__":
     parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])

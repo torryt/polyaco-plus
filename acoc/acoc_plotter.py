@@ -20,7 +20,7 @@ class LivePheromonePlot:
         plt.ion()
         self.plot_lines = []
         for edge in matrix.edges:
-            line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
+            line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
             plt.setp(line, linewidth=edge.pheromone_strength)
             self.plot_lines.append(line)
 
@@ -83,7 +83,7 @@ def plot_path_with_data(path, data, save=False, show=False):
 
 def plot_pheromone_values(matrix, show=False):
     for edge in matrix.edges:
-        line = plt.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
+        line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
     plt.axis([matrix.x_min_max[0], matrix.x_min_max[1], matrix.y_min_max[0], matrix.y_min_max[1]])
     if show:
@@ -146,10 +146,10 @@ def plot_data(data, subplot=None, show=False):
 
 def plot_path(path, subplot):
     for edge in path:
-        subplot.plot([edge.vertex_a.x, edge.vertex_b.x], [edge.vertex_a.y, edge.vertex_b.y], 'k-')
+        subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
 
 
-def plot_smooth_curves(curves, labels, show=False):
+def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
     f = plt.figure()
     ax = f.add_subplot(111)
     for i, c in enumerate(curves):
@@ -158,7 +158,18 @@ def plot_smooth_curves(curves, labels, show=False):
             window_size += 1
         y = savgol_filter(c, window_size, 2)
         ax.plot(range(y.shape[0]), y, label=labels[i])
-    ax.legend()
+    ax.legend(loc=loc)
+    if show:
+        plt.show()
+    return f
+
+
+def plot_curves(curves, labels, show=False, loc='upper right'):
+    f = plt.figure()
+    ax = f.add_subplot(111)
+    for i, c in enumerate(curves):
+        ax.plot(range(c.shape[0]), c, label=labels[i])
+    ax.legend(loc=loc)
     if show:
         plt.show()
     return f
@@ -196,3 +207,5 @@ if __name__ == "__main__":
         plot_data(points)
 
     main()
+
+

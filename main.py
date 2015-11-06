@@ -19,16 +19,15 @@ clf_config = {
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
-    'q_init':       20.0,
+    'q_init':       0.1,
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'on_global_best'
+    'ant_init':     'weighted'
 }
 
-
 clf = acoc.Classifier(clf_config)
-data_sets = pickle.load(open('data_sets.pickle', 'rb'))
+data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
 
 
 def run():
@@ -57,7 +56,8 @@ def run():
     score = acoc.polygon_score(global_best_polygon, data)
     if save:
         utils.save_object(all_ant_scores.mean(0), file_name='scores')
-        utils.save_object(global_best_polygon, file_name='best_path')
+        # TODO: Save best polygon without recursion. Just points maybe?
+        # utils.save_object(global_best_polygon, file_name='best_path')
         utils.save_dict(clf_config, 'config.txt')
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))

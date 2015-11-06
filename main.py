@@ -19,11 +19,12 @@ clf_config = {
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
-    'q_init':       0.1,
+    'q_init':       20.0,
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'weighted'
+    'ant_init':     'weighted',
+    'decay_type':   'grad_type'
 }
 
 clf = acoc.Classifier(clf_config)

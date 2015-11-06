@@ -80,6 +80,7 @@ class Classifier:
         self.alpha = config['alpha']
         self.beta = config['beta']
         self.ant_init = config['ant_init']
+        self.decay_type = config['decay_type']
 
     def classify(self, data, live_plot, print_string=''):
         ant_scores = []
@@ -127,7 +128,10 @@ class Classifier:
                 current_best_score = ant_score
 
             self.put_pheromones(current_best_polygon, data)
-            self.reset_at_random(matrix)
+            if self.decay_type == 'random_type':
+                self.reset_at_random(matrix)
+            elif self.decay_type == 'grad_type':
+                self.grad_pheromone_decay(matrix)
 
             ant_scores.append(ant_score)
 
@@ -145,6 +149,10 @@ class Classifier:
             rand_num = random.random()
             if rand_num < self.rho:
                 edge.pheromone_strength = self.q_min
+
+    def grad_pheromone_decay(self, matrix):
+        for edge in matrix.edges:
+            edge.pheromone_strength *= 1-self.rho
 
     def cost_function(self, polygon, data):
         score = polygon_score(polygon, data)

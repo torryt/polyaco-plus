@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pickle
 from acoc import acoc_plotter
-from acoc.acoc_plotter import plot_smooth_curves
+from acoc.acoc_plotter import plot_smooth_curves, plot_curves
 
 
 def plot_points():
@@ -19,8 +19,9 @@ def plot_points():
     plt.savefig('points.svg', bbox_inches='tight')
     # plt.show()
 
-labels = ['q_init=20.0', 'q_init=0.1']
-curves = pickle.load(open('/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/q_init.pickle', 'rb'))
-f = plot_smooth_curves(curves, labels)
+labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
+file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/Guro/2015-11-06_0156ant_init/data.pickle'
+curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
+f = plot_curves(curves, labels, loc='lower right')
 acoc_plotter.save_plot(f)
-#plot_points()
+# plt.show()

@@ -1,15 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import numpy as np
 
 import acoc
 from utils import utils
-import acoc.acoc_plotter as plotter
+from acoc import acoc_plotter as plotter
 import utils.data_generator as dg
 import pickle
 
 
-live_plot = False
+live_plot = True
 show_plot = True
-save = True
+save = False
 iterations = 1
 
 clf_config = {
@@ -25,7 +27,7 @@ clf_config = {
 }
 
 clf = acoc.Classifier(clf_config)
-data_sets = pickle.load(open('data_sets.pickle', 'rb'))
+data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
 
 
 def run():

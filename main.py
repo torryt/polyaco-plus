@@ -10,7 +10,7 @@ import pickle
 
 
 live_plot = True
-save = False
+save = True
 show_plot = True
 iterations = 5
 

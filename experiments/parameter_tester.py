@@ -9,7 +9,7 @@ from utils import utils
 
 CONFIG = {
     'ant_count': 500,
-    'iterations': 10,
+    'iterations': 5,
     'q': 5.0,
     'q_min': 0.1,
     'q_max': 20.0,
@@ -17,7 +17,8 @@ CONFIG = {
     'rho': 0.02,
     'alpha': 1,
     'beta': 0.05,
-    'ant_init': 'random',
+    'ant_init': 'weighted',
+    'decay_type': 'random_type',
     'live_plot': False
 }
 
@@ -64,7 +65,8 @@ def parameter_tester(parameter_name, values, config=CONFIG):
     acoc_plotter.save_plot(f2, parameter_name)
 
 if __name__ == "__main__":
-    parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
+    # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
+    parameter_tester('decay_type', ['random_type', 'grad_type'])
     # parameter_tester('q_init', [CONFIG['q_max'], CONFIG['q_min']])
     # parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
     # parameter_tester('iterations', [1, 2, 5, 10])

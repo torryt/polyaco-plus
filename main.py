@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
+import pickle
+from datetime import datetime
 
 import acoc
 from utils import utils
 from acoc import acoc_plotter as plotter
-import utils.data_generator as dg
-import pickle
 
+SAVE = False
+SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
+SHOW_PLOT = False
+NUMBER_RUNS = 1
 
-live_plot = True
-save = True
-show_plot = True
-iterations = 5
 
 clf_config = {
-    'ant_count':    200,
+    'ant_count':    1000,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -24,28 +24,23 @@ clf_config = {
     'alpha':        1,
     'beta':         0.05,
     'ant_init':     'weighted',
-    'decay_type':   'grad_type'
+    'decay_type':   'random_type'
 }
 
-clf = acoc.Classifier(clf_config)
+clf = acoc.Classifier(clf_config, SAVE_FOLDER)
 data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
+data = data_sets['rectangle']
 
 
 def run():
-    all_ant_scores = np.zeros((iterations, clf.ant_count))
+    all_ant_scores = np.zeros((NUMBER_RUNS, clf.ant_count))
     global_best_polygon = []
     global_best_score = 0
 
-    # red = dg.uniform_circle(3.0, 500, 1)
-    # blue = dg.uniform_circle(2.0, 500, 0)
-    red = dg.uniform_rectangle((1, 3), (2, 4), 500, 0)
-    blue = dg.uniform_rectangle((4, 6), (2, 4), 500, 1)
-    data = np.concatenate((red, blue), axis=1)
-
-    for i in range(iterations):
-        iter_string = "Iteration: {}/{}".format(i + 1, iterations)
+    for i in range(NUMBER_RUNS):
+        iter_string = "Iteration: {}/{}".format(i + 1, NUMBER_RUNS)
         ant_scores, path = \
-            clf.classify(data, live_plot, ', ' + iter_string)
+            clf.classify(data, SAVE, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         print(", Best ant score: {}".format(max(ant_scores)))
 
@@ -55,16 +50,18 @@ def run():
             global_best_score = max(ant_scores)
 
     score = acoc.polygon_score(global_best_polygon, data)
-    if save:
-        utils.save_object(all_ant_scores.mean(0), file_name='scores')
+    if SAVE:
+        utils.save_object(all_ant_scores.mean(0), 'scores', SAVE_FOLDER)
         # TODO: Save best polygon without recursion. Just points maybe?
         # utils.save_object(global_best_polygon, file_name='best_path')
-        utils.save_dict(clf_config, 'config.txt')
+        utils.save_dict(clf_config, 'config.txt', SAVE_FOLDER)
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))
 
-    plotter.plot_path_with_data(global_best_polygon, data, save=save, show=show_plot)
-    plotter.plot_ant_scores(all_ant_scores.mean(0), save=save, show=show_plot)
+    plotter.plot_path_with_data(global_best_polygon, data, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
+    plotter.plot_ant_scores(all_ant_scores.mean(0), save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
-
+# from timeit import timeit
+# time = timeit('run()', setup='from __main__ import run', number=5)
+# print("Time pr ant: {}".format(time / clf_config['ant_count']))
 run()

@@ -1,15 +1,16 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import pickle
+from datetime import datetime
 
 import acoc
 from acoc import acoc_plotter
-from utils import data_generator as dg
 from utils import utils
 
 
 CONFIG = {
-    'ant_count': 500,
-    'iterations': 5,
+    'ant_count': 1000,
+    'number_runs': 10,
     'q': 5.0,
     'q_min': 0.1,
     'q_max': 20.0,
@@ -18,13 +19,12 @@ CONFIG = {
     'alpha': 1,
     'beta': 0.05,
     'ant_init': 'weighted',
-    'decay_type': 'random_type',
-    'live_plot': False
+    'decay_type': 'random_type'
 }
+SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
-red = dg.uniform_rectangle((1, 4), (2, 5), 500, 0)
-blue = dg.uniform_rectangle((5, 8), (2, 5), 500, 1)
-data = np.concatenate((red, blue), axis=1)
+data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
+data = data_sets['rectangle']
 line_shapes = ['b-', 'g^', 'r-', 'c-', 'm-', 'y-']
 
 
@@ -32,14 +32,14 @@ def run(*args):
     config = dict(CONFIG)
     for arg in args:
         config[arg[0]] = arg[1]
-    iterations = config['iterations']
-    clf = acoc.Classifier(config)
-    all_ant_scores = np.zeros((iterations, config['ant_count']))
+    number_runs = config['number_runs']
+    clf = acoc.Classifier(config, SAVE_FOLDER)
+    all_ant_scores = np.zeros((number_runs, config['ant_count']))
 
-    for i in range(iterations):
-        iter_string = "Iteration: {}/{}".format(i + 1, iterations)
+    for i in range(number_runs):
+        iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
         ant_scores, path = \
-            clf.classify(data, config['live_plot'], ', ' + iter_string)
+            clf.classify(data, False, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         all_ant_scores[i, :] = ant_scores
 
@@ -56,13 +56,13 @@ def parameter_tester(parameter_name, values, config=CONFIG):
         all_scores.append(scores)
         utils.print_on_current_line('')
 
-    utils.save_dict(config, 'config_' + parameter_name + '.txt', parameter_name)
-    utils.save_object(all_scores, 'data', parameter_name)
+    utils.save_dict(config, 'config_' + parameter_name + '.txt', SAVE_FOLDER)
+    utils.save_object(all_scores, 'data', SAVE_FOLDER)
     labels = [parameter_name + '=' + str(v) for v in values]
     f1 = acoc_plotter.plot_curves(all_scores, labels)
-    acoc_plotter.save_plot(f1, parameter_name)
+    acoc_plotter.save_plot(f1, SAVE_FOLDER)
     f2 = acoc_plotter.plot_smooth_curves(all_scores, labels)
-    acoc_plotter.save_plot(f2, parameter_name)
+    acoc_plotter.save_plot(f2, SAVE_FOLDER)
 
 if __name__ == "__main__":
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])

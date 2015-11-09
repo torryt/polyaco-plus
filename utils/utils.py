@@ -15,7 +15,10 @@ def print_on_current_line(in_string):
 
 
 def save_object(obj, file_name=None, parent_folder=''):
-    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + parent_folder + '/'
+    if parent_folder != '':
+        directory = SAVE_DIR + parent_folder + '/'
+    else:
+        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
     if not os.path.exists(directory):
         os.makedirs(directory)
     if file_name is None:
@@ -25,7 +28,10 @@ def save_object(obj, file_name=None, parent_folder=''):
 
 
 def save_dict(dictionary, file_name=None, parent_folder=''):
-    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + parent_folder + '/'
+    if parent_folder != '':
+        directory = SAVE_DIR + parent_folder + '/'
+    else:
+        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
     if not os.path.exists(directory):
         os.makedirs(directory)
     if file_name is None:

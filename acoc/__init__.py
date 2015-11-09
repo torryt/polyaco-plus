@@ -4,12 +4,12 @@ from __future__ import division
 
 import random
 from copy import copy
-
 import numpy as np
 from numpy.random.mtrand import choice
 
 from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_plotter import LivePheromonePlot
+import acoc.acoc_plotter as plotter
 from acoc.ant import Ant
 from utils.utils import normalize
 from acoc.is_point_inside import is_point_inside
@@ -69,7 +69,7 @@ def get_chance_of_global(matrix, current_best_polygon):
 
 
 class Classifier:
-    def __init__(self, config):
+    def __init__(self, config, save_folder):
         self.ant_count = config['ant_count']
         self.q = config['q']
         self.q_min = config['q_min']
@@ -80,28 +80,23 @@ class Classifier:
         self.beta = config['beta']
         self.ant_init = config['ant_init']
         self.decay_type = config['decay_type']
+        self.save_folder = save_folder
 
-    def classify(self, data, live_plot, print_string=''):
+    def classify(self, data, plot=False, print_string=''):
         ant_scores = []
         current_best_polygon = []
         current_best_score = 0
         matrix = AcocMatrix(data, q_initial=self.q_init)
-
-        if live_plot:
-            live_plot = LivePheromonePlot(matrix, data)
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
                 start_vertex = get_static_start(matrix)
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
-
             elif self.ant_init == 'on_global_best':
                 start_vertex = get_global(matrix, current_best_polygon)
-
             elif self.ant_init == 'chance_of_global_best':
                 start_vertex = get_chance_of_global(matrix, current_best_polygon)
-
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
             _ant = Ant(start_vertex)
@@ -134,12 +129,13 @@ class Classifier:
 
             ant_scores.append(ant_score)
 
-            if live_plot and len(ant_scores) % 20 == 0:
-                live_plot.update(matrix.edges)
+            if plot and len(ant_scores) % 50 == 0:
+                plotter.plot_pheromones(matrix, data, True, self.save_folder)
+                # live_plot.update(matrix.edges)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
-        if live_plot:
-            live_plot.close()
+        # if live_plot:
+        #     live_plot.close()
 
         return ant_scores, current_best_polygon
 

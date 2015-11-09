@@ -14,7 +14,6 @@ RED_COLOR = '#F03A3A'
 EDGE_COLOR = '#1A1A1A'
 
 
-
 class LivePheromonePlot:
     def __init__(self, matrix, data=None):
         plt.ion()

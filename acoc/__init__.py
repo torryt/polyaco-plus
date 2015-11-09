@@ -6,7 +6,6 @@ import random
 from copy import copy
 
 import numpy as np
-from matplotlib import pyplot as plt
 from numpy.random.mtrand import choice
 
 from acoc.acoc_matrix import AcocMatrix
@@ -75,7 +74,7 @@ class Classifier:
         self.q = config['q']
         self.q_min = config['q_min']
         self.q_max = config['q_max']
-        self.q_init = config['q_init']
+        self.q_init = config['q_init']  
         self.rho = config['rho']
         self.alpha = config['alpha']
         self.beta = config['beta']

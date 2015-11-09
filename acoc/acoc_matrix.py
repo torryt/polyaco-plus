@@ -20,7 +20,6 @@ class AcocMatrix:
         self.vertices = init_vertices(coordinates)
         self.edges = init_edges(self.vertices, self.q_initial)
         [connect_edges_to_vertex(v, self.edges) for v in self.vertices]
-        pass
 
     def plot_matrix(self, show=True):
         x_coord, y_coord = zip(*[(v.x, v.y) for v in self.vertices])

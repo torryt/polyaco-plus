@@ -9,8 +9,8 @@ from utils import utils
 
 
 CONFIG = {
-    'ant_count': 1000,
-    'number_runs': 10,
+    'ant_count': 2000,
+    'number_runs': 50,
     'q': 5.0,
     'q_min': 0.1,
     'q_max': 20.0,

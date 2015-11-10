@@ -2,6 +2,7 @@ from __future__ import division
 import os
 import uuid
 from time import strftime
+from datetime import datetime
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -12,7 +13,6 @@ from config import SAVE_DIR
 BLUE_COLOR = '#0097E8'
 RED_COLOR = '#F03A3A'
 EDGE_COLOR = '#1A1A1A'
-
 
 
 class LivePheromonePlot:
@@ -56,27 +56,27 @@ class LivePheromonePlot:
         plt.pause(0.01)
 
 
-def plot_ant_scores(ant_scores, save=False, show=False):
-    plt.close()
+def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
     x = range(len(ant_scores))
     y = ant_scores
-    plt.plot(x, y, 'k-')
-    plt.axis([0, len(ant_scores), min(ant_scores), max(ant_scores)])
-    plt.title("Ant Scores")
+    ax.plot(x, y, 'k-')
+    ax.axis([0, len(ant_scores), min(ant_scores), max(ant_scores)])
     if save:
-        save_plot()
+        save_plot(fig, save_folder)
     if show:
         plt.show()
 
 
-def plot_path_with_data(path, data, save=False, show=False):
-    fig = plt.figure(1)
+def plot_path_with_data(path, data, save=False, show=False, save_folder=''):
+    fig = plt.figure()
     ax = fig.add_subplot(111)
     hide_top_and_right_axis(ax)
     plot_data(data, ax)
     plot_path(path, ax)
     if save:
-        save_plot(fig)
+        save_plot(fig, save_folder)
     if show:
         plt.show()
 
@@ -175,17 +175,38 @@ def plot_curves(curves, labels, show=False, loc='upper right'):
     return f
 
 
-def save_plot(fig=None, parent_folder=''):
-    directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + parent_folder + '/'
+def plot_pheromones(matrix, data, save=True, folder_name=''):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    for edge in matrix.edges:
+        line = ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
+        plt.setp(line, linewidth=edge.pheromone_strength)
+
+    if data is not None:
+        plot_data(data)
+
+    ax.axis([matrix.x_min_max[0] - .1,
+             matrix.x_min_max[1] + .1,
+             matrix.y_min_max[0] - .1,
+             matrix.y_min_max[1] + .1])
+    save_plot(fig, folder_name, file_type='png')
+
+
+def save_plot(fig=None, parent_folder='', file_type=None):
+    if parent_folder != '':
+        directory = SAVE_DIR + parent_folder + '/'
+    else:
+        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
     if not os.path.exists(directory):
         os.makedirs(directory)
-    file_name = str(uuid.uuid4())
+    file_name = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S::%f')[:-5]
     if fig is None:
-        plt.savefig(os.path.join(directory, file_name + '.eps'))
-        plt.savefig(os.path.join(directory, file_name + '.png'))
-    else:
-        fig.savefig(os.path.join(directory, file_name + '.eps'))
+        fig = plt
+    if file_type == 'png':
         fig.savefig(os.path.join(directory, file_name + '.png'))
+    else:
+        fig.savefig(os.path.join(directory, file_name + '.png'))
+        fig.savefig(os.path.join(directory, file_name + '.eps'))
 
 
 def hide_top_and_right_axis(ax):
@@ -207,5 +228,3 @@ if __name__ == "__main__":
         plot_data(points)
 
     main()
-
-

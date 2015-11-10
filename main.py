@@ -9,13 +9,13 @@ import utils.data_generator as dg
 import pickle
 
 
-live_plot = True
+live_plot = False
 save = True
 show_plot = True
-iterations = 5
+iterations = 2
 
 clf_config = {
-    'ant_count':    200,
+    'ant_count':    50,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -23,7 +23,7 @@ clf_config = {
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'weighted',
+    'ant_init':     'chance_of_global_best',
     'decay_type':   'grad_type'
 }
 

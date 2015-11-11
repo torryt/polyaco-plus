@@ -176,6 +176,7 @@ def plot_curves(curves, labels, show=False, loc='upper right'):
 
 
 def plot_pheromones(matrix, data, save=True, folder_name=''):
+    plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for edge in matrix.edges:

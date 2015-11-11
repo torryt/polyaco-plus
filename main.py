@@ -61,7 +61,7 @@ def run():
     plotter.plot_path_with_data(global_best_polygon, data, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
     plotter.plot_ant_scores(all_ant_scores.mean(0), save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
-# from timeit import timeit
-# time = timeit('run()', setup='from __main__ import run', number=5)
-# print("Time pr ant: {}".format(time / clf_config['ant_count']))
-run()
+from timeit import timeit
+time = timeit('run()', setup='from __main__ import run', number=1)
+print("Time pr ant: {}".format(time / clf_config['ant_count']))
+# run()

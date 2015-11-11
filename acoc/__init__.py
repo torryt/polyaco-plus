@@ -26,14 +26,14 @@ def polygon_score(polygon, data):
     points = data.T.tolist()
     score = 0
     unique_polygon = copy(polygon)
-    for p in unique_polygon:
-        if p.twin in unique_polygon:
-            unique_polygon.remove(p.twin)
-    for p in points:
-        if is_point_inside(p, unique_polygon):
-            score += 1 if p[2] == 0 else 0
+    for vertex in unique_polygon:
+        if vertex.twin in unique_polygon:
+            unique_polygon.remove(vertex.twin)
+    for vertex in points:
+        if is_point_inside(vertex, unique_polygon):
+            score += 1 if vertex[2] == 0 else 0
         else:
-            score += 1 if p[2] == 1 else 0
+            score += 1 if vertex[2] == 1 else 0
     return score / data.shape[1]
 
 

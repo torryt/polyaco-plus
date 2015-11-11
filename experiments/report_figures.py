@@ -20,8 +20,12 @@ def plot_points():
     # plt.show()
 
 labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/Guro/2015-11-06_0156ant_init/data.pickle'
+file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/Guro/2015-11-10_0943_BigTestResults/data.pickle'
 curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
+
 f = plot_curves(curves, labels, loc='lower right')
+acoc_plotter.save_plot(f)
+
+f = plot_smooth_curves(curves, labels, loc='lower right')
 acoc_plotter.save_plot(f)
 # plt.show()

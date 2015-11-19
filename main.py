@@ -14,6 +14,10 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 
+live_plot = False
+save = True
+show_plot = True
+iterations = 2
 
 clf_config = {
     'ant_count':    3000,

@@ -94,6 +94,7 @@ class Classifier:
                 start_vertex = get_chance_of_global(matrix, current_best_polygon)
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+
             _ant = Ant(start_vertex)
             edge = _ant.move_ant()
             _ant.edges_travelled.append(edge)

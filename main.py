@@ -16,7 +16,7 @@ NUMBER_RUNS = 1
 
 
 clf_config = {
-    'ant_count':    100,
+    'ant_count':    3000,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -30,7 +30,7 @@ clf_config = {
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
 data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
-data = data_sets['rectangle']
+data = data_sets['semicircle']
 
 
 def run():
@@ -41,7 +41,7 @@ def run():
     for i in range(NUMBER_RUNS):
         iter_string = "Iteration: {}/{}".format(i + 1, NUMBER_RUNS)
         ant_scores, path = \
-            clf.classify(data, SAVE, ', ' + iter_string)
+            clf.classify(data, True, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         print(", Best ant score: {}".format(max(ant_scores)))
 
@@ -53,8 +53,6 @@ def run():
     score = acoc.polygon_score(global_best_polygon, data)
     if SAVE:
         utils.save_object(all_ant_scores.mean(0), 'scores', SAVE_FOLDER)
-        # TODO: Save best polygon without recursion. Just points maybe?
-        # utils.save_object(global_best_polygon, file_name='best_path')
         utils.save_dict(clf_config, 'config.txt', SAVE_FOLDER)
     print("\n\nGlobal best score(points) {}".format(score))
     print("Global best score(|solution| and points): {}".format(global_best_score))

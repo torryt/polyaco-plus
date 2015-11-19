@@ -43,15 +43,10 @@ def get_random_weighted(edges):
     return random_weighted_edge.start
 
 
-def get_static_start(matrix):
-    return matrix.vertices[0]
-    # plt.plot(start_point.x, start_point.y, '^', color='#00B200')
-
-
 def get_global(matrix, current_best_polygon):
     if len(current_best_polygon) != 0:
         select_edge = random.choice(current_best_polygon)
-        return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+        return select_edge.start
     else:
         return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
@@ -61,7 +56,7 @@ def get_chance_of_global(matrix, current_best_polygon):
         # 50% probability for selecting a point from current best path
         if random.randint(0, 1) == 0:
             select_edge = random.choice(current_best_polygon)
-            return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+            return select_edge.start
         else:
             return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
     else:
@@ -69,7 +64,7 @@ def get_chance_of_global(matrix, current_best_polygon):
 
 
 class Classifier:
-    def __init__(self, config, save_folder):
+    def __init__(self, config, save_folder=''):
         self.ant_count = config['ant_count']
         self.q = config['q']
         self.q_min = config['q_min']
@@ -90,7 +85,7 @@ class Classifier:
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
-                start_vertex = get_static_start(matrix)
+                start_vertex = matrix.vertices[0]
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
             elif self.ant_init == 'on_global_best':

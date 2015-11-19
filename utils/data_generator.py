@@ -72,6 +72,11 @@ def generate_data_sets(size=500):
     return sets
 
 
+def load_data():
+    import pickle
+    return pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
+
+
 def main():
     sets = generate_data_sets()
     utils.save_object(sets, 'data_sets')

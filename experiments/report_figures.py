@@ -21,8 +21,9 @@ def plot_points():
 
 
 def plot_curves_from_data():
-    labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-    file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/Guro/2015-11-10_0943_BigTestResults/data.pickle'
+    # labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
+    labels = ['probabilistic', 'gradual']
+    file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/data.pickle'
     curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
     f = plot_curves(curves, labels, loc='lower right')
@@ -45,4 +46,5 @@ def plot_all_data_sets():
         ac.save_plot(fig)
 
 if __name__ == "__main__":
-    plot_all_data_sets()
+    # plot_all_data_sets()
+    plot_curves_from_data()

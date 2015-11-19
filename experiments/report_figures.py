@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import pickle
-from acoc import acoc_plotter
+from acoc import acoc_plotter as ac
 from acoc.acoc_plotter import plot_smooth_curves, plot_curves
 
 
@@ -13,19 +13,36 @@ def plot_points():
     data = np.concatenate((red, blue), axis=1)
 
     ax = plt.subplot(111)
-    acoc_plotter.plot_data(data, ax)
+    ac.plot_data(data, ax)
     plt.axis('off')
-    acoc_plotter.save_plot()
+    ac.save_plot()
     plt.savefig('points.svg', bbox_inches='tight')
     # plt.show()
 
-labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/Guro/2015-11-10_0943_BigTestResults/data.pickle'
-curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
-f = plot_curves(curves, labels, loc='lower right')
-acoc_plotter.save_plot(f)
+def plot_curves_from_data():
+    labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
+    file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/Guro/2015-11-10_0943_BigTestResults/data.pickle'
+    curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
-f = plot_smooth_curves(curves, labels, loc='lower right')
-acoc_plotter.save_plot(f)
-# plt.show()
+    f = plot_curves(curves, labels, loc='lower right')
+    ac.save_plot(f)
+
+    f = plot_smooth_curves(curves, labels, loc='lower right')
+    ac.save_plot(f)
+    # plt.show()
+
+
+def plot_all_data_sets():
+    data_sets = pickle.load(open('../data_sets.pickle', 'rb'), encoding='latin1')
+    for key in data_sets:
+        data = data_sets[key]
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ac.hide_top_and_right_axis(ax)
+        # plt.axis('off')
+        ac.plot_data(data, ax)
+        ac.save_plot(fig)
+
+if __name__ == "__main__":
+    plot_all_data_sets()

@@ -63,7 +63,7 @@ def generate_data_sets(size=500):
     sets['semicircle'] = np.concatenate((red, blue), axis=1)
 
     red = uniform_circle(1.0, size, 0)
-    blue = uniform_circle(1.0, size, 1)
+    blue = uniform_circle(2.0, size, 1)
     sets['circle'] = np.concatenate((red, blue), axis=1)
 
     red = uniform_rectangle((1, 3), (2, 4), size, 0)

@@ -3,19 +3,20 @@
 import numpy as np
 import pickle
 from datetime import datetime
+import os.path as osp
 
 import acoc
 from utils import utils
 from acoc import acoc_plotter as plotter
 
-SAVE = False
+SAVE = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 
 
 clf_config = {
-    'ant_count':    1000,
+    'ant_count':    100,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -23,11 +24,11 @@ clf_config = {
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'weighted',
+    'ant_init':     'on_global_best',
     'decay_type':   'random_type'
 }
 
-clf = acoc.Classifier(clf_config, SAVE_FOLDER)
+clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
 data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
 data = data_sets['rectangle']
 

@@ -7,17 +7,14 @@ import os.path as osp
 
 import acoc
 from utils import utils
+from utils.data_generator import uniform_circle
 from acoc import acoc_plotter as plotter
 
 SAVE = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-SHOW_PLOT = False
+SHOW_PLOT = True
 NUMBER_RUNS = 1
 
-live_plot = False
-save = True
-show_plot = True
-iterations = 2
 
 clf_config = {
     'ant_count':    3000,
@@ -34,7 +31,11 @@ clf_config = {
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
 data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
-data = data_sets['semicircle']
+# data = data_sets['semicircle']
+
+red = uniform_circle(1.0, 500, 0, spread=0.4)
+blue = uniform_circle(2.0, 500, 1, spread=0.4)
+data = np.concatenate((red, blue), axis=1)
 
 
 def run():
@@ -45,7 +46,7 @@ def run():
     for i in range(NUMBER_RUNS):
         iter_string = "Iteration: {}/{}".format(i + 1, NUMBER_RUNS)
         ant_scores, path = \
-            clf.classify(data, True, ', ' + iter_string)
+            clf.classify(data, SAVE, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         print(", Best ant score: {}".format(max(ant_scores)))
 

@@ -1,6 +1,5 @@
 from __future__ import division
 import os
-import uuid
 from time import strftime
 from datetime import datetime
 import numpy as np

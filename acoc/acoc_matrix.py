@@ -8,7 +8,7 @@ from utils import data_generator as dg
 
 
 class AcocMatrix:
-    def __init__(self, data, q_initial=0.1, granularity=1.0):
+    def __init__(self, data, q_initial=0.1, granularity=0.5):
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
         self.q_initial = q_initial

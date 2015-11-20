@@ -2,6 +2,7 @@ import math
 import random
 from collections import namedtuple
 import numpy as np
+
 import utils
 
 MinMax = namedtuple('MinMax', ['min', 'max'])
@@ -21,12 +22,13 @@ def uniform_rectangle(x_boundary, y_boundary, num_elements, value=0):
     return np.array(points).T
 
 
-def uniform_circle(radius, num_elements, value):
+def uniform_circle(radius, num_elements, value, spread=0.1):
     points = []
 
     for e in range(num_elements):
-        rad_diff = radius * 0.1
-        r = (random.random()*2*rad_diff) - rad_diff
+        # rad_diff = radius * spread
+        r = np.random.normal(radius, spread)
+        # r = (random.random()*2*rad_diff) - rad_diff
         o = random.random()*(2*math.pi)
 
         x = (radius + r) * math.cos(o)

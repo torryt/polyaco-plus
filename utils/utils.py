@@ -4,6 +4,7 @@ import sys
 import uuid
 import json
 from time import strftime
+from datetime import datetime
 
 from config import SAVE_DIR
 
@@ -14,29 +15,29 @@ def print_on_current_line(in_string):
     sys.stdout.flush()
 
 
-def save_object(obj, file_name=None, parent_folder=''):
+def save_object(obj, parent_folder='', file_name=None):
     if parent_folder != '':
-        directory = SAVE_DIR + parent_folder + '/'
+        directory = os.path.join(SAVE_DIR, parent_folder)
     else:
-        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
+        directory = os.path.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
     if not os.path.exists(directory):
         os.makedirs(directory)
     if file_name is None:
-        file_name = str(uuid.uuid4())
-    name = directory + file_name
+        file_name = datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S-%f')[:-5]
+    name = os.path.join(directory, file_name)
     pickle.dump(obj, open(name + ".pickle", "wb"))
 
 
-def save_dict(dictionary, file_name=None, parent_folder=''):
+def save_dict(dictionary, parent_folder='', file_name=None):
     if parent_folder != '':
-        directory = SAVE_DIR + parent_folder + '/'
+        directory = os.path.join(SAVE_DIR, parent_folder)
     else:
-        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
+        directory = os.path.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
     if not os.path.exists(directory):
         os.makedirs(directory)
     if file_name is None:
-        file_name = str(uuid.uuid4())
-    name = directory + file_name
+        file_name = datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S-%f')[:-5]
+    name = os.path.join(directory, file_name)
     with open(name, "w") as json_file:
         json_file.write(json.dumps(dictionary, sort_keys=True, indent=2, separators=(',', ': ')))
 

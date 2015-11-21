@@ -11,8 +11,8 @@ from utils import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count': 2000,
-    'number_runs': 50,
+    'ant_count': 3000,
+    'number_runs': 100,
     'q': 5.0,
     'q_min': 0.1,
     'q_max': 20.0,
@@ -65,13 +65,13 @@ def parameter_tester(parameter_name, values, config=CONFIG, data_set='rectangle'
         all_scores.append(scores)
         utils.print_on_current_line('')
 
-    utils.save_dict(config, 'config_' + parameter_name + '.txt', save_folder)
-    utils.save_object(all_scores, 'data', save_folder)
+    utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
+    utils.save_object(all_scores, save_folder, 'data')
     labels = [parameter_name + '=' + str(v) for v in values]
     f1 = acoc_plotter.plot_curves(all_scores, labels)
     acoc_plotter.save_plot(f1, save_folder)
-    # f2 = acoc_plotter.plot_smooth_curves(all_scores, labels)
-    # acoc_plotter.save_plot(f2, SAVE_FOLDER)
+    f2 = acoc_plotter.plot_smooth_curves(all_scores, labels)
+    acoc_plotter.save_plot(f2, save_folder)
 
 if __name__ == "__main__":
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])

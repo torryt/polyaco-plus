@@ -10,9 +10,9 @@ def ant_init():
 # parameter_tester('decay_type', ['random_type', 'grad_type'])
 
 
-def evap_strategy():
-    # parameter_tester('decay_type', ['random_type', 'grad_type'], data_set='rectangle')
+def evaporation_strategy():
+    parameter_tester('decay_type', ['random_type', 'grad_type'], data_set='rectangle')
     parameter_tester('decay_type', ['random_type', 'grad_type'], data_set='circle')
     parameter_tester('decay_type', ['random_type', 'grad_type'], data_set='semicircle')
 
-ant_init()
+evaporation_strategy()

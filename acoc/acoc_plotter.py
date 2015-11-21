@@ -195,12 +195,12 @@ def plot_pheromones(matrix, data, save=True, folder_name=''):
 
 def save_plot(fig=None, parent_folder='', file_type=None):
     if parent_folder != '':
-        directory = SAVE_DIR + parent_folder + '/'
+        directory = os.path.join(SAVE_DIR, parent_folder)
     else:
-        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
+        directory = os.path.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
     if not os.path.exists(directory):
         os.makedirs(directory)
-    file_name = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S::%f')[:-5]
+    file_name = datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S-%f')[:-5]
     if fig is None:
         fig = plt
     if file_type == 'png':

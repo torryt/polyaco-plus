@@ -1,6 +1,5 @@
 from __future__ import division
 import os
-import uuid
 from time import strftime
 from datetime import datetime
 import numpy as np
@@ -134,8 +133,8 @@ def plot_data(data, subplot=None, show=False):
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
         blue = temp[temp[:, 2] == 1][:, :2].T
-        ax.scatter(red[0], red[1], color=RED_COLOR, s=80, edgecolor=EDGE_COLOR)
-        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=80, edgecolor=EDGE_COLOR)
+        ax.scatter(red[0], red[1], color=RED_COLOR, s=80, edgecolor=EDGE_COLOR, linewidths=1.0)
+        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=80, edgecolor=EDGE_COLOR,linewidths=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
     ax.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
@@ -176,6 +175,7 @@ def plot_curves(curves, labels, show=False, loc='upper right'):
 
 
 def plot_pheromones(matrix, data, save=True, folder_name=''):
+    plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for edge in matrix.edges:
@@ -203,9 +203,9 @@ def save_plot(fig=None, parent_folder='', file_type=None):
     if fig is None:
         fig = plt
     if file_type == 'png':
-        fig.savefig(os.path.join(directory, file_name + '.png'))
+        fig.savefig(os.path.join(directory, file_name + '.png'), transparent=True)
     else:
-        fig.savefig(os.path.join(directory, file_name + '.png'))
+        fig.savefig(os.path.join(directory, file_name + '.png'), transparent=True)
         fig.savefig(os.path.join(directory, file_name + '.eps'))
 
 
@@ -219,12 +219,18 @@ def hide_top_and_right_axis(ax):
     ax.xaxis.set_ticks_position('bottom')
 
 
-if __name__ == "__main__":
-    def main():
-        # points = uniform_rectangle((2, 4), (2, 4), 500)
-        points = uniform_circle(10.0, 500, 0)
-        points2 = uniform_circle(5.0, 500, 1)
-        points = np.concatenate((points, points2), axis=1)
-        plot_data(points)
+def main():
+    # points = uniform_rectangle((2, 4), (2, 4), 500)
+    points = uniform_circle(10.0, 500, 0)
+    points2 = uniform_circle(5.0, 500, 1)
+    points = np.concatenate((points, points2), axis=1)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    hide_top_and_right_axis(ax)
+    # plt.axis('off')
+    plot_data(points, ax)
+    save_plot(fig)
+    # plt.show()
 
+if __name__ == "__main__":
     main()

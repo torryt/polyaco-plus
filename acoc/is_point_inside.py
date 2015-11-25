@@ -42,11 +42,9 @@ def ray_intersect_segment(p, e):
         return m_blue >= m_red
 
 
-def is_point_inside(p, poly):
-    p_copy = Pt(p[0], p[1])
-    # a = sorted([ray_intersect_segment(p_copy, edge)[1] for edge in poly])
-    # b = [len(list(group)) for key, group in groupby(a)]
-    # print("a: {}".format(b))
+def is_point_inside(vertex, solution):
+    p_copy = Pt(vertex[0], vertex[1])
+    n = len(solution)
 
     return _odd(sum(ray_intersect_segment(p_copy, edge)
-                    for edge in poly))
+                    for edge in solution))

@@ -26,14 +26,14 @@ def polygon_score(polygon, data):
     points = data.T.tolist()
     score = 0
     unique_polygon = copy(polygon)
-    for p in unique_polygon:
-        if p.twin in unique_polygon:
-            unique_polygon.remove(p.twin)
-    for p in points:
-        if is_point_inside(p, unique_polygon):
-            score += 1 if p[2] == 0 else 0
+    for vertex in unique_polygon:
+        if vertex.twin in unique_polygon:
+            unique_polygon.remove(vertex.twin)
+    for vertex in points:
+        if is_point_inside(vertex, unique_polygon):
+            score += 1 if vertex[2] == 0 else 0
         else:
-            score += 1 if p[2] == 1 else 0
+            score += 1 if vertex[2] == 1 else 0
     return score / data.shape[1]
 
 
@@ -41,11 +41,6 @@ def get_random_weighted(edges):
     weights = normalize(np.array([e.pheromone_strength for e in edges]))
     random_weighted_edge = choice(edges, p=weights)
     return random_weighted_edge.start
-
-
-def get_static_start(matrix):
-    return matrix.vertices[0]
-    # plt.plot(start_point.x, start_point.y, '^', color='#00B200')
 
 
 def get_global(matrix, current_best_polygon):
@@ -69,7 +64,7 @@ def get_chance_of_global(matrix, current_best_polygon):
 
 
 class Classifier:
-    def __init__(self, config, save_folder):
+    def __init__(self, config, save_folder=''):
         self.ant_count = config['ant_count']
         self.q = config['q']
         self.q_min = config['q_min']
@@ -90,7 +85,7 @@ class Classifier:
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
-                start_vertex = get_static_start(matrix)
+                start_vertex = matrix.vertices[0]
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(matrix.edges)
             elif self.ant_init == 'on_global_best':

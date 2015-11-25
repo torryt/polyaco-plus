@@ -8,13 +8,13 @@ import acoc
 from utils import utils
 from acoc import acoc_plotter as plotter
 
-SAVE = False
+SAVE = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 
 clf_config = {
-    'ant_count':    1000,
+    'ant_count':    50,
     'q':            5.0,
     'q_min':        0.1,
     'q_max':        20.0,
@@ -22,7 +22,7 @@ clf_config = {
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'weighted',
+    'ant_init':     'chance_of_global_best',
     'decay_type':   'random_type'
 }
 

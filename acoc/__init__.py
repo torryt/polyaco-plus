@@ -51,7 +51,7 @@ def get_static_start(matrix):
 def get_global(matrix, current_best_polygon):
     if len(current_best_polygon) != 0:
         select_edge = random.choice(current_best_polygon)
-        return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+        return select_edge.start
     else:
         return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
@@ -61,7 +61,7 @@ def get_chance_of_global(matrix, current_best_polygon):
         # 50% probability for selecting a point from current best path
         if random.randint(0, 1) == 0:
             select_edge = random.choice(current_best_polygon)
-            return random.choice([select_edge.vertex_a, select_edge.vertex_b])
+            return select_edge.start
         else:
             return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
     else:
@@ -99,6 +99,7 @@ class Classifier:
                 start_vertex = get_chance_of_global(matrix, current_best_polygon)
             else:  # Random
                 start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+
             _ant = Ant(start_vertex)
             edge = _ant.move_ant()
             _ant.edges_travelled.append(edge)

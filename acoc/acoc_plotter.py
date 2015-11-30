@@ -68,10 +68,11 @@ def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
         plt.show()
 
 
-def plot_path_with_data(path, data, save=False, show=False, save_folder=''):
+def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=''):
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    hide_top_and_right_axis(ax)
+    plt.axis("off")
+    plot_matrix(matrix, ax, with_vertices=False)
     plot_data(data, ax)
     plot_path(path, ax)
     if save:
@@ -125,10 +126,7 @@ def plot_aco_and_random(aco_path_lengths, random_path_lengths):
 
 
 def plot_data(data, subplot=None, show=False):
-    if subplot is not None:
-        ax = subplot
-    else:
-        ax = plt
+    ax = subplot if subplot is not None else plt
     if data.shape[0] > 2:
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
@@ -137,15 +135,34 @@ def plot_data(data, subplot=None, show=False):
         ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=80, edgecolor=EDGE_COLOR,linewidths=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
-    ax.axis([np.amin(data[0]) - 1, np.amax(data[0]) + 1, np.amin(data[1]) - 1, np.amax(data[1]) + 1])
+    ax.axis([np.amin(data[0]) - .2,
+             np.amax(data[0]) + .2,
+             np.amin(data[1]) - .2,
+             np.amax(data[1]) + .2])
 
     if show:
         plt.show()
 
 
+def plot_matrix(matrix, subplot=None, show=False, with_vertices=True):
+    ax = subplot if subplot is not None else plt
+    for edge in matrix.edges:
+        ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], '--', color='#CFCFCF')
+    if with_vertices:
+        for i, v in enumerate(matrix.vertices):
+            # if (i % 2 == 0 and i % 20 <= 9) or (i % 2 == 1 and i % 20 > 9):
+            if i % 2 == 0:
+                ax.plot(v.x, v.y, 'o', color='w')
+            else:
+                ax.plot(v.x, v.y, 'o', color='k')
+    if show:
+        ax.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1] + 1, matrix.y_min_max[0] - 1, matrix.y_min_max[1] + 1])
+        plt.show()
+
+
 def plot_path(path, subplot):
     for edge in path:
-        subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
+        subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-', linewidth=3)
 
 
 def plot_smooth_curves(curves, labels, show=False, loc='upper right'):

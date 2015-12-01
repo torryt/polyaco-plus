@@ -85,4 +85,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    red = uniform_circle(1.0, 500, 0, spread=0.4)
+    blue = uniform_circle(2.0, 500, 1, spread=0.4)
+    data = np.concatenate((red, blue), axis=1)
+    from acoc.acoc_plotter import plot_data
+    plot_data(data, show=True)

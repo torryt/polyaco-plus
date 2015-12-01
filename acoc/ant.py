@@ -2,8 +2,7 @@ from copy import copy
 
 import numpy as np
 from numpy.random.mtrand import choice
-
-from utils.utils import normalize
+from utils import normalize
 
 
 class Ant:

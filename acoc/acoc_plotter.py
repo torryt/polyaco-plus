@@ -81,7 +81,7 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
         plt.show()
 
 
-def plot_pheromone_values(matrix, show=False):
+def plot_pheromone_values(matrix, q_min, q_max, show=False):
     for edge in matrix.edges:
         line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
@@ -191,13 +191,17 @@ def plot_curves(curves, labels, show=False, loc='upper right'):
     return f
 
 
-def plot_pheromones(matrix, data, save=True, folder_name=''):
+def plot_pheromones(matrix, data, q_min, q_max, save=True, folder_name=''):
+    min_val = 0.1
+    max_val = 15.0
+
     plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for edge in matrix.edges:
         line = ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
-        plt.setp(line, linewidth=edge.pheromone_strength)
+        lw = edge.pheromone_strength*((max_val - min_val) / (q_max - q_min))
+        plt.setp(line, lw=lw)
 
     if data is not None:
         plot_data(data)

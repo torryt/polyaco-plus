@@ -112,7 +112,7 @@ class Classifier:
             ant_scores.append(ant_score)
 
             if plot and len(ant_scores) % 50 == 0:
-                plotter.plot_pheromones(matrix, data, True, self.save_folder)
+                plotter.plot_pheromones(matrix, data, self.q_min, self.q_max, True, self.save_folder)
                 # live_plot.update(matrix.edges)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 

@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
+
 import pickle
 from datetime import datetime
 import os.path as osp
 from timeit import timeit
 
+import os.path as osp
 import acoc
 import utils
 from utils.data_generator import gaussian_circle
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
+from timeit import timeit
 
 SAVE = True
 SAVE_PHEROMONE_VALUES = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
-
-
 clf_config = {
     'ant_count':    2000,
     'q':            10.0,

@@ -4,27 +4,28 @@ import numpy as np
 import pickle
 from datetime import datetime
 import os.path as osp
+from timeit import timeit
 
 import acoc
 import utils
-from utils.data_generator import uniform_circle
+from utils.data_generator import gaussian_circle
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 
 SAVE = True
-SAVE_PHEROMONE_VALUES = False
+SAVE_PHEROMONE_VALUES = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 
 
 clf_config = {
-    'ant_count':    4000,
-    'q':            5.0,
-    'q_min':        0.1,
-    'q_max':        20,
+    'ant_count':    2000,
+    'q':            10.0,
+    'q_min':        1.0,
+    'q_max':        100,
     'q_init':       20.0,
-    'rho':          0.02,
+    'rho':          0.04,
     'alpha':        1,
     'beta':         0.05,
     'ant_init':     'on_global_best',
@@ -32,8 +33,8 @@ clf_config = {
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
-data_sets = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
-data = data_sets['rectangle_gaussian']
+data_sets = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
+data = data_sets['semicircle_gaussian']
 
 
 def run():
@@ -64,7 +65,6 @@ def run():
     plotter.plot_path_with_data(global_best_polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
     plotter.plot_ant_scores(all_ant_scores.mean(0), save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
-from timeit import timeit
 time = timeit('run()', setup='from __main__ import run', number=1)
 print("Time pr ant: {}".format(time / clf_config['ant_count']))
 # run()

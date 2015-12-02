@@ -6,11 +6,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
 
-from utils.data_generator import uniform_circle
+from utils.data_generator import gaussian_circle
 
 from config import SAVE_DIR
-BLUE_COLOR = '#0097E8'
-RED_COLOR = '#F03A3A'
+CLASS_ONE_COLOR = '#FFFFFF'
+CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
 
 
@@ -42,9 +42,9 @@ class LivePheromonePlot:
         if current_edge:
             for j, edge in enumerate(new_edges):
                 if edge in connected_edges:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color=BLUE_COLOR)
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color=CLASS_TWO_COLOR)
                 elif edge == current_edge:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color=RED_COLOR)
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color=CLASS_ONE_COLOR)
                 else:
                     plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength, color='k')
 
@@ -98,7 +98,7 @@ def plot_two_path_lengths(path_length1, path_length2):
     y_coord2 = path_length2
 
     plt.plot(x_coord, y_coord, 'g')
-    plt.plot(x_coord2, y_coord2, RED_COLOR)
+    plt.plot(x_coord2, y_coord2, CLASS_ONE_COLOR)
     plt.axis([0, len(path_length1), 0, max(path_length1)])
 
 
@@ -131,8 +131,8 @@ def plot_data(data, subplot=None, show=False):
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
         blue = temp[temp[:, 2] == 1][:, :2].T
-        ax.scatter(red[0], red[1], color=RED_COLOR, s=80, edgecolor=EDGE_COLOR, linewidths=1.0)
-        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=80, edgecolor=EDGE_COLOR,linewidths=1.0)
+        ax.scatter(red[0], red[1], color=CLASS_ONE_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
+        ax.scatter(blue[0], blue[1], color=CLASS_TWO_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
     ax.axis([np.amin(data[0]) - .2,
@@ -238,8 +238,8 @@ def hide_top_and_right_axis(ax):
 
 def main():
     # points = uniform_rectangle((2, 4), (2, 4), 500)
-    points = uniform_circle(10.0, 500, 0)
-    points2 = uniform_circle(5.0, 500, 1)
+    points = gaussian_circle(10.0, 500, 0)
+    points2 = gaussian_circle(5.0, 500, 1)
     points = np.concatenate((points, points2), axis=1)
     fig = plt.figure()
     ax = fig.add_subplot(111)

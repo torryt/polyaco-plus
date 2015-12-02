@@ -2,6 +2,7 @@ import math
 import random
 from collections import namedtuple
 import numpy as np
+import pickle
 
 import utils
 
@@ -22,36 +23,45 @@ def uniform_rectangle(x_boundary, y_boundary, num_elements, value=0):
     return np.array(points).T
 
 
-def uniform_circle(radius, num_elements, value, spread=0.1):
+def gaussian_circle(radius, num_elements, value, spread=0.1):
     points = []
 
     for e in range(num_elements):
-        # rad_diff = radius * spread
-        r = np.random.normal(radius, spread)
-        # r = (random.random()*2*rad_diff) - rad_diff
+        rad = np.random.normal(radius, spread)
         o = random.random()*(2*math.pi)
-
-        x = (radius + r) * math.cos(o)
-        y = (radius + r) * math.sin(o)
+        x = (radius + rad) * math.cos(o)
+        y = (radius + rad) * math.sin(o)
         points.append([x, y, value])
     return np.array(points).T
 
 
-def semi_circle(radius, circle_range, num_elements, value, center=(0, 0)):
+def uniform_circle(radius, num_elements, value, spread=0.1):
     points = []
 
     for e in range(num_elements):
-        rad_diff = radius * 0.1
-        r = (random.random()*2*rad_diff) - rad_diff
-        o = random.random() * (circle_range.max - circle_range.min) + circle_range.min
+        rad_diff = radius * spread
+        rad = (random.random()*2*rad_diff) - rad_diff
+        o = random.random()*(2*math.pi)
 
-        x = (radius + r) * math.cos(o)
-        y = (radius + r) * math.sin(o)
+        x = (radius + rad) * math.cos(o)
+        y = (radius + rad) * math.sin(o)
+        points.append([x, y, value])
+    return np.array(points).T
+
+
+def semi_circle_gaussian(radius, circle_range, num_elements, value, center=(0, 0), spread=1):
+    points = []
+
+    for e in range(num_elements):
+        rad = np.random.normal(radius, spread)
+        o = random.random() * (circle_range.max - circle_range.min) + circle_range.min
+        x = (radius + rad) * math.cos(o)
+        y = (radius + rad) * math.sin(o)
         points.append([x, y, value])
 
     array = np.array(points).T
-    array[0] = array[0] + center[0]
-    array[1] = array[1] + center[1]
+    array[0] += center[0]
+    array[1] += center[1]
     return array
 
 
@@ -59,13 +69,13 @@ def generate_data_sets(size=500):
     sets = {}
     # sets = np.zeros([3, 3, size*2])
     r = MinMax(math.pi, 2*math.pi)
-    red = semi_circle(1.0, r, size, 0)
+    red = semi_circle_gaussian(1.0, r, size, 0)
     r = MinMax(0, math.pi)
-    blue = semi_circle(1.0, r, size, 1, center=(1, -.5))
+    blue = semi_circle_gaussian(1.0, r, size, 1, center=(1, -.5))
     sets['semicircle'] = np.concatenate((red, blue), axis=1)
 
-    red = uniform_circle(1.0, size, 0)
-    blue = uniform_circle(2.0, size, 1)
+    red = gaussian_circle(1.0, size, 0)
+    blue = gaussian_circle(2.0, size, 1)
     sets['circle'] = np.concatenate((red, blue), axis=1)
 
     red = uniform_rectangle((1, 3), (2, 4), size, 0)
@@ -75,8 +85,7 @@ def generate_data_sets(size=500):
 
 
 def load_data():
-    import pickle
-    return pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
+    return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
 
 
 def main():
@@ -86,8 +95,13 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    red = uniform_circle(1.0, 500, 0, spread=0.4)
-    blue = uniform_circle(2.0, 500, 1, spread=0.4)
-    data = np.concatenate((red, blue), axis=1)
+    white = semi_circle_gaussian(4.0, MinMax(math.pi, 2*math.pi), 500, 0)
+    blue = semi_circle_gaussian(4.0, MinMax(0, math.pi), 500, 1, center=(8, -5))
+    dataset = np.concatenate((white, blue), axis=1)
+
     from acoc.acoc_plotter import plot_data
-    plot_data(data, show=True)
+    plot_data(dataset, show=True)
+
+    # data = load_data()
+    # data['semicircle_gaussian'] = dataset
+    # pickle.dump(data, open('data_sets.pickle', 'wb'))

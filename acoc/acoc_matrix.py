@@ -8,7 +8,7 @@ from utils import data_generator as dg
 
 
 class AcocMatrix:
-    def __init__(self, data, q_initial=1.0, granularity=20):
+    def __init__(self, data, q_initial=1.0, granularity=10):
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
         self.q_initial = q_initial
@@ -122,8 +122,8 @@ def init_edges(vertices, q_initial):
 
 
 def main():
-    red = dg.uniform_circle(1.0, 500, 1, .5)
-    blue = dg.uniform_circle(2.0, 500, 0, .5)
+    red = dg.gaussian_circle(1.0, 500, 1, .5)
+    blue = dg.gaussian_circle(2.0, 500, 0, .5)
     data = np.concatenate((red, blue), axis=1)
     matrix = AcocMatrix(data, granularity=5)
     fig = plt.figure()

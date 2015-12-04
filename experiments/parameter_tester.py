@@ -74,14 +74,15 @@ def parameter_tester(parameter_name, values, config=CONFIG, data_set='rectangle'
     labels = [parameter_name + '=' + str(v) for v in values]
     f1 = acoc_plotter.plot_curves(all_scores, labels, 'score')
 
+    # If Beta test, save a graph with the polygon length also
     if parameter_name == 'beta':
         utils.save_object(all_polygon_lengths, 'data', save_folder)
         f2 = acoc_plotter.plot_curves(all_polygon_lengths, labels, 'polygon')
         acoc_plotter.save_plot(f2, save_folder)
 
     acoc_plotter.save_plot(f1, save_folder)
-    # f2 = acoc_plotter.plot_smooth_curves(all_scores, labels)
-    # acoc_plotter.save_plot(f2, SAVE_FOLDER)
+    f_smooth = acoc_plotter.plot_smooth_curves(all_scores, labels)
+    acoc_plotter.save_plot(f_smooth, save_folder)
 
 if __name__ == "__main__":
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])

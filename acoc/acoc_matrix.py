@@ -88,16 +88,6 @@ def init_vertices(coordinates):
     for x, y in coordinates:
         vertices.append(Vertex(x, y))
     return vertices
-    # for e in edges:
-    #     if e.start not in vertices:
-    #         vertices.append(e.start)
-    #     if e.target not in vertices:
-    #         vertices.append(e.target)
-    # # vertices = [Vertex(p[0], p[1]) for p in coordinates]
-    #
-    # for v in vertices:
-    #     connect_edges_to_vertex(v, edges)
-    # return vertices
 
 
 def init_edges(vertices, q_initial):

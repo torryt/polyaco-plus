@@ -16,26 +16,27 @@ from acoc import acoc_plotter as plotter
 from timeit import timeit
 
 SAVE = True
-SAVE_PHEROMONE_VALUES = True
+SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 clf_config = {
-    'ant_count':    2000,
-    'q':            10.0,
-    'q_min':        1.0,
-    'q_max':        100,
-    'q_init':       20.0,
+    'ant_count':    3000,
+    # 'q':            10.0,
+    'q_min':        0.01,
+    'q_max':        1,
+    'q_init':       0.01,
+    'dynamic_q_max':    False,
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
-    'ant_init':     'on_global_best',
-    'decay_type':   'random_type'
+    'ant_init':     'weighted',
+    'decay_type':   'probabilistic'
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
-data_sets = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
-data = data_sets['semicircle_gaussian']
+data = pickle.load(
+    open('utils/data_sets.pickle', 'rb'), encoding='latin1')['iris']
 
 
 def run():

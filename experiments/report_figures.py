@@ -23,10 +23,7 @@ def plot_points():
     # plt.show()
 
 
-def plot_curves_from_data(file_name):
-    # labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-    # labels = ['probabilistic', 'gradual']
-    labels = ['0.01', '0.1', '1.0', '10.0']
+def plot_curves_from_data(file_name, labels):
     curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
     f1 = plot_curves(curves, labels, loc='upper left')
@@ -52,6 +49,20 @@ def plot_all_data_sets():
         ac.plot_data(data, ax)
         ac.save_plot(fig)
 
+
+def create_iris_figure():
+    from sklearn import datasets
+    iris = datasets.load_iris()
+    data = np.append(iris.data.T[0:2], np.array([iris.target]), axis=0)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.axis('off')
+    ac.plot_data(data, ax)
+    ac.save_plot(fig)
+
+
 if __name__ == "__main__":
+    # create_iris_figure()
     # plot_all_data_sets()
-    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/p_q kort/data.pickle')
+    labels = [0.1, 1.0, 10.0, 100.0]
+    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/2015-12-07_1656-0/data.pickle', labels)

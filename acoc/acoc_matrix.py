@@ -8,17 +8,17 @@ from utils import data_generator as dg
 
 
 class AcocMatrix:
-    def __init__(self, data, q_initial=1.0, granularity=10):
+    def __init__(self, data, tau_initial=1.0, granularity=10):
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
-        self.q_initial = q_initial
+        self.tau_initial = tau_initial
 
         x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=int(granularity), endpoint=True)
         y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=int(granularity), endpoint=True)
 
         coordinates = list(product(x_coord, y_coord))
         self.vertices = init_vertices(coordinates)
-        self.edges = init_edges(self.vertices, self.q_initial)
+        self.edges = init_edges(self.vertices, self.tau_initial)
         [connect_edges_to_vertex(v, self.edges) for v in self.vertices]
 
     def add_to_plot(self, ax):
@@ -88,34 +88,24 @@ def init_vertices(coordinates):
     for x, y in coordinates:
         vertices.append(Vertex(x, y))
     return vertices
-    # for e in edges:
-    #     if e.start not in vertices:
-    #         vertices.append(e.start)
-    #     if e.target not in vertices:
-    #         vertices.append(e.target)
-    # # vertices = [Vertex(p[0], p[1]) for p in coordinates]
-    #
-    # for v in vertices:
-    #     connect_edges_to_vertex(v, edges)
-    # return vertices
 
 
-def init_edges(vertices, q_initial):
+def init_edges(vertices, tau_initial):
     edges = []
 
     for v in vertices:
         vertices_in_row = [p for p in vertices if p.x > v.x and p.y == v.y]
         if len(vertices_in_row) > 0:
             next_east = min(vertices_in_row, key=lambda pos: pos.x)
-            e1 = AcocEdge(v, next_east, q_initial)
-            e2 = AcocEdge(next_east, v, q_initial, e1)
+            e1 = AcocEdge(v, next_east, tau_initial)
+            e2 = AcocEdge(next_east, v, tau_initial, e1)
             e1.twin = e2
             edges.extend([e1, e2])
         vertices_in_column = [p for p in vertices if p.y > v.y and p.x == v.x]
         if len(vertices_in_column) > 0:
             next_north = min(vertices_in_column, key=lambda pos: pos.y)
-            e1 = AcocEdge(v, next_north, q_initial)
-            e2 = AcocEdge(next_north, v, q_initial, e1)
+            e1 = AcocEdge(v, next_north, tau_initial)
+            e2 = AcocEdge(next_north, v, tau_initial, e1)
             e1.twin = e2
             edges.extend([e1, e2])
     return edges

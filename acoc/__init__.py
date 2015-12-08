@@ -52,10 +52,9 @@ def get_chance_of_global(matrix, current_best_polygon):
 class Classifier:
     def __init__(self, config, save_folder=''):
         self.ant_count = config['ant_count']
-        self.q = config['q']
-        self.q_min = config['q_min']
-        self.q_max = config['q_max']
-        self.q_init = config['q_init']  
+        self.tau_min = config['tau_min']
+        self.tau_max = config['tau_max']
+        self.tau_init = config['tau_init']
         self.rho = config['rho']
         self.alpha = config['alpha']
         self.beta = config['beta']
@@ -67,7 +66,7 @@ class Classifier:
         ant_scores = []
         current_best_polygon = []
         current_best_score = 0
-        matrix = AcocMatrix(data, q_initial=self.q_init)
+        matrix = AcocMatrix(data, tau_initial=self.tau_init)
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
@@ -104,15 +103,15 @@ class Classifier:
                 current_best_score = ant_score
 
             self.put_pheromones(current_best_polygon, data)
-            if self.decay_type == 'random_type':
+            if self.decay_type == 'probabilistic':
                 self.reset_at_random(matrix)
-            elif self.decay_type == 'grad_type':
+            elif self.decay_type == 'gradual':
                 self.grad_pheromone_decay(matrix)
 
             ant_scores.append(ant_score)
 
-            if plot and len(ant_scores) % 50 == 0:
-                plotter.plot_pheromones(matrix, data, self.q_min, self.q_max, True, self.save_folder)
+            if plot and len(ant_scores) % 20 == 0:
+                plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
                 # live_plot.update(matrix.edges)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
@@ -125,7 +124,7 @@ class Classifier:
         for edge in matrix.edges:
             rand_num = random.random()
             if rand_num < self.rho:
-                edge.pheromone_strength = self.q_min
+                edge.pheromone_strength = self.tau_min
 
     def grad_pheromone_decay(self, matrix):
         for edge in matrix.edges:
@@ -149,9 +148,9 @@ class Classifier:
         score = self.polygon_score(polygon, data)
         try:
             length_factor = 1/len(polygon)
-        # Handles very rare and weird error
+        # Handles very rare and weird error where length of polygon == 0
         except ZeroDivisionError:
-            length_factor = self.beta
+            length_factor = 1
         return (score**self.alpha) * (length_factor**self.beta)
 
     def put_pheromones(self, path, data):
@@ -159,5 +158,5 @@ class Classifier:
 
         unique_edges = get_unique_edges(path)
         for edge in unique_edges:
-            new_pheromone_strength = edge.pheromone_strength + (self.q * score)
-            edge.pheromone_strength = new_pheromone_strength if new_pheromone_strength < self.q_max else self.q_max
+            pheromone_strength = edge.pheromone_strength + score
+            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max

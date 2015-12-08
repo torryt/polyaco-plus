@@ -11,8 +11,8 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    10,
-    'number_runs':  1,
+    'ant_count':    3000,
+    'number_runs':  50,
     'tau_min':      0.01,
     'tau_max':      100,
     'tau_init':     0.01,

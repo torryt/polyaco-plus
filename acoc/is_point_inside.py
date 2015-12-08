@@ -44,7 +44,5 @@ def ray_intersect_segment(p, e):
 
 def is_point_inside(vertex, solution):
     p_copy = Pt(vertex[0], vertex[1])
-    n = len(solution)
-
     return _odd(sum(ray_intersect_segment(p_copy, edge)
                     for edge in solution))

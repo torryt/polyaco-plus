@@ -10,18 +10,11 @@ MinMax = namedtuple('MinMax', ['min', 'max'])
 
 
 def run():
-    # red = dg.semi_circle(1.0, MinMax(math.pi, 2*math.pi), 500, 0)
-    # blue = dg.semi_circle(1.0, MinMax(0, math.pi), 500, 1, center=(1, -.5))
-
-    # red = dg.uniform_rectangle((1, 3), (2, 4), 500, 0)
-    # blue = dg.uniform_rectangle((4, 6), (2, 4), 500, 1)
-
-    red = dg.uniform_circle(3.0, 500, 0)
-    blue = dg.uniform_circle(2.0, 500, 1)
-    # green = dg.uniform_circle(1.0, 500, 2)
+    # Based on http://scikit-learn.org/stable/auto_examples/svm/plot_iris.html
+    red = dg.gaussian_circle(3.0, 500, 0)
+    blue = dg.gaussian_circle(2.0, 500, 1)
 
     data = np.concatenate((red, blue), axis=1)
-    # data = np.concatenate((data, green), axis=1)
     X = data[:2].T
     y = data[2]
 

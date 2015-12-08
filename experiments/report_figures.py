@@ -1,6 +1,9 @@
-import numpy as np
-from matplotlib import pyplot as plt
 import pickle
+import numpy as np
+import os.path as osp
+from uuid import uuid4
+from matplotlib import pyplot as plt
+
 from acoc import acoc_plotter as ac
 from acoc.acoc_plotter import plot_smooth_curves, plot_curves
 
@@ -20,17 +23,21 @@ def plot_points():
     # plt.show()
 
 
-def plot_curves_from_data():
+def plot_curves_from_data(file_name):
     # labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-    labels = ['probabilistic', 'gradual']
-    file_name = '/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/data.pickle'
+    # labels = ['probabilistic', 'gradual']
+    labels = ['0.01', '0.1', '1.0', '10.0']
     curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
-    f = plot_curves(curves, labels, loc='lower right')
-    ac.save_plot(f)
+    f1 = plot_curves(curves, labels, loc='upper left')
+    f2 = plot_smooth_curves(curves, labels, loc='upper left')
 
-    f = plot_smooth_curves(curves, labels, loc='lower right')
-    ac.save_plot(f)
+    base_path = osp.dirname(file_name)
+    f1.savefig(osp.join(base_path, str(uuid4()) + '.eps'))
+    f1.savefig(osp.join(base_path, str(uuid4()) + '.png'))
+    f2.savefig(osp.join(base_path, str(uuid4()) + '.eps'))
+    f2.savefig(osp.join(base_path, str(uuid4()) + '.png'))
+    # ac.save_plot(f)
     # plt.show()
 
 
@@ -47,4 +54,4 @@ def plot_all_data_sets():
 
 if __name__ == "__main__":
     # plot_all_data_sets()
-    plot_curves_from_data()
+    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/p_q kort/data.pickle')

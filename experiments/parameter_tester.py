@@ -5,17 +5,19 @@ from datetime import datetime
 import os.path as osp
 
 import acoc
+import utils
 from acoc import acoc_plotter
-from utils import utils
+import utils
 
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count': 3000,
-    'number_runs': 100,
-    'q': 5.0,
-    'q_min': 0.1,
-    'q_max': 20.0,
+
+    'ant_count': 1000,
+    'number_runs': 10,
+    'q': 10.0,
+    'q_min': 1.0,
+    'q_max': 100.0,
     'q_init': 0.1,
     'rho': 0.02,
     'alpha': 1,
@@ -30,9 +32,9 @@ def run(*args):
     for conf in args:
         config[conf[0]] = conf[1]
     if 'data_set' in config:
-        data = pickle.load(open('../data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
+        data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     else:
-        data = pickle.load(open('../data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
+        data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
     number_runs = config['number_runs']
     clf = acoc.Classifier(config)
     all_ant_scores = np.zeros((number_runs, config['ant_count']))
@@ -75,7 +77,8 @@ def parameter_tester(parameter_name, values, config=CONFIG, data_set='rectangle'
 
 if __name__ == "__main__":
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
-    parameter_tester('decay_type', ['random_type', 'grad_type'])
+    # parameter_tester('decay_type', ['random_type', 'grad_type'])
     # parameter_tester('q_init', [CONFIG['q_max'], CONFIG['q_min']])
+    parameter_tester('q', [0.1, 1.0, 10.0, 20.0])
     # parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
     # parameter_tester('iterations', [1, 2, 5, 10])

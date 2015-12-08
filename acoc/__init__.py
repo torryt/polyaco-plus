@@ -7,34 +7,20 @@ from copy import copy
 import numpy as np
 from numpy.random.mtrand import choice
 
+import utils
 from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_plotter import LivePheromonePlot
 import acoc.acoc_plotter as plotter
 from acoc.ant import Ant
-from utils.utils import normalize
+from utils import normalize
 from acoc.is_point_inside import is_point_inside
-from utils import utils
+from utils import normalize
 
 
 def get_unique_edges(path):
     z = set(path)
     unique_edges = list(z)
     return unique_edges
-
-
-def polygon_score(polygon, data):
-    points = data.T.tolist()
-    score = 0
-    unique_polygon = copy(polygon)
-    for vertex in unique_polygon:
-        if vertex.twin in unique_polygon:
-            unique_polygon.remove(vertex.twin)
-    for vertex in points:
-        if is_point_inside(vertex, unique_polygon):
-            score += 1 if vertex[2] == 0 else 0
-        else:
-            score += 1 if vertex[2] == 1 else 0
-    return score / data.shape[1]
 
 
 def get_random_weighted(edges):
@@ -126,7 +112,7 @@ class Classifier:
             ant_scores.append(ant_score)
 
             if plot and len(ant_scores) % 50 == 0:
-                plotter.plot_pheromones(matrix, data, True, self.save_folder)
+                plotter.plot_pheromones(matrix, data, self.q_min, self.q_max, True, self.save_folder)
                 # live_plot.update(matrix.edges)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
@@ -145,8 +131,22 @@ class Classifier:
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
 
+    def polygon_score(self, polygon, data):
+        points = data.T.tolist()
+        score = 0
+        unique_polygon = copy(polygon)
+        for vertex in unique_polygon:
+            if vertex.twin in unique_polygon:
+                unique_polygon.remove(vertex.twin)
+        for vertex in points:
+            if is_point_inside(vertex, unique_polygon):
+                score += 1 if vertex[2] == 0 else 0
+            else:
+                score += 1 if vertex[2] != 0 else 0
+        return score / data.shape[1]
+
     def cost_function(self, polygon, data):
-        score = polygon_score(polygon, data)
+        score = self.polygon_score(polygon, data)
         try:
             length_factor = 1/len(polygon)
         # Handles very rare and weird error

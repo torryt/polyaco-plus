@@ -81,7 +81,7 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
         plt.show()
 
 
-def plot_pheromone_values(matrix, q_min, q_max, show=False):
+def plot_pheromone_values(matrix, tau_min, tau_max, show=False):
     for edge in matrix.edges:
         line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
@@ -165,7 +165,7 @@ def plot_path(path, subplot):
         subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-', linewidth=3)
 
 
-def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
+def plot_smooth_curves(curves, labels, show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
     for i, c in enumerate(curves):
@@ -180,7 +180,7 @@ def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
     return f
 
 
-def plot_curves(curves, labels, show=False, loc='upper right'):
+def plot_curves(curves, labels, show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
     for i, c in enumerate(curves):
@@ -191,7 +191,7 @@ def plot_curves(curves, labels, show=False, loc='upper right'):
     return f
 
 
-def plot_pheromones(matrix, data, q_min, q_max, save=True, folder_name=''):
+def plot_pheromones(matrix, data, tau_min, tau_max, save=True, folder_name=''):
     min_val = 0.1
     max_val = 15.0
 
@@ -200,7 +200,7 @@ def plot_pheromones(matrix, data, q_min, q_max, save=True, folder_name=''):
     ax = fig.add_subplot(111)
     for edge in matrix.edges:
         line = ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
-        lw = edge.pheromone_strength*((max_val - min_val) / (q_max - q_min))
+        lw = edge.pheromone_strength*((max_val - min_val) / (tau_max - tau_min))
         plt.setp(line, lw=lw)
 
     if data is not None:

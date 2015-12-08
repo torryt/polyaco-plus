@@ -103,7 +103,13 @@ def main():
 
 
 if __name__ == "__main__":
-    get_iris()
+
+    white = uniform_rectangle((1, 3), (2, 4), 150, 0)
+    blue = uniform_rectangle((4, 6), (2, 4), 150, 1)
+    data = np.concatenate((white, blue), axis=1)
+    from acoc.acoc_plotter import plot_data
+    plot_data(data, show=True)
+    # get_iris()
     # main()
     # white = semi_circle_gaussian(4.0, MinMax(math.pi, 2*math.pi), 500, 0)
     # blue = semi_circle_gaussian(4.0, MinMax(0, math.pi), 500, 1, center=(8, -5))

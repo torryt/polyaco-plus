@@ -22,11 +22,9 @@ SHOW_PLOT = False
 NUMBER_RUNS = 1
 clf_config = {
     'ant_count':    3000,
-    # 'q':            10.0,
-    'q_min':        0.01,
-    'q_max':        1,
-    'q_init':       0.01,
-    'dynamic_q_max':    False,
+    'tau_min':      0.01,
+    'tau_max':      100,
+    'tau_init':     0.01,
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,

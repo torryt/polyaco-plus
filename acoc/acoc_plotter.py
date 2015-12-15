@@ -6,11 +6,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
 
-from utils.data_generator import uniform_circle
+from utils.data_generator import gaussian_circle
 
 from config import SAVE_DIR
-BLUE_COLOR = '#0097E8'
-RED_COLOR = '#F03A3A'
+CLASS_ONE_COLOR = '#FFFFFF'
+CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
 
 
@@ -42,9 +42,9 @@ class LivePheromonePlot:
         if current_edge:
             for j, edge in enumerate(new_edges):
                 if edge in connected_edges:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color=BLUE_COLOR)
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color=CLASS_TWO_COLOR)
                 elif edge == current_edge:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color=RED_COLOR)
+                    plt.setp(self.plot_lines[j], linewidth=5.0, color=CLASS_ONE_COLOR)
                 else:
                     plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength, color='k')
 
@@ -81,7 +81,7 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
         plt.show()
 
 
-def plot_pheromone_values(matrix, show=False):
+def plot_pheromone_values(matrix, tau_min, tau_max, show=False):
     for edge in matrix.edges:
         line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
         plt.setp(line, linewidth=edge.pheromone_strength)
@@ -98,7 +98,7 @@ def plot_two_path_lengths(path_length1, path_length2):
     y_coord2 = path_length2
 
     plt.plot(x_coord, y_coord, 'g')
-    plt.plot(x_coord2, y_coord2, RED_COLOR)
+    plt.plot(x_coord2, y_coord2, CLASS_ONE_COLOR)
     plt.axis([0, len(path_length1), 0, max(path_length1)])
 
 
@@ -131,8 +131,8 @@ def plot_data(data, subplot=None, show=False):
         temp = data.T
         red = temp[temp[:, 2] == 0][:, :2].T
         blue = temp[temp[:, 2] == 1][:, :2].T
-        ax.scatter(red[0], red[1], color=RED_COLOR, s=80, edgecolor=EDGE_COLOR, linewidths=1.0)
-        ax.scatter(blue[0], blue[1], color=BLUE_COLOR, s=80, edgecolor=EDGE_COLOR, linewidths=1.0)
+        ax.scatter(red[0], red[1], color=CLASS_ONE_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
+        ax.scatter(blue[0], blue[1], color=CLASS_TWO_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
     ax.axis([np.amin(data[0]) - .2,
@@ -165,9 +165,11 @@ def plot_path(path, subplot):
         subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-', linewidth=3)
 
 
-def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
+def plot_smooth_curves(curves, labels, axis_name='score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
+    plt.xlabel("Ants")
+    plt.ylabel('Polygon length') if axis_name == 'polygon' else plt.ylabel('Score')
     for i, c in enumerate(curves):
         window_size = c.size // 4
         if window_size % 2 == 0:
@@ -180,7 +182,7 @@ def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
     return f
 
 
-def plot_curves(curves, labels, axis_name='score', show=False, loc='upper right'):
+def plot_curves(curves, labels, axis_name='score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
     plt.xlabel("Ants")
@@ -196,13 +198,17 @@ def plot_curves(curves, labels, axis_name='score', show=False, loc='upper right'
     return f
 
 
-def plot_pheromones(matrix, data, save=True, folder_name=''):
+def plot_pheromones(matrix, data, tau_min, tau_max, save=True, folder_name=''):
+    min_val = 0.1
+    max_val = 15.0
+
     plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for edge in matrix.edges:
         line = ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
-        plt.setp(line, linewidth=edge.pheromone_strength)
+        lw = edge.pheromone_strength*((max_val - min_val) / (tau_max - tau_min))
+        plt.setp(line, lw=lw)
 
     if data is not None:
         plot_data(data)
@@ -214,21 +220,18 @@ def plot_pheromones(matrix, data, save=True, folder_name=''):
     save_plot(fig, folder_name, file_type='png')
 
 
-def save_plot(fig=None, parent_folder='', file_type=None):
+def save_plot(fig=None, parent_folder='', file_name=''):
     if parent_folder != '':
-        directory = SAVE_DIR + parent_folder + '/'
+        directory = os.path.join(SAVE_DIR, parent_folder)
     else:
-        directory = SAVE_DIR + strftime("%Y-%m-%d_%H%M") + '/'
+        directory = os.path.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
     if not os.path.exists(directory):
         os.makedirs(directory)
-    file_name = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S-%f')[:-5]
+    file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5] if file_name == '' else file_name
     if fig is None:
         fig = plt
-    if file_type == 'png':
-        fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
-    else:
-        fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
-        fig.savefig(os.path.join(directory, file_name + '.eps'))
+    fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
+    fig.savefig(os.path.join(directory, file_name + '.eps'))
 
 
 def hide_top_and_right_axis(ax):
@@ -243,8 +246,8 @@ def hide_top_and_right_axis(ax):
 
 def main():
     # points = uniform_rectangle((2, 4), (2, 4), 500)
-    points = uniform_circle(10.0, 500, 0)
-    points2 = uniform_circle(5.0, 500, 1)
+    points = gaussian_circle(10.0, 500, 0)
+    points2 = gaussian_circle(5.0, 500, 1)
     points = np.concatenate((points, points2), axis=1)
     fig = plt.figure()
     ax = fig.add_subplot(111)

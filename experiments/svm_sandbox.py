@@ -11,8 +11,8 @@ MinMax = namedtuple('MinMax', ['min', 'max'])
 
 def run():
     # Based on http://scikit-learn.org/stable/auto_examples/svm/plot_iris.html
-    red = dg.uniform_circle(3.0, 500, 0)
-    blue = dg.uniform_circle(2.0, 500, 1)
+    red = dg.gaussian_circle(3.0, 500, 0)
+    blue = dg.gaussian_circle(2.0, 500, 1)
 
     data = np.concatenate((red, blue), axis=1)
     X = data[:2].T

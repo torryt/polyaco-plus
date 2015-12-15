@@ -23,15 +23,12 @@ def plot_points():
     # plt.show()
 
 
-def plot_curves_from_data(file_name):
-    # labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-    labels = ['?', '?']
+def plot_curves_from_data(file_name, labels):
     curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
-    f1 = plot_curves(curves, labels, loc='lower right')
-    f2 = plot_smooth_curves(curves, labels, loc='lower right')
-    plt.xlabel("Ants")
-    plt.ylabel("Score")
+    f1 = plot_curves(curves, labels, loc='upper left')
+    f2 = plot_smooth_curves(curves, labels, loc='upper left')
+
     base_path = osp.dirname(file_name)
     f1.savefig(osp.join(base_path, str(uuid4()) + '.eps'))
     f1.savefig(osp.join(base_path, str(uuid4()) + '.png'))
@@ -52,6 +49,21 @@ def plot_all_data_sets():
         ac.plot_data(data, ax)
         ac.save_plot(fig)
 
+
+def create_iris_figure():
+    from sklearn import datasets
+    iris = datasets.load_iris()
+    data = np.append(iris.data.T[0:2], np.array([iris.target]), axis=0)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.axis('off')
+    ac.plot_data(data, ax)
+    ac.save_plot(fig)
+
+
 if __name__ == "__main__":
+    # create_iris_figure()
     # plot_all_data_sets()
-    plot_curves_from_data('C:\\Users\Guro\Dropbox\ACOC\experiments\Guro\\2015-12-01_0925-0\data.pickle')
+    # labels = [0.1, 1.0, 10.0, 100.0]
+    labels = ['tau_init=0.1', 'tau_init=20.0']
+    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/data.pickle', labels)

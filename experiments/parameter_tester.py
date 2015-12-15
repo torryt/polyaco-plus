@@ -11,17 +11,17 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count': 2000,
-    'number_runs': 50,
-    'q': 5.0,
-    'q_min': 0.1,
-    'q_max': 20.0,
-    'q_init': 0.1,
-    'rho': 0.02,
-    'alpha': 1,
-    'beta': 0.05,
-    'ant_init': 'weighted',
-    'decay_type': 'probabilistic'
+    'ant_count':    3000,
+    'number_runs':  20,
+    'tau_min':      0.001,
+    'tau_max':      1.0,
+    'tau_init':     0.001,
+    'rho':          0.02,
+    'alpha':        1,
+    'beta':         0.05,
+    'ant_init':     'weighted',
+    'decay_type':   'probabilistic',
+    'data_set':     'rectangle_small'
 }
 
 
@@ -29,11 +29,9 @@ def run(*args):
     config = dict(CONFIG)
     for conf in args:
         config[conf[0]] = conf[1]
-    if 'data_set' in config:
-        data = pickle.load(open('../data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
-    else:
-        data = pickle.load(open('../data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
+    data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
+
     clf = acoc.Classifier(config)
     all_ant_scores = np.zeros((number_runs, config['ant_count']))
     all_polygons = np.zeros((number_runs, config['ant_count']))
@@ -49,7 +47,7 @@ def run(*args):
     return all_ant_scores.mean(0), all_polygons.mean(0)
 
 
-def parameter_tester(parameter_name, values, config=CONFIG, data_set='rectangle'):
+def parameter_tester(parameter_name, values, config=CONFIG):
     save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
     iterator = 0
     full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
@@ -57,41 +55,41 @@ def parameter_tester(parameter_name, values, config=CONFIG, data_set='rectangle'
         iterator += 1
         full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
     save_folder = osp.basename(full_path)
-    config['data_set'] = data_set
     print("\n\nExperiment for parameter '{}' with values {}".format(parameter_name, values))
     plt.clf()
     all_scores = []
     all_polygon_lengths = []
     for index, v in enumerate(values):
         print("Run {} with value {}".format(index+1, v))
-        scores, polygons = run((parameter_name, v), ('data_set', data_set))
+        scores, polygons = run((parameter_name, v))
         all_scores.append(scores)
         all_polygon_lengths.append(polygons)
         utils.print_on_current_line('')
 
-    utils.save_dict(config, 'config_' + parameter_name + '.txt', save_folder)
-    utils.save_object(all_scores, 'data', save_folder)
+    utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
+    utils.save_object(all_scores, save_folder, 'data_scores')
     labels = [parameter_name + '=' + str(v) for v in values]
     f1 = acoc_plotter.plot_curves(all_scores, labels, 'score')
+    acoc_plotter.save_plot(f1, save_folder, 'score_noise')
+    acoc_plotter.save_plot(acoc_plotter.plot_smooth_curves(all_scores, labels), save_folder, 'score_smooth')
 
     # If Beta test, save a graph with the polygon length also
     if parameter_name == 'beta':
-        utils.save_object(all_polygon_lengths, 'data', save_folder)
+        utils.save_object(all_polygon_lengths, save_folder, 'data_lengths')
         f2 = acoc_plotter.plot_curves(all_polygon_lengths, labels, 'polygon')
-        acoc_plotter.save_plot(f2, save_folder)
+        acoc_plotter.save_plot(f2, save_folder, 'length_noise')
+        acoc_plotter.save_plot(acoc_plotter.plot_smooth_curves(all_scores, labels, 'polygon'),
+                               save_folder, 'length_smooth')
 
-    acoc_plotter.save_plot(f1, save_folder)
-    f_smooth = acoc_plotter.plot_smooth_curves(all_scores, labels)
-    acoc_plotter.save_plot(f_smooth, save_folder)
 
 if __name__ == "__main__":
+    # parameter_tester('tau_min', [0.001, 0.01, 0.1])
+    # parameter_tester('tau_max', [0.1, 1.0, 10.0, 100.0])
+    parameter_tester('beta', [0.001, 0.01, 0.1, 1.0])
+
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
     # parameter_tester('decay_type', ['probabilistic', 'gradual'])
-
-    # parameter_tester('q_init', [CONFIG['q_max'], CONFIG['q_min']])
-    parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
-    parameter_tester('q', [1, 5, 10, 20])
-    parameter_tester('q_min', [0.01, 0.1, 1.0, 19])
-    parameter_tester('beta', [0.005, 0.01, 0.05, 0.1])
-
+    # parameter_tester('tau_init', [CONFIG['tau_max'], CONFIG['tau_min']])
+    # parameter_tester('q', [0.1, 1.0, 10.0, 20.0])
+    # parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
     # parameter_tester('iterations', [1, 2, 5, 10])

@@ -85,13 +85,14 @@ def parameter_tester(parameter_name, values, config=CONFIG):
     [save_results(*obj) for obj in results]
 
 if __name__ == "__main__":
+
     # parameter_tester('tau_min', [0.001, 0.01, 0.1])
     # parameter_tester('tau_max', [0.1, 1.0, 10.0, 100.0])
     parameter_tester('beta', [0, 0.01, 0.1, 1.0])
 
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
+    # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
     # parameter_tester('decay_type', ['probabilistic', 'gradual'])
     # parameter_tester('tau_init', [CONFIG['tau_max'], CONFIG['tau_min']])
-    # parameter_tester('q', [0.1, 1.0, 10.0, 20.0])
     # parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
     # parameter_tester('iterations', [1, 2, 5, 10])

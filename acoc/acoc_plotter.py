@@ -165,11 +165,11 @@ def plot_path(path, subplot):
         subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-', linewidth=3)
 
 
-def plot_smooth_curves(curves, labels, axis_name='score', show=False, loc='upper left'):
+def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
     plt.xlabel("Ants")
-    plt.ylabel('Polygon length') if axis_name == 'polygon' else plt.ylabel('Score')
+    plt.ylabel(y_axis_label)
     for i, c in enumerate(curves):
         window_size = c.size // 4
         if window_size % 2 == 0:
@@ -182,14 +182,11 @@ def plot_smooth_curves(curves, labels, axis_name='score', show=False, loc='upper
     return f
 
 
-def plot_curves(curves, labels, axis_name='score', show=False, loc='upper left'):
+def plot_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
     plt.xlabel("Ants")
-    if axis_name == 'polygon':
-        plt.ylabel("Polygon length")
-    else:
-        plt.ylabel("Score")
+    plt.ylabel(y_axis_label)
     for i, c in enumerate(curves):
         ax.plot(range(c.shape[0]), c, label=labels[i])
     ax.legend(loc=loc)

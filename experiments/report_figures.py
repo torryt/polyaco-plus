@@ -25,12 +25,13 @@ def plot_points():
 
 def plot_curves_from_data(file_name):
     # labels = ['random', 'weighted', 'static', 'on_global_best', 'chance_of_global_best']
-    labels = ['probabilistic', 'gradual']
+    labels = ['?', '?']
     curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
     f1 = plot_curves(curves, labels, loc='lower right')
     f2 = plot_smooth_curves(curves, labels, loc='lower right')
-
+    plt.xlabel("Ants")
+    plt.ylabel("Score")
     base_path = osp.dirname(file_name)
     f1.savefig(osp.join(base_path, str(uuid4()) + '.eps'))
     f1.savefig(osp.join(base_path, str(uuid4()) + '.png'))
@@ -53,4 +54,4 @@ def plot_all_data_sets():
 
 if __name__ == "__main__":
     # plot_all_data_sets()
-    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/torry/decay type/rectangle/data.pickle')
+    plot_curves_from_data('C:\\Users\Guro\Dropbox\ACOC\experiments\Guro\\2015-12-01_0925-0\data.pickle')

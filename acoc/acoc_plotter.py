@@ -180,7 +180,7 @@ def plot_smooth_curves(curves, labels, show=False, loc='upper right'):
     return f
 
 
-def plot_curves(curves, labels, axis_name, show=False, loc='upper right'):
+def plot_curves(curves, labels, axis_name='score', show=False, loc='upper right'):
     f = plt.figure()
     ax = f.add_subplot(111)
     plt.xlabel("Ants")

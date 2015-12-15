@@ -64,5 +64,6 @@ def create_iris_figure():
 if __name__ == "__main__":
     # create_iris_figure()
     # plot_all_data_sets()
-    labels = [0.1, 1.0, 10.0, 100.0]
-    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/2015-12-07_1656-0/data.pickle', labels)
+    # labels = [0.1, 1.0, 10.0, 100.0]
+    labels = ['tau_init=0.1', 'tau_init=20.0']
+    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/q_init/data.pickle', labels)

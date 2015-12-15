@@ -11,12 +11,11 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    3000,
+    'ant_count':    2000,
     'number_runs':  50,
-    'tau_min':      0.01,
-    'tau_max':      100,
-    'tau_init':     0.01,
-    # 'Q':            10.0,
+    'tau_min':      0.001,
+    'tau_max':      1.0,
+    'tau_init':     0.001,
     'rho':          0.02,
     'alpha':        1,
     'beta':         0.05,
@@ -72,8 +71,9 @@ def parameter_tester(parameter_name, values, config=CONFIG):
     acoc_plotter.save_plot(f2, save_folder)
 
 if __name__ == "__main__":
-    parameter_tester('tau_min', [0.001, 0.01, 0.1])
-    parameter_tester('tau_max', [0.1, 1.0, 10.0, 100.0])
+    # parameter_tester('tau_min', [0.001, 0.01, 0.1])
+    # parameter_tester('tau_max', [0.1, 1.0, 10.0, 100.0])
+    parameter_tester('beta', [0.001, 0.01, 0.1, 1.0])
 
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
     # parameter_tester('decay_type', ['probabilistic', 'gradual'])

@@ -165,9 +165,11 @@ def plot_path(path, subplot):
         subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-', linewidth=3)
 
 
-def plot_smooth_curves(curves, labels, show=False, loc='upper left'):
+def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
+    plt.xlabel("Ants")
+    plt.ylabel(y_axis_label)
     for i, c in enumerate(curves):
         window_size = c.size // 4
         if window_size % 2 == 0:
@@ -180,9 +182,11 @@ def plot_smooth_curves(curves, labels, show=False, loc='upper left'):
     return f
 
 
-def plot_curves(curves, labels, show=False, loc='upper left'):
+def plot_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
+    plt.xlabel("Ants")
+    plt.ylabel(y_axis_label)
     for i, c in enumerate(curves):
         ax.plot(range(c.shape[0]), c, label=labels[i])
     ax.legend(loc=loc)
@@ -213,22 +217,18 @@ def plot_pheromones(matrix, data, tau_min, tau_max, save=True, folder_name=''):
     save_plot(fig, folder_name, file_type='png')
 
 
-def save_plot(fig=None, parent_folder='', file_type=None):
+def save_plot(fig=None, parent_folder='', file_name=''):
     if parent_folder != '':
         directory = os.path.join(SAVE_DIR, parent_folder)
     else:
         directory = os.path.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
     if not os.path.exists(directory):
         os.makedirs(directory)
-    file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5]
-
+    file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5] if file_name == '' else file_name
     if fig is None:
         fig = plt
-    if file_type == 'png':
-        fig.savefig(os.path.join(directory, file_name + '.png'), transparent=True)
-    else:
-        fig.savefig(os.path.join(directory, file_name + '.png'), transparent=True)
-        fig.savefig(os.path.join(directory, file_name + '.eps'))
+    fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
+    fig.savefig(os.path.join(directory, file_name + '.eps'))
 
 
 def hide_top_and_right_axis(ax):

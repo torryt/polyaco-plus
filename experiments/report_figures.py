@@ -23,11 +23,11 @@ def plot_points():
     # plt.show()
 
 
-def plot_curves_from_data(file_name, labels):
+def plot_curves_from_data(file_name, labels, y_axis_label='Score', loc='upper left'):
     curves = pickle.load(open(file_name, 'rb'), encoding='latin1')
 
-    f1 = plot_curves(curves, labels, loc='upper left')
-    f2 = plot_smooth_curves(curves, labels, loc='upper left')
+    f1 = plot_curves(curves, labels, y_axis_label, loc=loc)
+    f2 = plot_smooth_curves(curves, labels, y_axis_label, loc=loc)
 
     base_path = osp.dirname(file_name)
     f1.savefig(osp.join(base_path, str(uuid4()) + '.eps'))
@@ -64,5 +64,9 @@ def create_iris_figure():
 if __name__ == "__main__":
     # create_iris_figure()
     # plot_all_data_sets()
-    labels = [0.1, 1.0, 10.0, 100.0]
-    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/2015-12-07_1656-0/data.pickle', labels)
+    # labels = [0.1, 1.0, 10.0, 100.0]
+    labels = ['beta=' + str(el) for el in [0.001, 0.01, 0.1, 1.0]]
+    plot_curves_from_data('/Users/torrytufteland/Dropbox/ACOC/experiments/2015-12-15_1011-0/data_scores.pickle',
+                          labels,
+                          'Score',
+                          loc='lower right')

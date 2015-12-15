@@ -64,6 +64,7 @@ class Classifier:
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
+        polygon_lengths = []
         current_best_polygon = []
         current_best_score = 0
         matrix = AcocMatrix(data, tau_initial=self.tau_init)
@@ -109,16 +110,13 @@ class Classifier:
                 self.grad_pheromone_decay(matrix)
 
             ant_scores.append(ant_score)
+            polygon_lengths.append(len(_ant.edges_travelled))
 
             if plot and len(ant_scores) % 20 == 0:
                 plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
-                # live_plot.update(matrix.edges)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
-        # if live_plot:
-        #     live_plot.close()
-
-        return ant_scores, current_best_polygon
+        return ant_scores, current_best_polygon, polygon_lengths
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:

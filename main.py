@@ -21,13 +21,13 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 clf_config = {
-    'ant_count':    3000,
-    'tau_min':      0.01,
-    'tau_max':      100,
-    'tau_init':     0.01,
+    'ant_count':    1000,
+    'tau_min':      0.001,
+    'tau_max':      1.0,
+    'tau_init':     0.001,
     'rho':          0.02,
     'alpha':        1,
-    'beta':         0.05,
+    'beta':         0.01,
     'ant_init':     'weighted',
     'decay_type':   'probabilistic'
 }
@@ -44,7 +44,7 @@ def run():
 
     for i in range(NUMBER_RUNS):
         iter_string = "Iteration: {}/{}".format(i + 1, NUMBER_RUNS)
-        ant_scores, path = \
+        ant_scores, path, _ = \
             clf.classify(data, SAVE_PHEROMONE_VALUES, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         print(", Best ant score: {}".format(max(ant_scores)))

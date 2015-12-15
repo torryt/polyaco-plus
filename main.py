@@ -44,7 +44,7 @@ def run():
 
     for i in range(NUMBER_RUNS):
         iter_string = "Iteration: {}/{}".format(i + 1, NUMBER_RUNS)
-        ant_scores, path, _ = \
+        ant_scores, path, _, _ = \
             clf.classify(data, SAVE_PHEROMONE_VALUES, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         print(", Best ant score: {}".format(max(ant_scores)))
@@ -54,7 +54,7 @@ def run():
             global_best_polygon = path
             global_best_score = max(ant_scores)
 
-    score = clf.polygon_score(global_best_polygon, data)
+    score = clf.cost_function(global_best_polygon, data)
     if SAVE:
         utils.save_object(all_ant_scores.mean(0), 'scores', SAVE_FOLDER)
         utils.save_dict(clf_config, 'config.txt', SAVE_FOLDER)

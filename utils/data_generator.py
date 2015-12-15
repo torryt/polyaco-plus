@@ -104,20 +104,25 @@ def main():
 
 if __name__ == "__main__":
 
-    white = uniform_rectangle((1, 3), (2, 4), 150, 0)
-    blue = uniform_rectangle((4, 6), (2, 4), 150, 1)
-    data = np.concatenate((white, blue), axis=1)
-    from acoc.acoc_plotter import plot_data
-    plot_data(data, show=True)
+    white = uniform_rectangle((0, 2), (3, 5), 150, 0)
+    blue = uniform_rectangle((4, 6), (0, 2), 150, 1)
+    dataset = np.concatenate((white, blue), axis=1)
+
+    # r = MinMax(math.pi, 2*math.pi)
+    # red = semi_circle_gaussian(1.0, r, 150, 0, spread=0.1)
+    # r = MinMax(0, math.pi)
+    # blue = semi_circle_gaussian(1.0, r, 150, 1, center=(1, -.5), spread=0.1)
+    # data = np.concatenate((red, blue), axis=1)
+
     # get_iris()
     # main()
     # white = semi_circle_gaussian(4.0, MinMax(math.pi, 2*math.pi), 500, 0)
     # blue = semi_circle_gaussian(4.0, MinMax(0, math.pi), 500, 1, center=(8, -5))
     # dataset = np.concatenate((white, blue), axis=1)
     #
-    # from acoc.acoc_plotter import plot_data
-    # plot_data(dataset, show=True)
+    from acoc.acoc_plotter import plot_data
+    plot_data(dataset, show=True)
 
-    # data = load_data()
-    # data['semicircle_gaussian'] = dataset
+    # data = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
+    # data['square_spaced'] = dataset
     # pickle.dump(data, open('data_sets.pickle', 'wb'))

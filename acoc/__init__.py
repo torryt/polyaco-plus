@@ -65,6 +65,8 @@ class Classifier:
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
         polygon_lengths = []
+        ant_costs = []
+
         current_best_polygon = []
         current_best_score = 0
         matrix = AcocMatrix(data, tau_initial=self.tau_init)
@@ -98,7 +100,7 @@ class Classifier:
 
             if ant_is_stuck:
                 continue
-            ant_score = self.cost_function(_ant.edges_travelled, data)
+            ant_score, ant_cost = self.score(_ant.edges_travelled, data)
             if ant_score > current_best_score:
                 current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
@@ -110,13 +112,14 @@ class Classifier:
                 self.grad_pheromone_decay(matrix)
 
             ant_scores.append(ant_score)
+            ant_costs.append(ant_cost)
             polygon_lengths.append(len(_ant.edges_travelled))
 
             if plot and len(ant_scores) % 20 == 0:
                 plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
-        return ant_scores, current_best_polygon, polygon_lengths
+        return ant_scores, current_best_polygon, polygon_lengths, ant_costs
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:
@@ -128,7 +131,7 @@ class Classifier:
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
 
-    def polygon_score(self, polygon, data):
+    def cost_function(self, polygon, data):
         points = data.T.tolist()
         score = 0
         unique_polygon = copy(polygon)
@@ -142,17 +145,17 @@ class Classifier:
                 score += 1 if vertex[2] != 0 else 0
         return score / data.shape[1]
 
-    def cost_function(self, polygon, data):
-        score = self.polygon_score(polygon, data)
+    def score(self, polygon, data):
+        cost = self.cost_function(polygon, data)
         try:
             length_factor = 1/len(polygon)
         # Handles very rare and weird error where length of polygon == 0
         except ZeroDivisionError:
             length_factor = 1
-        return (score**self.alpha) * (length_factor**self.beta)
+        return (cost**self.alpha) * (length_factor**self.beta), cost
 
     def put_pheromones(self, path, data):
-        score = self.cost_function(path, data)
+        score, _ = self.score(path, data)
 
         unique_edges = get_unique_edges(path)
         for edge in unique_edges:

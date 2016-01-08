@@ -50,6 +50,16 @@ def plot_all_data_sets():
         ac.save_plot(fig)
 
 
+def plot_data_set(dataset_name):
+    data_set = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[dataset_name]
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ac.hide_top_and_right_axis(ax)
+    # plt.axis('off')
+    ac.plot_data(data_set, ax)
+    ac.save_plot(fig)
+
+
 def create_iris_figure():
     from sklearn import datasets
     iris = datasets.load_iris()

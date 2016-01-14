@@ -9,7 +9,7 @@ _tiny = sys.float_info.min
 Pt = namedtuple('Point', ['x', 'y'])
 
 
-def _odd(x):
+def odd(x):
     return x % 2 == 1
 
 
@@ -42,18 +42,57 @@ def _ray_intersect_segment(p, e):
         return m_blue >= m_red
 
 
-@cuda.jit
-def ray_intersect_segment_cuda(p, E, result):
-    tx = cuda.threadIdx.x
+# @cuda.jit
+# def ray_intersect_segment_cuda(p, E, result):
+#     tx = cuda.threadIdx.x
+#
+#     EPS = 0.00001
+#     HUGE = 9000000000000000
+#     TINY = 0.000000000000001
+#
+#     e = E[tx]
+#     a = e[0]
+#     b = e[1]
+#
+#     if a[1] > b[1]:
+#         a, b = b, a
+#
+#     if p[1] == a[1] or p[1] == b[1]:
+#         p[1] += EPS
+#
+#     if p[1] > b[1] or p[1] < a[1]:
+#         result[tx] = False
+#         return
+#     if p[0] > max(a[0], b[0]):
+#         result[tx] = False
+#         return
+#
+#     if p[0] < min(a[0], b[0]):
+#         result[tx] = True
+#         return
+#     else:
+#         if abs(a[0] - b[0]) > TINY:
+#             m_red = (b[1] - a[1]) / float(b[0] - a[0])
+#         else:
+#             m_red = HUGE
+#         if abs(a[0] - p[0]) > TINY:
+#             m_blue = (p[1] - a[1]) / float(p[0] - a[0])
+#         else:
+#             m_blue = HUGE
+#         result[tx] = m_blue >= m_red
+#         return
+
+
+@cuda.jit(device=True)
+def ray_intersect_segment_device(p, e):
 
     EPS = 0.00001
     HUGE = 9000000000000000
     TINY = 0.000000000000001
-    
-    e = E[tx]
+
     a = e[0]
     b = e[1]
-    
+
     if a[1] > b[1]:
         a, b = b, a
 
@@ -61,15 +100,11 @@ def ray_intersect_segment_cuda(p, E, result):
         p[1] += EPS
 
     if p[1] > b[1] or p[1] < a[1]:
-        result[tx] = False
-        return
+        return False
     if p[0] > max(a[0], b[0]):
-        result[tx] = False
-        return
-
+        return False
     if p[0] < min(a[0], b[0]):
-        result[tx] = True
-        return
+        return True
     else:
         if abs(a[0] - b[0]) > TINY:
             m_red = (b[1] - a[1]) / float(b[0] - a[0])
@@ -79,21 +114,23 @@ def ray_intersect_segment_cuda(p, E, result):
             m_blue = (p[1] - a[1]) / float(p[0] - a[0])
         else:
             m_blue = HUGE
-        result[tx] = m_blue >= m_red
-        return
+        return m_blue >= m_red
 
 
-def is_point_inside_cuda(vertex, solution):
-    p = np.array([vertex[0], vertex[1]], dtype='float32')
-    E = np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in solution], dtype='float32')
-    threads_per_block = E.size
-    blocks_per_grid = 1
-    result = np.empty(E.shape[0], dtype=bool)
-    ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](p, E, result)
-    return _odd(np.sum(result))
+@cuda.jit
+def ray_intersect_segment_cuda(E, P, result):
+    edge_index, point_index = cuda.grid(2)
+    e = E[edge_index]
+    p = P[point_index]
 
+    if edge_index < E.shape[0] and point_index < P.shape[1]:
+        result[edge_index][point_index] = ray_intersect_segment_device(p, e)
+
+
+def is_point_inside_cuda(points, solution):
+    pass
 
 def is_point_inside(vertex, solution):
     p_copy = Pt(vertex[0], vertex[1])
-    return _odd(sum(_ray_intersect_segment(p_copy, edge)
-                    for edge in solution))
+    return odd(sum(_ray_intersect_segment(p_copy, edge)
+                   for edge in solution))

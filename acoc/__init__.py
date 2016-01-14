@@ -6,6 +6,7 @@ import random
 from copy import copy
 import numpy as np
 from numpy.random.mtrand import choice
+import math
 
 import utils
 from acoc.acoc_matrix import AcocMatrix
@@ -16,6 +17,7 @@ from acoc.ray_cast import is_point_inside
 from acoc import ray_cast
 from utils import normalize
 
+odd = np.vectorize(ray_cast.odd)
 
 def get_unique_edges(path):
     z = set(path)
@@ -132,19 +134,23 @@ class Classifier:
             edge.pheromone_strength *= 1-self.rho
 
     def cost_function(self, polygon, data):
-        points = data.T.tolist()
-        score = 0
+        points = data.T
         unique_polygon = copy(polygon)
         for vertex in unique_polygon:
             if vertex.twin in unique_polygon:
                 unique_polygon.remove(vertex.twin)
 
-        for vertex in points:
-            if ray_cast.is_point_inside_cuda(vertex, unique_polygon):
-                score += 1 if vertex[2] == 0 else 0
-            else:
-                score += 1 if vertex[2] != 0 else 0
-        return score / data.shape[1]
+        edges = np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in polygon], dtype='float32')
+
+        threads_per_block = (16, 8)
+        blocks_per_grid_x = math.ceil(edges.shape[0] / threads_per_block[0])
+        blocks_per_grid_y = math.ceil(points.shape[0] / threads_per_block[0])
+        blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
+        result = np.empty((edges.shape[0], points.shape[0]), dtype=bool)
+        ray_cast.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](edges, points, result)
+
+        is_inside = odd(np.sum(result, axis=0))
+        return np.sum(is_inside) / data.shape[1]
 
     def score(self, polygon, data):
         cost = self.cost_function(polygon, data)

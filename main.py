@@ -21,7 +21,7 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 clf_config = {
-    'ant_count':    100,
+    'ant_count':    3000,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -34,7 +34,7 @@ clf_config = {
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
 data = pickle.load(
-    open('utils/data_sets.pickle', 'rb'), encoding='latin1')['iris']
+    open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
 
 
 def run():

@@ -97,6 +97,12 @@ def load_data():
     return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
 
 
+def list_datasets():
+    keys = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1').keys()
+    for key in keys:
+        print(key)
+
+
 def main():
     sets = generate_data_sets()
     utils.save_object(sets, 'data_sets')

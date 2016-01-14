@@ -12,8 +12,8 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_plotter import LivePheromonePlot
 import acoc.acoc_plotter as plotter
 from acoc.ant import Ant
-from utils import normalize
-from acoc.is_point_inside import is_point_inside
+from acoc.ray_cast import is_point_inside
+from acoc import ray_cast
 from utils import normalize
 
 
@@ -138,8 +138,9 @@ class Classifier:
         for vertex in unique_polygon:
             if vertex.twin in unique_polygon:
                 unique_polygon.remove(vertex.twin)
+
         for vertex in points:
-            if is_point_inside(vertex, unique_polygon):
+            if ray_cast.is_point_inside_cuda(vertex, unique_polygon):
                 score += 1 if vertex[2] == 0 else 0
             else:
                 score += 1 if vertex[2] != 0 else 0

@@ -14,45 +14,28 @@ CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
 
 
-class LivePheromonePlot:
-    def __init__(self, matrix, data=None):
-        plt.ion()
-        self.plot_lines = []
-        for edge in matrix.edges:
-            line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
-            plt.setp(line, linewidth=edge.pheromone_strength)
-            self.plot_lines.append(line)
+def plot_bar_graph(gpu_results, cpu_results, experiments_name):
+    n_groups = len(experiments_name)  # number of experiments run
 
-        if data is not None:
-            plot_data(data)
+    means_cpu = cpu_results
+    means_gpu = gpu_results
 
-        plt.axis([matrix.x_min_max[0] - .1,
-                  matrix.x_min_max[1] + .1,
-                  matrix.y_min_max[0] - .1,
-                  matrix.y_min_max[1] + .1])
-        plt.draw()
-        plt.pause(0.01)
+    fig, ax = plt.subplots()
 
-    @staticmethod
-    def close():
-        plt.clf()
-        plt.ioff()
+    index = np.arange(n_groups)
+    bar_width = 0.35
 
-    def update(self, new_edges, current_edge=None, connected_edges=None):
-        if current_edge:
-            for j, edge in enumerate(new_edges):
-                if edge in connected_edges:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color=CLASS_TWO_COLOR)
-                elif edge == current_edge:
-                    plt.setp(self.plot_lines[j], linewidth=5.0, color=CLASS_ONE_COLOR)
-                else:
-                    plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength, color='k')
+    opacity = 0.4
+    error_config = {'ecolor': '0.3'}
+    plt.bar(index, means_cpu, bar_width, alpha=opacity, color='b', error_kw=error_config, label='cpu')
+    plt.bar(index + bar_width, means_gpu, bar_width, alpha=opacity, color='r', error_kw=error_config, label='gpu')
 
-        else:
-            for j, edge in enumerate(new_edges):
-                plt.setp(self.plot_lines[j], linewidth=edge.pheromone_strength)
-        plt.draw()
-        plt.pause(0.01)
+    plt.xlabel('Experiments')
+    plt.ylabel('Scores')
+    plt.xticks(index + bar_width, experiments_name)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
@@ -79,50 +62,6 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
         save_plot(fig, save_folder)
     if show:
         plt.show()
-
-
-def plot_pheromone_values(matrix, tau_min, tau_max, show=False):
-    for edge in matrix.edges:
-        line = plt.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
-        plt.setp(line, linewidth=edge.pheromone_strength)
-    plt.axis([matrix.x_min_max[0], matrix.x_min_max[1], matrix.y_min_max[0], matrix.y_min_max[1]])
-    if show:
-        plt.show()
-
-
-def plot_two_path_lengths(path_length1, path_length2):
-    x_coord = range(len(path_length1))
-    y_coord = path_length1
-
-    x_coord2 = range(len(path_length2))
-    y_coord2 = path_length2
-
-    plt.plot(x_coord, y_coord, 'g')
-    plt.plot(x_coord2, y_coord2, CLASS_ONE_COLOR)
-    plt.axis([0, len(path_length1), 0, max(path_length1)])
-
-
-def draw_all(ant_path_lengths, shortest_path, data, ran_path_lengths=None):
-    plt.figure(1)
-    plt.subplot(211)
-    plt.title("Path")
-    plot_path_with_data(shortest_path, data)
-    plt.subplot(212)
-    plt.title("Pheromone Values")
-
-    if ran_path_lengths:
-        plot_aco_and_random(ant_path_lengths, ran_path_lengths)
-    else:
-        plt.figure(1)
-        plt.title("ACO Path Lengths")
-        plot_ant_scores(ant_path_lengths)
-    plt.show()
-
-
-def plot_aco_and_random(aco_path_lengths, random_path_lengths):
-    plt.figure(1)
-    plot_two_path_lengths(aco_path_lengths, random_path_lengths)
-    plt.show()
 
 
 def plot_data(data, subplot=None, show=False):

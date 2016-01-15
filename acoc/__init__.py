@@ -10,7 +10,6 @@ import math
 
 import utils
 from acoc.acoc_matrix import AcocMatrix
-from acoc.acoc_plotter import LivePheromonePlot
 import acoc.acoc_plotter as plotter
 from acoc.ant import Ant
 from acoc.ray_cast import is_point_inside
@@ -64,6 +63,7 @@ class Classifier:
         self.ant_init = config['ant_init']
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
+        self.gpu = config['gpu']
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
@@ -134,26 +134,21 @@ class Classifier:
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
 
-
-    # def cost_function(self, polygon, data):
-    #     points = data.T.tolist()
-    #     unique_polygon = copy(polygon)
-    #     gpu = True
-    #     if gpu:
-    #         pass
-    #     else:
-    #         score = 0
-    #         for vertex in unique_polygon:
-    #             if vertex.twin in unique_polygon:
-    #                 unique_polygon.remove(vertex.twin)
-    #         for vertex in points:
-    #             if is_point_inside(vertex, unique_polygon):
-    #                 score += 1 if vertex[2] == 0 else 0
-    #             else:
-    #                 score += 1 if vertex[2] != 0 else 0
-    #         return score / data.shape[1]
-
     def cost_function(self, polygon, data):
+        points = data.T.tolist()
+        unique_polygon = copy(polygon)
+        score = 0
+        for vertex in unique_polygon:
+            if vertex.twin in unique_polygon:
+                unique_polygon.remove(vertex.twin)
+        for vertex in points:
+            if is_point_inside(vertex, unique_polygon):
+                score += 1 if vertex[2] == 0 else 0
+            else:
+                score += 1 if vertex[2] != 0 else 0
+        return score / data.shape[1]
+
+    def cost_function_gpu(self, polygon, data):
         points = data.T
         unique_polygon = copy(polygon)
         for vertex in unique_polygon:
@@ -175,7 +170,10 @@ class Classifier:
         return np.sum(score) / data.shape[1]
 
     def score(self, polygon, data):
-        cost = self.cost_function(polygon, data)
+        if self.gpu:
+            cost = self.cost_function_gpu(polygon, data)
+        else:
+            cost = self.cost_function(polygon, data)
         try:
             length_factor = 1/len(polygon)
         # Handles very rare and weird error where length of polygon == 0

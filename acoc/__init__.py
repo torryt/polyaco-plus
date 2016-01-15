@@ -63,6 +63,7 @@ class Classifier:
         self.ant_init = config['ant_init']
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
+        self.pu_type = config['pu_type']
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []

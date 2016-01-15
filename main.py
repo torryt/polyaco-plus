@@ -21,7 +21,7 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 clf_config = {
-    'ant_count':    1000,
+    'ant_count':    100,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,

@@ -107,7 +107,7 @@ class Classifier:
                 current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
 
-            self.put_pheromones(current_best_polygon, data)
+            self.put_pheromones(current_best_polygon, data, current_best_score)
             if self.decay_type == 'probabilistic':
                 self.reset_at_random(matrix)
             elif self.decay_type == 'gradual':
@@ -132,6 +132,25 @@ class Classifier:
     def grad_pheromone_decay(self, matrix):
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
+
+
+    # def cost_function(self, polygon, data):
+    #     points = data.T.tolist()
+    #     unique_polygon = copy(polygon)
+    #     gpu = True
+    #     if gpu:
+    #         pass
+    #     else:
+    #         score = 0
+    #         for vertex in unique_polygon:
+    #             if vertex.twin in unique_polygon:
+    #                 unique_polygon.remove(vertex.twin)
+    #         for vertex in points:
+    #             if is_point_inside(vertex, unique_polygon):
+    #                 score += 1 if vertex[2] == 0 else 0
+    #             else:
+    #                 score += 1 if vertex[2] != 0 else 0
+    #         return score / data.shape[1]
 
     def cost_function(self, polygon, data):
         points = data.T
@@ -161,8 +180,9 @@ class Classifier:
             length_factor = 1
         return (cost**self.alpha) * (length_factor**self.beta), cost
 
-    def put_pheromones(self, path, data):
-        score, _ = self.score(path, data)
+    def put_pheromones(self, path, data, score=None):
+        if score is None:
+            score, _ = self.score(path, data)
 
         unique_edges = get_unique_edges(path)
         for edge in unique_edges:

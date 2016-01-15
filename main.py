@@ -15,13 +15,13 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 from timeit import timeit
 
-SAVE = True
+SAVE = False
 SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 NUMBER_RUNS = 1
 clf_config = {
-    'ant_count':    3000,
+    'ant_count':    1500,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -66,8 +66,8 @@ def run():
     plotter.plot_path_with_data(global_best_polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
     plotter.plot_ant_scores(all_ant_scores.mean(0), save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
-
 time = timeit('run()', setup='from __main__ import run', number=1)
 # plotter.plot_bar_graph(gpu_result, cpu_result, experiment, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 print("Time pr ant: {}".format(time / clf_config['ant_count']))
+print("Total runtime: {:.6f} seconds".format(time))
 # run()

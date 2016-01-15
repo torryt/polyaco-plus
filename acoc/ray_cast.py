@@ -123,7 +123,7 @@ def ray_intersect_segment_cuda(E, P, result):
     e = E[edge_index]
     p = P[point_index]
 
-    if edge_index < E.shape[0] and point_index < P.shape[1]:
+    if edge_index < E.shape[0] and point_index < P.shape[0]:
         result[edge_index][point_index] = ray_intersect_segment_device(p, e)
 
 

@@ -117,7 +117,7 @@ class Classifier:
             ant_costs.append(ant_cost)
             polygon_lengths.append(len(_ant.edges_travelled))
 
-            if plot and len(ant_scores) % 20 == 0:
+            if plot and len(ant_scores) % 200 == 0:
                 plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
@@ -161,7 +161,7 @@ class Classifier:
 
         edges = np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in polygon], dtype='float32')
 
-        threads_per_block = (16, 8)
+        threads_per_block = (16, 16)
         blocks_per_grid_x = math.ceil(edges.shape[0] / threads_per_block[0])
         blocks_per_grid_y = math.ceil(points.shape[0] / threads_per_block[0])
         blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
@@ -169,7 +169,9 @@ class Classifier:
         ray_cast.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](edges, points, result)
 
         is_inside = odd(np.sum(result, axis=0))
-        return np.sum(is_inside) / data.shape[1]
+        score = np.logical_xor(is_inside, data[2])
+
+        return np.sum(score) / data.shape[1]
 
     def score(self, polygon, data):
         cost = self.cost_function(polygon, data)
@@ -180,10 +182,7 @@ class Classifier:
             length_factor = 1
         return (cost**self.alpha) * (length_factor**self.beta), cost
 
-    def put_pheromones(self, path, data, score=None):
-        if score is None:
-            score, _ = self.score(path, data)
-
+    def put_pheromones(self, path, data, score):
         unique_edges = get_unique_edges(path)
         for edge in unique_edges:
             pheromone_strength = edge.pheromone_strength + score

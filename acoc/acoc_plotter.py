@@ -214,7 +214,7 @@ def plot_pheromones(matrix, data, tau_min, tau_max, save=True, folder_name=''):
              matrix.x_min_max[1] + .1,
              matrix.y_min_max[0] - .1,
              matrix.y_min_max[1] + .1])
-    save_plot(fig, folder_name, file_type='png')
+    save_plot(fig, folder_name)
 
 
 def save_plot(fig=None, parent_folder='', file_name=''):

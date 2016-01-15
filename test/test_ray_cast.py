@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+from numba import cuda
+import math
 
 from acoc import ray_cast as rc
 from acoc.ray_cast import Pt
@@ -65,3 +67,25 @@ class TestIsPointInsideCuda(unittest.TestCase):
         result = np.empty(1, dtype='uint8')
         rc.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](points, edges, result)
         self.assertTrue(type(result[0]) is np.uint8, 'Type is not {} but "{}" '.format(np.float32, type(result[0])))
+
+
+class TestCudaGrid(unittest.TestCase):
+
+    def test_grid_fills_all_values(self):
+
+        @cuda.jit
+        def make_true(arr):
+            x, y = cuda.grid(2)
+            if x < arr.shape[0] and y < arr.shape[1]:
+                arr[x, y] = True
+
+        arr = np.empty((64, 64), dtype=bool)
+        threads_per_block = (16, 16)
+        block_x = math.ceil(arr.shape[0] / threads_per_block[0])
+        block_y = math.ceil(arr.shape[1] / threads_per_block[1])
+        blocks_per_grid = (block_x, block_y)
+
+        make_true[blocks_per_grid, threads_per_block](arr)
+
+        # Assert whether all values evaluate to true
+        self.assertTrue(np.all(arr), 'Not all values in array is True: \n{}'.format(arr))

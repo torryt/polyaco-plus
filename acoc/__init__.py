@@ -19,6 +19,7 @@ from utils import normalize
 
 odd = np.vectorize(ray_cast.odd)
 
+
 def get_unique_edges(path):
     z = set(path)
     unique_edges = list(z)

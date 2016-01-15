@@ -14,7 +14,7 @@ CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
 
 
-def plot_bar_graph(gpu_results, cpu_results, experiments_name):
+def plot_bar_graph(gpu_results, cpu_results, experiments_name, save=False, show=False, save_folder=''):
     n_groups = len(experiments_name)  # number of experiments run
 
     means_cpu = cpu_results
@@ -35,7 +35,10 @@ def plot_bar_graph(gpu_results, cpu_results, experiments_name):
     plt.xticks(index + bar_width, experiments_name)
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    if save:
+        save_plot(fig, save_folder)
+    if show:
+        plt.show()
 
 
 def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):

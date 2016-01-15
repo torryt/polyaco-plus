@@ -10,7 +10,6 @@ import math
 
 import utils
 from acoc.acoc_matrix import AcocMatrix
-from acoc.acoc_plotter import LivePheromonePlot
 import acoc.acoc_plotter as plotter
 from acoc.ant import Ant
 from acoc.ray_cast import is_point_inside
@@ -133,7 +132,6 @@ class Classifier:
     def grad_pheromone_decay(self, matrix):
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
-
 
     # def cost_function(self, polygon, data):
     #     points = data.T.tolist()

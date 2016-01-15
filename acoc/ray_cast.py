@@ -130,6 +130,7 @@ def ray_intersect_segment_cuda(E, P, result):
 def is_point_inside_cuda(points, solution):
     pass
 
+
 def is_point_inside(vertex, solution):
     p_copy = Pt(vertex[0], vertex[1])
     return odd(sum(_ray_intersect_segment(p_copy, edge)

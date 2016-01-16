@@ -18,6 +18,8 @@ class AcocMatrix:
 
         coordinates = list(product(x_coord, y_coord))
         self.vertices = init_vertices(coordinates)
+        # The number of edges |E| depends on number of vertices with the following formula |E| = 2(y(x-1) + x(y-1))
+        # Example: A 4x4 matrix will generate 2(4(4-1) + 4(4-1)) = 48
         self.edges = init_edges(self.vertices, self.tau_initial)
         [connect_edges_to_vertex(v, self.edges) for v in self.vertices]
 
@@ -115,7 +117,7 @@ def main():
     red = dg.gaussian_circle(1.0, 500, 1, .5)
     blue = dg.gaussian_circle(2.0, 500, 0, .5)
     data = np.concatenate((red, blue), axis=1)
-    matrix = AcocMatrix(data, granularity=5)
+    matrix = AcocMatrix(data, granularity=10)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     # acoc_plotter.plot_data(data, ax)

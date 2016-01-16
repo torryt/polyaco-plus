@@ -32,8 +32,7 @@ clf_config = {
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
-data = pickle.load(
-    open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
+data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
 
 
 def run():
@@ -50,7 +49,7 @@ def run():
         plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
 
-runs = 10
+runs = 1
 cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
 print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))
 

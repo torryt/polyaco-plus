@@ -30,7 +30,8 @@ clf_config = {
     'beta':         0.01,
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
-    'pu_type':      'gpu'
+    'gpu':          True,
+    'granularity':  10
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
@@ -54,8 +55,8 @@ def run():
         if max(ant_scores) > global_best_score:
             global_best_polygon = path
             global_best_score = max(ant_scores)
-
-    score = clf.cost_function(global_best_polygon, data)
+    if clf.gpu:
+        score = clf.cost_function_gpu(global_best_polygon, data)
     if SAVE:
         utils.save_object(all_ant_scores.mean(0), 'scores', SAVE_FOLDER)
         utils.save_dict(clf_config, 'config.txt', SAVE_FOLDER)

@@ -63,7 +63,8 @@ class Classifier:
         self.ant_init = config['ant_init']
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
-        self.pu_type = config['pu_type']
+        self.gpu = config['gpu']
+        self.granularity = config['granularity']
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
@@ -72,7 +73,7 @@ class Classifier:
 
         current_best_polygon = []
         current_best_score = 0
-        matrix = AcocMatrix(data, tau_initial=self.tau_init)
+        matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
@@ -134,25 +135,25 @@ class Classifier:
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
 
-    # def cost_function(self, polygon, data):
-    #     points = data.T.tolist()
-    #     unique_polygon = copy(polygon)
-    #     gpu = True
-    #     if gpu:
-    #         pass
-    #     else:
-    #         score = 0
-    #         for vertex in unique_polygon:
-    #             if vertex.twin in unique_polygon:
-    #                 unique_polygon.remove(vertex.twin)
-    #         for vertex in points:
-    #             if is_point_inside(vertex, unique_polygon):
-    #                 score += 1 if vertex[2] == 0 else 0
-    #             else:
-    #                 score += 1 if vertex[2] != 0 else 0
-    #         return score / data.shape[1]
+    def cost_function_cpu(self, polygon, data):
+        points = data.T.tolist()
+        unique_polygon = copy(polygon)
+        gpu = True
+        if gpu:
+            pass
+        else:
+            score = 0
+            for vertex in unique_polygon:
+                if vertex.twin in unique_polygon:
+                    unique_polygon.remove(vertex.twin)
+            for vertex in points:
+                if is_point_inside(vertex, unique_polygon):
+                    score += 1 if vertex[2] == 0 else 0
+                else:
+                    score += 1 if vertex[2] != 0 else 0
+            return score / data.shape[1]
 
-    def cost_function(self, polygon, data):
+    def cost_function_gpu(self, polygon, data):
         points = data.T
         unique_polygon = copy(polygon)
         for vertex in unique_polygon:
@@ -174,7 +175,11 @@ class Classifier:
         return np.sum(score) / data.shape[1]
 
     def score(self, polygon, data):
-        cost = self.cost_function(polygon, data)
+        if self.gpu:
+            cost = self.cost_function_gpu(polygon, data)
+        elif not self.gpu:
+            cost = self.cost_function_cpu(polygon, data)
+
         try:
             length_factor = 1/len(polygon)
         # Handles very rare and weird error where length of polygon == 0

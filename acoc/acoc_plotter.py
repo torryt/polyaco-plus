@@ -30,8 +30,8 @@ def plot_bar_graph(gpu_results, cpu_results, experiments_name, save=False, show=
     plt.bar(index, means_cpu, bar_width, alpha=opacity, color='b', error_kw=error_config, label='cpu')
     plt.bar(index + bar_width, means_gpu, bar_width, alpha=opacity, color='r', error_kw=error_config, label='gpu')
 
-    plt.xlabel('Experiments')
-    plt.ylabel('Scores')
+    plt.xlabel('Experiment values')
+    plt.ylabel('Time spent')
     plt.xticks(index + bar_width, experiments_name)
     plt.legend()
     plt.tight_layout()

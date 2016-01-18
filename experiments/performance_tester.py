@@ -11,8 +11,8 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    1500,
-    'number_runs':  10,
+    'ant_count':    100,
+    'number_runs':  1,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -31,7 +31,7 @@ def run(*args):
     config = dict(CONFIG)
     for conf in args:
         config[conf[0]] = conf[1]
-    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
+    data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
 
     clf = acoc.Classifier(config)
@@ -74,10 +74,12 @@ def performance(parameter_name, values, config=CONFIG):
         utils.clear_current_line()
 
     print("Results: \n{}".format(results))
-    gpu_results = results[:, 0]
-    cpu_results = results[:, 1]
+    gpu_results = tuple(results[:, 0])
+    cpu_results = tuple(results[:, 1])
+    exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
-    acoc_plotter.plot_bar_graph(gpu_results, cpu_results, parameter_name, save=True, show=True, save_folder=SAVE_DIR)
+
+    acoc_plotter.plot_bar_graph(gpu_results, cpu_results, exp_name, save=True, show=True, save_folder=SAVE_DIR)
 
 if __name__ == "__main__":
-    performance('granularity', [10, 20, 30, 40, 50, 100])
+    performance('granularity', [10, 20])

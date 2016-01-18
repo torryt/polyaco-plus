@@ -1,20 +1,18 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import pickle
 from datetime import datetime
 import os.path as osp
+import time
 
 import acoc
 from acoc import acoc_plotter
 import utils
-from timeit import timeit
-import time
 
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    100,
-    'number_runs':  1,
+    'ant_count':    1500,
+    'number_runs':  10,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -23,9 +21,9 @@ CONFIG = {
     'beta':         0.1,
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
-    'data_set':     'rectangle_small',
-    'gpu':          True,
-    'granularity':  10
+    'data_set':     'rectangle',
+    'granularity':  10,
+    'gpu':          False
 }
 
 
@@ -33,52 +31,53 @@ def run(*args):
     config = dict(CONFIG)
     for conf in args:
         config[conf[0]] = conf[1]
-    data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
+    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
-    run_time = np.zeros((number_runs, config['ant_count']))
 
+    clf = acoc.Classifier(config)
+
+    run_times = np.zeros(number_runs, dtype=float)
     for i in range(number_runs):
+        iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
+
         start = time.clock()
-        clf = acoc.Classifier(config)
-        clf.classify(data, False)
+        clf.classify(data)
         end = time.clock()
-        time_spent = end - start
-        run_time[i, :] = time_spent
+        run_times[i] = end - start
 
-    return run_time
+        utils.print_on_current_line(iter_string)
+    return np.mean(run_times)
 
 
-def performance_tester(parameter_name, values, config=CONFIG):
-    save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
+def generate_folder_name():
+    now = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
     iterator = 0
-    full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
+    full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
     while osp.exists(full_path):
         iterator += 1
-        full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
-    save_folder = osp.basename(full_path)
-    print("\n\nExperiment for performance '{}' with {}".format(parameter_name, values))
+        full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
+    return osp.basename(full_path)
 
-    plt.clf()
-    all_times = []
-    all_grids = []
 
+def performance(parameter_name, values, config=CONFIG):
+    save_folder = generate_folder_name()
+    print("\n\nPerformance test for parameter '{}' with values {}".format(parameter_name, values))
+
+    results = np.empty((len(values), 2), dtype=float)
     for index, v in enumerate(values):
-        print("Run {} with value {}".format(index+1, v))
-        time_spent_gpu = run((parameter_name, v))
-        all_times.append(time_spent_gpu)
-        utils.print_on_current_line('')
+        print("Run {} with value {} on GPU".format(index+1, v))
+        results[index, 0] = run((parameter_name, v), ('gpu', True))
+        utils.clear_current_line()
 
+        print("Run {} with value {} on CPU".format(index+1, v))
+        results[index, 1] = run((parameter_name, v), ('gpu', False))
+        utils.clear_current_line()
+
+    print("Results: \n{}".format(results))
+    gpu_results = results[:, 0]
+    cpu_results = results[:, 1]
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
-    labels = [parameter_name + '=' + str(v) for v in values]
-
-    def save_results(data, typ, gpu_results, cpu_results, granularity):
-        utils.save_object(data, save_folder, 'data_' + typ)
-        fig = acoc_plotter.plot_bar_graph(gpu_results, cpu_results, granularity, save=True, save_folder=SAVE_DIR)
-
-    results = [(all_times, 'time', 'Time'),
-               (all_types, 'type', 'Type'),
-               (all_grids, 'grid', 'Grid')]
-    [save_results(*obj) for obj in results]
+    acoc_plotter.plot_bar_graph(gpu_results, cpu_results, parameter_name, save=True, show=True, save_folder=SAVE_DIR)
 
 if __name__ == "__main__":
-    performance_tester('granularity', [10, 20])
+    performance('granularity', [10, 20, 30, 40, 50, 100])

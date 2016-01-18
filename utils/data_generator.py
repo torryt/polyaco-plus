@@ -69,19 +69,28 @@ def generate_data_sets(size=500):
     sets = {}
     # sets = np.zeros([3, 3, size*2])
     r = MinMax(math.pi, 2*math.pi)
-    red = semi_circle_gaussian(1.0, r, size, 0)
+    white = semi_circle_gaussian(1.0, r, size, 0)
     r = MinMax(0, math.pi)
     blue = semi_circle_gaussian(1.0, r, size, 1, center=(1, -.5))
-    sets['semicircle'] = np.concatenate((red, blue), axis=1)
+    sets['semicircle'] = np.concatenate((white, blue), axis=1)
 
-    red = gaussian_circle(1.0, size, 0)
+    white = gaussian_circle(1.0, size, 0)
     blue = gaussian_circle(2.0, size, 1)
-    sets['circle'] = np.concatenate((red, blue), axis=1)
+    sets['circle'] = np.concatenate((white, blue), axis=1)
 
-    red = uniform_rectangle((1, 3), (2, 4), size, 0)
+    white = uniform_rectangle((1, 3), (2, 4), size, 0)
     blue = uniform_rectangle((4, 6), (2, 4), size, 1)
-    sets['rectangle'] = np.concatenate((red, blue), axis=1)
+    sets['rectangle'] = np.concatenate((white, blue), axis=1)
     return sets
+
+
+def generate_various_sized_rectangles(sizes):
+    sets = load_data()
+    for s in sizes:
+        white = uniform_rectangle((1, 3), (2, 4), s, 0)
+        blue = uniform_rectangle((4, 6), (2, 4), s, 1)
+        sets['r_' + str(s)] = np.concatenate((white, blue), axis=1)
+    pickle.dump(sets, open('data_sets.pickle', 'wb'))
 
 
 def get_iris():
@@ -109,10 +118,9 @@ def main():
 
 
 if __name__ == "__main__":
-
-    white = uniform_rectangle((0, 2), (3, 5), 150, 0)
-    blue = uniform_rectangle((4, 6), (0, 2), 150, 1)
-    dataset = np.concatenate((white, blue), axis=1)
+    class_one = uniform_rectangle((0, 2), (3, 5), 150, 0)
+    class_two = uniform_rectangle((4, 6), (0, 2), 150, 1)
+    dataset = np.concatenate((class_one, class_two), axis=1)
 
     # r = MinMax(math.pi, 2*math.pi)
     # red = semi_circle_gaussian(1.0, r, 150, 0, spread=0.1)
@@ -126,8 +134,8 @@ if __name__ == "__main__":
     # blue = semi_circle_gaussian(4.0, MinMax(0, math.pi), 500, 1, center=(8, -5))
     # dataset = np.concatenate((white, blue), axis=1)
     #
-    from acoc.acoc_plotter import plot_data
-    plot_data(dataset, show=True)
+    # from acoc.acoc_plotter import plot_data
+    # plot_data(dataset, show=True)
 
     # data = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
     # data['square_spaced'] = dataset

@@ -14,7 +14,7 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 from timeit import timeit
 
-SAVE = False
+SAVE = True
 SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
@@ -37,7 +37,7 @@ data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rec
 
 
 def run():
-    ant_scores, path, _, _ = clf.classify(data, SAVE_PHEROMONE_VALUES)
+    ant_scores, path = clf.classify(data, SAVE_PHEROMONE_VALUES)
     print(", Best ant score: {}".format(max(ant_scores)))
 
     for i in range(NUMBER_RUNS):
@@ -66,6 +66,7 @@ def run():
 
 runs = 1
 cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
+
 print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))
 
 time = timeit('run()', setup='from __main__ import run', number=1)

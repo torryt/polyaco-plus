@@ -16,6 +16,11 @@ def print_on_current_line(in_string):
     sys.stdout.flush()
 
 
+def clear_current_line():
+    sys.stdout.write("\r")
+    sys.stdout.flush()
+
+
 def save_object(obj, parent_folder='', file_name=None):
     if parent_folder != '':
         directory = osp.join(SAVE_DIR, parent_folder)

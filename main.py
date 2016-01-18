@@ -10,7 +10,6 @@ from timeit import timeit
 import os.path as osp
 import acoc
 import utils
-from utils.data_generator import gaussian_circle
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 from timeit import timeit
@@ -19,7 +18,6 @@ SAVE = False
 SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
-NUMBER_RUNS = 1
 clf_config = {
     'ant_count':    1500,
     'tau_min':      0.001,
@@ -35,14 +33,12 @@ clf_config = {
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
-data = pickle.load(
-    open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
+data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
 
 
 def run():
-    all_ant_scores = np.zeros((NUMBER_RUNS, clf.ant_count))
-    global_best_polygon = []
-    global_best_score = 0
+    ant_scores, path, _, _ = clf.classify(data, SAVE_PHEROMONE_VALUES)
+    print(", Best ant score: {}".format(max(ant_scores)))
 
     for i in range(NUMBER_RUNS):
         iter_string = "Iteration: {}/{}".format(i + 1, NUMBER_RUNS)
@@ -57,18 +53,24 @@ def run():
             global_best_score = max(ant_scores)
     if clf.gpu:
         score = clf.cost_function_gpu(global_best_polygon, data)
-    if SAVE:
-        utils.save_object(all_ant_scores.mean(0), 'scores', SAVE_FOLDER)
-        utils.save_dict(clf_config, 'config.txt', SAVE_FOLDER)
-    print("\n\nGlobal best score(points) {0:.5f}".format(score))
-    print("Global best score(|solution| and points): {}".format(global_best_score))
 
-    matrix = AcocMatrix(data)
-    plotter.plot_path_with_data(global_best_polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
-    plotter.plot_ant_scores(all_ant_scores.mean(0), save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
+    if SAVE:
+        utils.save_object(ant_scores, 'scores', SAVE_FOLDER)
+        utils.save_dict(clf_config, 'config.txt', SAVE_FOLDER)
+
+    if SAVE or SHOW_PLOT:
+        matrix = AcocMatrix(data)
+        plotter.plot_path_with_data(path, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
+        plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
+
+
+runs = 1
+cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
+print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))
 
 time = timeit('run()', setup='from __main__ import run', number=1)
 # plotter.plot_bar_graph(gpu_result, cpu_result, experiment, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 print("Time pr ant: {}".format(time / clf_config['ant_count']))
 print("Total runtime: {:.6f} seconds".format(time))
+
 # run()

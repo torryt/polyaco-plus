@@ -138,20 +138,16 @@ class Classifier:
     def cost_function_cpu(self, polygon, data):
         points = data.T.tolist()
         unique_polygon = copy(polygon)
-        gpu = True
-        if gpu:
-            pass
-        else:
-            score = 0
-            for vertex in unique_polygon:
-                if vertex.twin in unique_polygon:
-                    unique_polygon.remove(vertex.twin)
-            for vertex in points:
-                if is_point_inside(vertex, unique_polygon):
-                    score += 1 if vertex[2] == 0 else 0
-                else:
-                    score += 1 if vertex[2] != 0 else 0
-            return score / data.shape[1]
+        score = 0
+        for vertex in unique_polygon:
+            if vertex.twin in unique_polygon:
+                unique_polygon.remove(vertex.twin)
+        for vertex in points:
+            if is_point_inside(vertex, unique_polygon):
+                score += 1 if vertex[2] == 0 else 0
+            else:
+                score += 1 if vertex[2] != 0 else 0
+        return score / data.shape[1]
 
     def cost_function_gpu(self, polygon, data):
         points = data.T
@@ -177,9 +173,8 @@ class Classifier:
     def score(self, polygon, data):
         if self.gpu:
             cost = self.cost_function_gpu(polygon, data)
-        elif not self.gpu:
+        else:
             cost = self.cost_function_cpu(polygon, data)
-
         try:
             length_factor = 1/len(polygon)
         # Handles very rare and weird error where length of polygon == 0

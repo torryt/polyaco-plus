@@ -51,6 +51,35 @@ def get_chance_of_global(matrix, current_best_polygon):
         return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
 
+def cost_function_gpu(edges, points):
+    threads_per_block = (16, 16)
+    blocks_per_grid_x = math.ceil(edges.shape[0] / threads_per_block[0])
+    blocks_per_grid_y = math.ceil(points.shape[0] / threads_per_block[0])
+    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
+    result = np.empty((edges.shape[0], points.shape[0]), dtype=bool)
+    ray_cast.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](edges, points, result)
+
+    is_inside = odd(np.sum(result, axis=0))
+    score = np.logical_xor(is_inside, points[:, 2])
+
+    return np.sum(score) / points.shape[0]
+
+
+def cost_function(polygon, data):
+    points = data.T.tolist()
+    unique_polygon = copy(polygon)
+    score = 0
+    for vertex in unique_polygon:
+        if vertex.twin in unique_polygon:
+            unique_polygon.remove(vertex.twin)
+    for vertex in points:
+        if is_point_inside(vertex, unique_polygon):
+            score += 1 if vertex[2] == 0 else 0
+        else:
+            score += 1 if vertex[2] != 0 else 0
+    return score / data.shape[1]
+
+
 class Classifier:
     def __init__(self, config, save_folder=''):
         self.ant_count = config['ant_count']
@@ -63,16 +92,15 @@ class Classifier:
         self.ant_init = config['ant_init']
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
+        self.granularity = config['granularity']
         self.gpu = config['gpu']
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
-        polygon_lengths = []
-        ant_costs = []
 
         current_best_polygon = []
         current_best_score = 0
-        matrix = AcocMatrix(data, tau_initial=self.tau_init)
+        matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
@@ -115,14 +143,12 @@ class Classifier:
                 self.grad_pheromone_decay(matrix)
 
             ant_scores.append(ant_score)
-            ant_costs.append(ant_cost)
-            polygon_lengths.append(len(_ant.edges_travelled))
 
             if plot and len(ant_scores) % 200 == 0:
                 plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
-        return ant_scores, current_best_polygon, polygon_lengths, ant_costs
+        return ant_scores, current_best_polygon
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:
@@ -134,46 +160,17 @@ class Classifier:
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
 
-    def cost_function(self, polygon, data):
-        points = data.T.tolist()
-        unique_polygon = copy(polygon)
-        score = 0
-        for vertex in unique_polygon:
-            if vertex.twin in unique_polygon:
-                unique_polygon.remove(vertex.twin)
-        for vertex in points:
-            if is_point_inside(vertex, unique_polygon):
-                score += 1 if vertex[2] == 0 else 0
-            else:
-                score += 1 if vertex[2] != 0 else 0
-        return score / data.shape[1]
-
-    def cost_function_gpu(self, polygon, data):
-        points = data.T
-        unique_polygon = copy(polygon)
-        for vertex in unique_polygon:
-            if vertex.twin in unique_polygon:
-                unique_polygon.remove(vertex.twin)
-
-        edges = np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in polygon], dtype='float32')
-
-        threads_per_block = (16, 16)
-        blocks_per_grid_x = math.ceil(edges.shape[0] / threads_per_block[0])
-        blocks_per_grid_y = math.ceil(points.shape[0] / threads_per_block[0])
-        blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
-        result = np.empty((edges.shape[0], points.shape[0]), dtype=bool)
-        ray_cast.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](edges, points, result)
-
-        is_inside = odd(np.sum(result, axis=0))
-        score = np.logical_xor(is_inside, data[2])
-
-        return np.sum(score) / data.shape[1]
-
     def score(self, polygon, data):
         if self.gpu:
-            cost = self.cost_function_gpu(polygon, data)
+            twins_removed = copy(polygon)
+            for vertex in twins_removed:
+                if vertex.twin in twins_removed:
+                    twins_removed.remove(vertex.twin)
+
+            edges = np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in twins_removed], dtype='float32')
+            cost = cost_function_gpu(edges, data.T)
         else:
-            cost = self.cost_function(polygon, data)
+            cost = cost_function(polygon, data)
         try:
             length_factor = 1/len(polygon)
         # Handles very rare and weird error where length of polygon == 0

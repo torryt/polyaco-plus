@@ -39,12 +39,10 @@ def run(*args):
 
     for i in range(number_runs):
         iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
-        ant_scores, path, polygon_length, ant_cost = \
+        ant_scores, path = \
             clf.classify(data, False, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         all_ant_scores[i, :] = ant_scores
-        all_polygons[i, :] = polygon_length
-        all_costs[i, :] = ant_cost
 
     return all_ant_scores.mean(0), all_polygons.mean(0), all_costs.mean(0)
 

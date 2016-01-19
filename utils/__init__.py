@@ -1,7 +1,6 @@
 import os
 import pickle
 import sys
-import uuid
 import json
 import os.path as osp
 from time import strftime
@@ -46,6 +45,20 @@ def save_dict(dictionary, parent_folder='', file_name=None):
     name = os.path.join(directory, file_name)
     with open(name, "w") as json_file:
         json_file.write(json.dumps(dictionary, sort_keys=True, indent=2, separators=(',', ': ')))
+
+
+def save_string_to_file(string, parent_folder=None, file_name=None):
+    if parent_folder is None:
+        directory = osp.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
+    else:
+        directory = osp.join(SAVE_DIR, parent_folder)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    if file_name is None:
+        file_name = datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S-%f')[:-5]
+    name = os.path.join(directory, file_name)
+    with open(name, "w") as f:
+        f.write(string)
 
 
 def normalize(values):

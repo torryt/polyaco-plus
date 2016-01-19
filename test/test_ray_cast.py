@@ -13,12 +13,12 @@ class TestPointInside(unittest.TestCase):
     def test_ray_intersect_segment_returns_true(self):
         p = Pt(0, 1)
         e = AcocEdge(Pt(1, 1), Pt(1, 3))
-        self.assertTrue(rc._ray_intersect_segment(p, e))
+        self.assertTrue(rc.ray_intersect_segment(p, e))
 
     def test_ray_intersect_segment_returns_false(self):
         p = Pt(2, 2)
         e = AcocEdge(Pt(1, 1), Pt(1, 3))
-        self.assertFalse(rc._ray_intersect_segment(p, e))
+        self.assertFalse(rc.ray_intersect_segment(p, e))
 
 
 class TestRayIntersectSegmentCuda(unittest.TestCase):

@@ -41,12 +41,12 @@ def run(*args):
         iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
 
         start = time.clock()
-        a, b, c = clf.classify(data)
+        a_score, best_poly, dropped = clf.classify(data)
         end = time.clock()
         run_times[i] = end - start
 
         utils.print_on_current_line(iter_string)
-    return np.mean(run_times), c
+    return np.mean(run_times), dropped
 
 
 def generate_folder_name():
@@ -76,7 +76,7 @@ def performance(parameter_name, values, config=CONFIG):
         utils.clear_current_line()
 
     print("Results: \n{}".format(results))
-    print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]) + "CPU: " + format(drop[:, 1]))
+    print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]) + ", CPU: " + format(drop[:, 1]))
     gpu_results = tuple(results[:, 0])
     cpu_results = tuple(results[:, 1])
     exp_name = tuple(values)

@@ -15,7 +15,7 @@ from acoc import acoc_plotter as plotter
 from timeit import timeit
 
 SAVE = True
-SAVE_PHEROMONE_VALUES = True
+SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
@@ -28,7 +28,7 @@ clf_config = {
     'beta':         0.01,
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
-    'gpu':          False,
+    'gpu':          True,
     'granularity':  10
 }
 
@@ -37,7 +37,7 @@ data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rec
 
 
 def run():
-    ant_scores, polygon = clf.classify(data, SAVE_PHEROMONE_VALUES)
+    ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONE_VALUES)
     print(", Best ant score: {}".format(max(ant_scores)))
 
     if SAVE:

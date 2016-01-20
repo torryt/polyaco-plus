@@ -172,7 +172,7 @@ def save_plot(fig=None, parent_folder='', file_name=''):
     if fig is None:
         fig = plt
     fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
-    # fig.savefig(os.path.join(directory, file_name + '.eps'))
+    fig.savefig(os.path.join(directory, file_name + '.eps'))
 
 
 def hide_top_and_right_axis(ax):

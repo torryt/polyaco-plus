@@ -11,8 +11,8 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    1500,
-    'number_runs':  10,
+    'ant_count':    100,
+    'number_runs':  1,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -83,7 +83,7 @@ def performance(parameter_name, values, config=CONFIG):
     exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
 
-    acoc_plotter.plot_bar_graph(gpu_results, cpu_results, exp_name, save=False, show=False, save_folder=SAVE_DIR)
+    acoc_plotter.plot_bar_graph(gpu_results, cpu_results, exp_name, save=True, show=True, save_folder=SAVE_DIR)
 
 if __name__ == "__main__":
-    performance('granularity', [10, 20, 30, 40, 50])
+    performance('granularity', [10, 20])

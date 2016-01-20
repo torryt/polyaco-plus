@@ -3,6 +3,7 @@ import pickle
 import sys
 import json
 import os.path as osp
+from os import path as osp
 from time import strftime
 from datetime import datetime
 
@@ -67,3 +68,13 @@ def normalize(values):
 
     normalize_const = 1.0 / values.sum()
     return values * normalize_const
+
+
+def generate_folder_name():
+    now = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
+    iterator = 0
+    full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
+    while osp.exists(full_path):
+        iterator += 1
+        full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
+    return osp.basename(full_path)

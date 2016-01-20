@@ -14,7 +14,7 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 from timeit import timeit
 
-SAVE = True
+SAVE = False
 SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
@@ -28,7 +28,7 @@ clf_config = {
     'beta':         0.01,
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
-    'gpu':          True,
+    'gpu':          False,
     'granularity':  10
 }
 
@@ -50,8 +50,8 @@ def run():
         plotter.plot_path_with_data(polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
         plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
+if __name__ == "__main__":
+    runs = 10
+    cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
 
-runs = 1
-cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
-
-print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))
+    print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))

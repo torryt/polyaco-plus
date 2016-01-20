@@ -1,13 +1,11 @@
-import numpy as np
 import pickle
-from datetime import datetime
-import os.path as osp
 import time
+
+import numpy as np
 
 import acoc
 import utils
-
-from config import SAVE_DIR
+from utils import generate_folder_name
 
 CONFIG = {
     'ant_count':    1500,
@@ -46,16 +44,6 @@ def run(*args):
 
         utils.print_on_current_line(iter_string)
     return np.mean(run_times)
-
-
-def generate_folder_name():
-    now = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-    iterator = 0
-    full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
-    while osp.exists(full_path):
-        iterator += 1
-        full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
-    return osp.basename(full_path)
 
 
 def benchmark(parameter_name, values, config=CONFIG):

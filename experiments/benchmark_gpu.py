@@ -78,28 +78,36 @@ def benchmark(parameter_name, values, config=CONFIG):
     utils.save_string_to_file(result_str, save_folder, 'results.txt')
 
 
-def benchmark_cost_function(parameter_name, values, config=CONFIG):
-    data = pickle.load(open('utils/data_sets.pickle', 'rb'))[config['data_set']]
-    # TODO: Fill in
-    polygon = []
+def benchmark_cost_function(data_sets):
+    polygon = pickle.load(open('../utils/good_path_for_rectangle.pickle', 'rb'))
 
     save_folder = generate_folder_name()
-    results = np.empty((len(values), 2), dtype=float)
+    iterations = 100
+    results = np.empty((len(data_sets), iterations, 2), dtype=float)
 
-    for index, v in enumerate(values):
-        print("Run {} with value {} on GPU".format(index+1, v))
-        results[index, 0] = acoc.cost_function_gpu(polygon, data)
-        utils.clear_current_line()
+    for i, data_set_name in enumerate(data_sets):
+        data = pickle.load(open('../utils/data_sets.pickle', 'rb'))[data_set_name]
 
-        print("Run {} with value {} on CPU".format(index+1, v))
-        results[index, 1] = acoc.cost_function_cpu(polygon, data)
-        utils.clear_current_line()
-    print("Results: \n{}".format(results))
-    utils.save_object(results, save_folder, 'results')
+        print("\nRun {} with value {}".format(i+1, data_set_name))
+        for j in range(iterations):
+            utils.print_on_current_line('Iteration {}/{}'.format(j, iterations))
+            start_gpu = time.clock()
+            acoc.cost_function_gpu(data.T, polygon)
+            end_gpu = time.clock()
+            results[i][j][0] = end_gpu - start_gpu
+
+            start_cpu = time.clock()
+            acoc.cost_function_cpu(data.T, polygon)
+            end_cpu = time.clock()
+            results[i][j][1] = end_cpu - start_cpu
+
+    mean_results = np.mean(results, axis=1)
+    print("Results: \n{}".format(mean_results))
+    utils.save_object(mean_results, save_folder, 'results')
 
 
 if __name__ == "__main__":
     # benchmark('granularity', [10, 20, 30, 40, 50, 100])
     # benchmark('data_set', ['r_50', 'r_500', 'r_5000', 'r_50000', 'r_500000'])
-    benchmark('data_set', ['r_500'])
-    # benchmark_cost_function('granularity', [10, 20, 40, 100])
+    # benchmark('data_set', ['r_50', 'r_500', 'r_5000'])
+    benchmark_cost_function(['r_50', 'r_500', 'r_5000', 'r_50000'])

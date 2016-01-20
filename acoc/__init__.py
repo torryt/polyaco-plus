@@ -100,7 +100,7 @@ class Classifier:
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
-        dropt = 0
+        dropped = 0
         current_best_polygon = []
         current_best_score = 0
         matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
@@ -133,7 +133,7 @@ class Classifier:
                         _ant.edges_travelled.append(edge)
 
             if ant_is_stuck:
-                dropt += 1
+                dropped += 1
                 continue
             ant_score, ant_cost = self.score(_ant.edges_travelled, data)
             if ant_score > current_best_score:
@@ -153,7 +153,7 @@ class Classifier:
 
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
-        return ant_scores, current_best_polygon, dropt
+        return ant_scores, current_best_polygon, dropped
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:

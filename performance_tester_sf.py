@@ -31,7 +31,7 @@ def run(*args):
     config = dict(CONFIG)
     for conf in args:
         config[conf[0]] = conf[1]
-    data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
+    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
 
     clf = acoc.Classifier(config)
@@ -83,8 +83,12 @@ def performance(parameter_name, values, config=CONFIG):
     # cpu_results = tuple(results[:, 1])
     exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
+    utils.save_string_to_file(
+            "Number of dropped solutions:" + "\n GPU: " + format(drop[:, 0]) + " \n CPU: " + format(drop[:, 1]) +
+            "\n Results: \n{}".format(results) + "\n" + parameter_name + " : " + str(exp_name),
+            save_folder, 'results_' + parameter_name + '.txt')
 
-    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=True, show=True, save_folder=SAVE_DIR)
+    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=True, show=True, save_folder=save_folder)
 
 if __name__ == "__main__":
     performance('granularity', [10])

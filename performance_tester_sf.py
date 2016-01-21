@@ -23,7 +23,7 @@ CONFIG = {
     'decay_type':   'probabilistic',
     'data_set':     'rectangle',
     'granularity':  10,
-    'gpu':          False
+    'gpu':          True
 }
 
 
@@ -69,21 +69,22 @@ def performance(parameter_name, values, config=CONFIG):
 
     for index, v in enumerate(values):
         print("Run {} with value {} on GPU".format(index+1, v))
-        results[index, 0], drop[index, 0] = run((parameter_name, v), ('gpu', True))
+        results[index, 0], drop[index, 0] = run((parameter_name, v))
         utils.clear_current_line()
 
-        print("Run {} with value {} on CPU".format(index+1, v))
-        results[index, 1], drop[index, 1] = run((parameter_name, v), ('gpu', False))
-        utils.clear_current_line()
+        # print("Run {} with value {} on CPU".format(index+1, v))
+        # results[index, 1], drop[index, 1] = run((parameter_name, v), ('gpu', False))
+        # utils.clear_current_line()
 
     print("Results: \n{}".format(results))
-    print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]) + ", CPU: " + format(drop[:, 1]))
+    # Print uten CPU resultater
+    print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]))
     gpu_results = tuple(results[:, 0])
-    cpu_results = tuple(results[:, 1])
+    # cpu_results = tuple(results[:, 1])
     exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
 
-    acoc_plotter.plot_bar_graph(gpu_results, cpu_results, exp_name, save=False, show=False, save_folder=SAVE_DIR)
+    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=False, show=False, save_folder=SAVE_DIR)
 
 if __name__ == "__main__":
-    performance('granularity', [10, 20, 30, 40, 50])
+    performance('granularity', [10])

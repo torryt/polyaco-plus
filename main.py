@@ -4,22 +4,20 @@ import numpy as np
 
 import pickle
 from datetime import datetime
-import os.path as osp
 from timeit import timeit
-
 import os.path as osp
+
 import acoc
 import utils
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
-from timeit import timeit
 
-SAVE = True
+SAVE = False
 SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
-    'ant_count':    1500,
+    'ant_count':    5000,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -28,12 +26,12 @@ clf_config = {
     'beta':         0.01,
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
-    'gpu':          True,
+    'gpu':          False,
     'granularity':  10
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
-data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['rectangle']
+data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['r_5000']
 
 
 def run():
@@ -50,8 +48,8 @@ def run():
         plotter.plot_path_with_data(polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
         plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
+if __name__ == "__main__":
+    runs = 1
+    cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
 
-runs = 1
-cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
-
-print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))
+    print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))

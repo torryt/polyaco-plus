@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 from acoc import acoc_plotter as ap
 from utils.data_generator import gaussian_circle
 from utils import data_generator
+from main import run
+
 
 def main():
     red = gaussian_circle(1.0, 500, 0, spread=0.4)
@@ -20,5 +22,6 @@ def main():
 def generate_data():
     data_generator.generate_various_sized_rectangles([50, 500, 5000, 50000, 500000])
 
-generate_data()
-# main()
+if __name__ == "__main__":
+    generate_data()
+    # main()

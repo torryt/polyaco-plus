@@ -16,8 +16,8 @@ CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
 
 
-def plot_bar_graph(gpu_results, cpu_results, experiments_name, save=False, show=False, save_folder=''):
-    n_groups = len(experiments_name)  # number of experiments run
+def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, save_folder=''):
+    n_groups = len(labels)  # number of experiments run
 
     means_cpu = cpu_results
     means_gpu = gpu_results
@@ -34,7 +34,7 @@ def plot_bar_graph(gpu_results, cpu_results, experiments_name, save=False, show=
 
     plt.xlabel('Experiment values')
     plt.ylabel('Time spent')
-    plt.xticks(index + bar_width, experiments_name)
+    plt.xticks(index + bar_width, labels)
     plt.legend()
     plt.tight_layout()
     if save:
@@ -172,7 +172,7 @@ def save_plot(fig=None, parent_folder='', file_name=''):
     if fig is None:
         fig = plt
     fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
-    # fig.savefig(os.path.join(directory, file_name + '.eps'))
+    fig.savefig(os.path.join(directory, file_name + '.eps'))
 
 
 def hide_top_and_right_axis(ax):

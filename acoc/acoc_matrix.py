@@ -1,10 +1,5 @@
 from itertools import product
-
-import matplotlib.pyplot as plt
 import numpy as np
-
-from acoc import acoc_plotter
-from utils import data_generator as dg
 
 
 class AcocMatrix:
@@ -18,6 +13,8 @@ class AcocMatrix:
 
         coordinates = list(product(x_coord, y_coord))
         self.vertices = init_vertices(coordinates)
+        # The number of edges |E| depends on number of vertices with the following formula |E| = 2(y(x-1) + x(y-1))
+        # Example: A 4x4 matrix will generate 2(4(4-1) + 4(4-1)) = 48
         self.edges = init_edges(self.vertices, self.tau_initial)
         [connect_edges_to_vertex(v, self.edges) for v in self.vertices]
 
@@ -109,22 +106,3 @@ def init_edges(vertices, tau_initial):
             e1.twin = e2
             edges.extend([e1, e2])
     return edges
-
-
-def main():
-    red = dg.gaussian_circle(1.0, 500, 1, .5)
-    blue = dg.gaussian_circle(2.0, 500, 0, .5)
-    data = np.concatenate((red, blue), axis=1)
-    matrix = AcocMatrix(data, granularity=5)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    # acoc_plotter.plot_data(data, ax)
-    acoc_plotter.plot_matrix(matrix, ax)
-    ax.axis([matrix.x_min_max[0] - .1, matrix.x_min_max[1] + .1, matrix.y_min_max[0] - .1, matrix.y_min_max[1] + .1])
-    # acoc_plotter.hide_top_and_right_axis(ax)
-    plt.axis("off")
-    acoc_plotter.save_plot(fig)
-    # plt.show()
-
-if __name__ == "__main__":
-    main()

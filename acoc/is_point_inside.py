@@ -1,7 +1,6 @@
 from collections import namedtuple
 import sys
-from itertools import groupby
-from numba import vectorize
+from numba import cuda
 import numpy as np
 
 _eps = 0.00001
@@ -10,44 +9,56 @@ _tiny = sys.float_info.min
 Pt = namedtuple('Point', ['x', 'y'])
 
 
-def _odd(x):
+def odd(x):
     return x % 2 == 1
 
 
 def ray_intersect_segment(p, e):
 
-    a = e.start
-    b = e.target
+    EPS = 0.00001
+    HUGE = 9000000000000000
+    TINY = 0.000000000000001
 
-    if a.y > b.y:
+    a = e[0]
+    b = e[1]
+
+    if a[1] > b[1]:
         a, b = b, a
 
-    if p.item(1) == a.y or p.item(1) == b.y:
-        p = Pt(p.item(0), p.item(1) + _eps)
+    if p[1] == a[1] or p[1] == b[1]:
+        p[1] += EPS
 
-    if p.item(1) > b.y or p.item(1) < a.y:
+    if p[1] > b[1] or p[1] < a[1]:
         return False
-    if p.item(0) > max(a.x, b.x):
+    if p[0] > max(a[0], b[0]):
         return False
-
-    if p.item(0) < min(a.x, b.x):
+    if p[0] < min(a[0], b[0]):
         return True
     else:
-        if abs(a.x - b.x) > _tiny:
-            m_red = (b.y - a.y) / float(b.x - a.x)
+        if abs(a[0] - b[0]) > TINY:
+            m_red = (b[1] - a[1]) / float(b[0] - a[0])
         else:
-            m_red = _huge
-        if abs(a.x - p.item(0)) > _tiny:
-            m_blue = (p.item(1) - a.y) / float(p.item(0) - a.x)
+            m_red = HUGE
+        if abs(a[0] - p[0]) > TINY:
+            m_blue = (p[1] - a[1]) / float(p[0] - a[0])
         else:
-            m_blue = _huge
+            m_blue = HUGE
         return m_blue >= m_red
 
+ray_intersect_segment_device = cuda.jit(ray_intersect_segment, device=True)
+ray_intersect_segment_vectorized = np.vectorize(ray_intersect_segment, excluded='p')
 
-def is_point_inside(vertex, solution):
-    np_vertex = np.array([vertex[0], vertex[1]])
-    np_polygon = np.array(solution)
 
-    # p_copy = Pt(vertex[0], vertex[1])
-    return _odd(sum(ray_intersect_segment(np_vertex, edge)
-                    for edge in np_polygon))
+@cuda.jit
+def ray_intersect_segment_cuda(P, E, result):
+    point_index, edge_index = cuda.grid(2)
+    p = P[point_index]
+    e = E[edge_index]
+
+    if edge_index < E.shape[0] and point_index < P.shape[0]:
+        result[point_index][edge_index] = ray_intersect_segment_device(p, e)
+
+
+def is_point_inside(point, solution):
+    return odd(sum(ray_intersect_segment(point, edge)
+                   for edge in solution))

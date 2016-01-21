@@ -11,8 +11,8 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    1500,
-    'number_runs':  10,
+    'ant_count':    100,
+    'number_runs':  1,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -76,7 +76,7 @@ def performance(parameter_name, values, config=CONFIG):
         # results[index, 1], drop[index, 1] = run((parameter_name, v), ('gpu', False))
         # utils.clear_current_line()
 
-    print("Results: \n{}".format(results))
+    # print("Results: \n{}".format(results))
     # Print uten CPU resultater
     print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]))
     gpu_results = tuple(results[:, 0])
@@ -84,7 +84,7 @@ def performance(parameter_name, values, config=CONFIG):
     exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
 
-    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=False, show=False, save_folder=SAVE_DIR)
+    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=True, show=True, save_folder=SAVE_DIR)
 
 if __name__ == "__main__":
     performance('granularity', [10])

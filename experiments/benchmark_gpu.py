@@ -9,7 +9,7 @@ from utils import generate_folder_name
 
 CONFIG = {
     'ant_count':    1500,
-    'number_runs':  2,
+    'number_runs':  20,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,

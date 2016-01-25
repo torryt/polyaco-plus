@@ -3,6 +3,8 @@ from matplotlib import pyplot as plt
 
 from acoc import acoc_plotter as ap
 from utils.data_generator import gaussian_circle
+from utils import data_generator
+from main import run
 
 
 def main():
@@ -16,4 +18,10 @@ def main():
     ap.plot_data(data, ax)
     ap.save_plot(fig)
 
-main()
+
+def generate_data():
+    data_generator.generate_various_sized_rectangles([50, 500, 5000, 50000, 500000])
+
+if __name__ == "__main__":
+    generate_data()
+    # main()

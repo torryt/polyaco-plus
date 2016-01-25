@@ -90,7 +90,7 @@ def benchmark_cost_function(data_sets):
             results[i][j][1] = end_cpu - start_cpu
 
     mean_results = np.mean(results, axis=1)
-    print("Results: \n{}".format(mean_results))
+    print("\nResults: \n{}".format(mean_results))
     utils.save_object(mean_results, save_folder, 'results')
 
 

@@ -5,6 +5,7 @@ import numpy as np
 
 import acoc
 import utils
+from utils import data_generator as dg
 from utils import generate_folder_name
 
 CONFIG = {
@@ -66,17 +67,17 @@ def benchmark(parameter_name, values, config=CONFIG):
     utils.save_string_to_file(result_str, save_folder, 'results.txt')
 
 
-def benchmark_cost_function(data_sets):
+def benchmark_cost_function(data_size):
     polygon = pickle.load(open('../utils/good_path_for_rectangle.pickle', 'rb'))
 
     save_folder = generate_folder_name()
     iterations = 100
-    results = np.empty((len(data_sets), iterations, 2), dtype=float)
+    results = np.empty((len(data_size), iterations, 2), dtype=float)
 
-    for i, data_set_name in enumerate(data_sets):
-        data = pickle.load(open('../utils/data_sets.pickle', 'rb'))[data_set_name]
+    for i, dsize in enumerate(data_size):
+        data = dg.generate_rectangle_set(data_size)
 
-        print("\nRun {} with value {}".format(i+1, data_set_name))
+        print("\nRun {} with value {}".format(i+1, dsize))
         for j in range(iterations):
             utils.print_on_current_line('Iteration {}/{}'.format(j, iterations))
             start_gpu = time.clock()
@@ -98,4 +99,4 @@ if __name__ == "__main__":
     # benchmark('granularity', [10, 20, 30, 40, 50, 100])
     # benchmark('data_set', ['r_50', 'r_500', 'r_5000', 'r_50000', 'r_500000'])
     # benchmark('data_set', ['r_50', 'r_500', 'r_5000'])
-    benchmark_cost_function(['r_50', 'r_500', 'r_5000', 'r_50000'])
+    benchmark_cost_function([100, 1000, 10000, 100000])

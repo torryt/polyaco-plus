@@ -84,6 +84,12 @@ def generate_data_sets(size=500):
     return sets
 
 
+def generate_rectangle_set(size):
+    white = uniform_rectangle((1, 3), (2, 4), size, 0)
+    blue = uniform_rectangle((4, 6), (2, 4), size, 1)
+    return np.concatenate((white, blue), axis=1)
+
+
 def generate_various_sized_rectangles(sizes):
     sets = load_data()
     for s in sizes:

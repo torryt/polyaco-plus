@@ -72,14 +72,15 @@ def performance(parameter_name, values, config=CONFIG):
         results[index, 0], drop[index, 0] = run((parameter_name, v))
         utils.clear_current_line()
 
-       # print("Run {} with value {} on CPU".format(index+1, v))
-       # results[index, 1], drop[index, 1] = run((parameter_name, v), ('gpu', False))
-       # utils.clear_current_line()
+        # print("Run {} with value {} on CPU".format(index+1, v))
+        # results[index, 1], drop[index, 1] = run((parameter_name, v), ('gpu', False))
+        # utils.clear_current_line()
 
     print("Results: \n{}".format(results))
-    print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]) + ", CPU: " + format(drop[:, 1]))
+    # Print uten CPU resultater
+    print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]))
     gpu_results = tuple(results[:, 0])
-   # cpu_results = tuple(results[:, 1])
+    # cpu_results = tuple(results[:, 1])
     exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
 

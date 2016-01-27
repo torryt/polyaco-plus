@@ -17,7 +17,7 @@ SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
-    'ant_count':    1500,
+    'ant_count':    1000,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,

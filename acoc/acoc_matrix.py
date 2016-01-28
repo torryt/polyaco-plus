@@ -50,6 +50,18 @@ class AcocEdge:
             return True
         return False
 
+    def __eq__(self, other):
+        if (self.start == other.start or self.start == other.target) \
+                and (self.target == other.target or self.target == other.start):
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.start, self.target))
+
 
 class Vertex:
     def __init__(self, x, y):
@@ -62,6 +74,17 @@ class Vertex:
 
     def coordinates(self):
         return self.x, self.y
+
+    def __eq__(self, other):
+        if (self.x == other.x) and (self.y == other.y):
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
 
 
 def edge_is_in_list(edge, ignore_list):

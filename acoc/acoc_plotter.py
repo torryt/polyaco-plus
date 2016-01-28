@@ -3,14 +3,12 @@ import os
 from time import strftime
 from datetime import datetime
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
-
 from utils.data_generator import gaussian_circle
-
 from config import SAVE_DIR
+
+# matplotlib.use('Agg')
 CLASS_ONE_COLOR = '#FFFFFF'
 CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
@@ -45,6 +43,7 @@ def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, sav
 
 def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
     fig = plt.figure()
+    fig.suptitle("ant scores")
     ax = fig.add_subplot(111)
     x = range(len(ant_scores))
     y = ant_scores
@@ -56,13 +55,27 @@ def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
         plt.show()
 
 
-def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=''):
+def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder='', color='k-'):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.axis("off")
+    plot_matrix(matrix, ax, with_vertices=False)
+    plot_path(path, ax, color)
+    plot_data(data, ax)
+    if save:
+        save_plot(fig, save_folder)
+    if show:
+        plt.show()
+
+
+def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_folder=''):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.axis("off")
     plot_matrix(matrix, ax, with_vertices=False)
     plot_data(data, ax)
-    plot_path(path, ax)
+    plot_path(best_path, ax)
+    plot_path(rest_path, ax, color='r-')
     if save:
         save_plot(fig, save_folder)
     if show:
@@ -104,9 +117,9 @@ def plot_matrix(matrix, subplot=None, show=False, with_vertices=True):
         plt.show()
 
 
-def plot_path(path, subplot):
+def plot_path(path, subplot, color='k-'):
     for edge in path:
-        subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-', linewidth=3)
+        subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], color, linewidth=3)
 
 
 def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
@@ -146,6 +159,7 @@ def plot_pheromones(matrix, data, tau_min, tau_max, save=True, folder_name=''):
     plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    plt.title("Pheromones")
     for edge in matrix.edges:
         line = ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
         lw = edge.pheromone_strength*((max_val - min_val) / (tau_max - tau_min))

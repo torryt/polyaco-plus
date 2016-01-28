@@ -10,7 +10,7 @@ import math
 from numba import cuda
 
 import utils
-# import acoc.acoc_plotter as plotter
+import acoc.acoc_plotter as plotter
 from acoc.acoc_matrix import AcocMatrix
 from acoc.ant import Ant
 from acoc.ray_cast import is_point_inside
@@ -76,10 +76,18 @@ def cost_function_cpu(points, edges):
 
 def polygon_to_array(polygon):
     twins_removed = copy(polygon)
-    for vertex in twins_removed:
-        if vertex.twin in twins_removed:
-            twins_removed.remove(vertex.twin)
+    for edge in twins_removed:
+        if edge.twin in twins_removed:
+            twins_removed.remove(edge.twin)
     return np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in twins_removed], dtype='float32')
+
+
+def remove_twins(polygon):
+    twins_removed = copy(polygon)
+    for edge in twins_removed:
+        if edge.twin in twins_removed:
+            twins_removed.remove(edge.twin)
+    return twins_removed
 
 
 class Classifier:
@@ -148,8 +156,8 @@ class Classifier:
 
             ant_scores.append(ant_score)
 
-            # if plot and len(ant_scores) % 100 == 0:
-            #     plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
+            if plot and len(ant_scores) % 50 == 0:
+                plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
 
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 

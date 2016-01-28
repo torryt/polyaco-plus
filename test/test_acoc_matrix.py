@@ -6,6 +6,19 @@ from acoc.acoc_matrix import AcocEdge, AcocMatrix, Vertex
 
 class TestEdge(unittest.TestCase):
 
+    def test_symmetric_differences(self):
+        vertex_a = (1, 1)
+        vertex_b = (2, 1)
+        vertex_c = (3, 1)
+        vertex_d = (4, 1)
+        edge_a_b = AcocEdge(vertex_a, vertex_b)
+        edge_b_c = AcocEdge(vertex_b, vertex_c)
+        edge_c_d = AcocEdge(vertex_c, vertex_d)
+        set_x = set([edge_a_b]).union([edge_b_c])
+        set_y = set([edge_b_c]).union([edge_c_d])
+        result = set_x ^ set_y
+        self.assertTrue(result == set([edge_a_b]).union([edge_c_d]))
+
     def test_have_vertices_returns_true_on_identical_vertices(self):
         vertex_a = (1, 1)
         vertex_b = (2, 2)

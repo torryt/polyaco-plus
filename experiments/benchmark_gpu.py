@@ -67,15 +67,15 @@ def benchmark(parameter_name, values, config=CONFIG):
     utils.save_string_to_file(result_str, save_folder, 'results.txt')
 
 
-def benchmark_cost_function(data_size):
+def benchmark_cost_function(data_sizes):
     polygon = pickle.load(open('../utils/good_path_for_rectangle.pickle', 'rb'))
 
     save_folder = generate_folder_name()
-    iterations = 100
-    results = np.empty((len(data_size), iterations, 2), dtype=float)
+    iterations = 3000
+    results = np.empty((len(data_sizes), iterations, 2), dtype=float)
 
-    for i, dsize in enumerate(data_size):
-        data = dg.generate_rectangle_set(data_size)
+    for i, dsize in enumerate(data_sizes):
+        data = dg.generate_rectangle_set(dsize)
 
         print("\nRun {} with value {}".format(i+1, dsize))
         for j in range(iterations):
@@ -91,6 +91,7 @@ def benchmark_cost_function(data_size):
             results[i][j][1] = end_cpu - start_cpu
 
     mean_results = np.mean(results, axis=1)
+    np.set_printoptions(precision=5)
     print("\nResults: \n{}".format(mean_results))
     utils.save_object(mean_results, save_folder, 'results')
 

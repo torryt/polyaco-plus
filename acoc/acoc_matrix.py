@@ -58,7 +58,7 @@ class Vertex:
         self.connected_edges = []
 
     def __repr__(self):
-        return str((self.x, self.y))
+        return self.x, self.y
 
     def coordinates(self):
         return self.x, self.y
@@ -74,7 +74,7 @@ def edge_is_in_list(edge, ignore_list):
 def connect_edges_to_vertex(vertex, edges):
     connected_edges = []
     for e in edges:
-        if (vertex.x, vertex.y) == e.start.coordinates():
+        if (vertex.x, vertex.y) == e.start.__repr__():
             connected_edges.append(e)
     vertex.connected_edges = connected_edges
 

@@ -76,9 +76,9 @@ def cost_function_cpu(points, edges):
 
 def polygon_to_array(polygon):
     twins_removed = copy(polygon)
-    for vertex in twins_removed:
-        if vertex.twin in twins_removed:
-            twins_removed.remove(vertex.twin)
+    for edge in twins_removed:
+        if edge.twin in twins_removed:
+            twins_removed.remove(edge.twin)
     return np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in twins_removed], dtype='float32')
 
 

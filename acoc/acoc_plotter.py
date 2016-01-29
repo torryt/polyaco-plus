@@ -104,7 +104,7 @@ def plot_data(data, subplot=None, show=False):
 def plot_matrix(matrix, subplot=None, show=False, with_vertices=True):
     ax = subplot if subplot is not None else plt
     for edge in matrix.edges:
-        ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], '--', color='#CFCFCF')
+        ax.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], '--', color='#CFCFCF')
     if with_vertices:
         for i, v in enumerate(matrix.vertices):
             # if (i % 2 == 0 and i % 20 <= 9) or (i % 2 == 1 and i % 20 > 9):
@@ -119,7 +119,7 @@ def plot_matrix(matrix, subplot=None, show=False, with_vertices=True):
 
 def plot_path(path, subplot, color='k-'):
     for edge in path:
-        subplot.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], color, linewidth=3)
+        subplot.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], color, linewidth=3)
 
 
 def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
@@ -161,7 +161,7 @@ def plot_pheromones(matrix, data, tau_min, tau_max, save=True, folder_name=''):
     ax = fig.add_subplot(111)
     plt.title("Pheromones")
     for edge in matrix.edges:
-        line = ax.plot([edge.start.x, edge.target.x], [edge.start.y, edge.target.y], 'k-')
+        line = ax.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], 'k-')
         lw = edge.pheromone_strength*((max_val - min_val) / (tau_max - tau_min))
         plt.setp(line, lw=lw)
 

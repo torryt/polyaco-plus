@@ -1,7 +1,9 @@
 import unittest
 
 from acoc import acoc_matrix as am
-from acoc.acoc_matrix import AcocEdge, AcocMatrix, Vertex
+from acoc.acoc_matrix import AcocMatrix
+from acoc.vertex import Vertex
+from acoc.edge import MatrixEdge
 
 
 class TestEdge(unittest.TestCase):
@@ -11,58 +13,33 @@ class TestEdge(unittest.TestCase):
         vertex_b = (2, 1)
         vertex_c = (3, 1)
         vertex_d = (4, 1)
-        edge_a_b = AcocEdge(vertex_a, vertex_b)
-        edge_b_c = AcocEdge(vertex_b, vertex_c)
-        edge_c_d = AcocEdge(vertex_c, vertex_d)
-        set_x = set([edge_a_b]).union([edge_b_c])
-        set_y = set([edge_b_c]).union([edge_c_d])
+        edge_a_b = MatrixEdge(vertex_a, vertex_b)
+        edge_b_c = MatrixEdge(vertex_b, vertex_c)
+        edge_c_d = MatrixEdge(vertex_c, vertex_d)
+        set_x = {edge_a_b}.union([edge_b_c])
+        set_y = {edge_b_c}.union([edge_c_d])
         result = set_x ^ set_y
-        self.assertTrue(result == set([edge_a_b]).union([edge_c_d]))
+        self.assertTrue(result == {edge_a_b}.union([edge_c_d]))
 
-    def test_have_vertices_returns_true_on_identical_vertices(self):
-        vertex_a = (1, 1)
-        vertex_b = (2, 2)
-        edge = AcocEdge(vertex_a, vertex_b)
-        self.assertTrue(edge.has_both_vertices(vertex_a, vertex_b))
 
-    def test_have_vertices_returns_true_on_identical_vertices_but_reversed(self):
-        vertex_a = (1, 1)
-        vertex_b = (2, 2)
-        edge = AcocEdge(vertex_a, vertex_b)
-        self.assertTrue(edge.has_both_vertices(vertex_b, vertex_a))
+class TestMatrix(unittest.TestCase):
 
-    def test_have_vertices_returns_false_if_not_both_vertices_are_there(self):
-        vertex_a = (1, 1)
-        vertex_b = (2, 2)
-        edge = AcocEdge(vertex_a, vertex_b)
-        self.assertFalse(edge.has_both_vertices(vertex_a, vertex_a))
+    def test_granularity_4_should_return_matrix_with_24_edges_and_16_vertices(self):
+        matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
+        self.assertEqual(len(matrix.vertices), 16)
+        self.assertEqual(len(matrix.edges), 24)
 
-    def test_edge_count_should_be_12_in_3_by_3_matrix(self):
-        matrix = AcocMatrix(3, 3)
-        self.assertEqual(12, len(matrix.edges))
-
-    def test_edge_count_should_be_4_in_2_by_2_matrix(self):
-        matrix = AcocMatrix(2, 2)
-        self.assertEqual(4, len(matrix.edges))
-
-    def test_edge_count_should_be_7_in_2_by_3_matrix(self):
-        matrix = AcocMatrix(2, 3)
-        self.assertEqual(7, len(matrix.edges))
-
-    def test_vertex_count_should_be_4_in_2_by_2_matrix(self):
-        vertices = AcocMatrix(2, 2).vertices
-        self.assertEqual(4, len(vertices))
-
-    def test_vertex_count_should_be_6_in_2_by_3_matrix(self):
-        vertices = AcocMatrix(2, 3).vertices
-        self.assertEqual(6, len(vertices))
+    def test_granularity_10_should_return_matrix_with_180_edges_and_100_vertices(self):
+        matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
+        self.assertEqual(len(matrix.vertices), 16)
+        self.assertEqual(len(matrix.edges), 24)
 
 
 class TestVertex(unittest.TestCase):
     def test_connect_edges_to_vertex_should_be_1(self):
         v1 = Vertex(0, 0)
         v2 = Vertex(1, 2)
-        e = AcocEdge(v1, v2)
+        e = MatrixEdge(v1, v2)
         am.connect_edges_to_vertex(v1, [e])
         self.assertEqual(1, len(v1.connected_edges))
 
@@ -70,8 +47,8 @@ class TestVertex(unittest.TestCase):
         v1 = Vertex(0, 0)
         v2 = Vertex(1, 2)
         v3 = Vertex(1, 1)
-        e1 = AcocEdge(v1, v2)
-        e2 = AcocEdge(v1, v3)
+        e1 = MatrixEdge(v1, v2)
+        e2 = MatrixEdge(v1, v3)
         am.connect_edges_to_vertex(v1, [e1, e2])
         self.assertEqual(2, len(v1.connected_edges))
 

@@ -5,19 +5,19 @@ import math
 
 from acoc import ray_cast as rc
 from acoc.ray_cast import Pt
-from acoc.acoc_matrix import AcocEdge
+from acoc.edge import MatrixEdge
 
 
 class TestPointInside(unittest.TestCase):
 
     def test_ray_intersect_segment_returns_true(self):
         p = Pt(0, 1)
-        e = AcocEdge(Pt(1, 1), Pt(1, 3))
+        e = MatrixEdge(Pt(1, 1), Pt(1, 3))
         self.assertTrue(rc.ray_intersect_segment(p, e))
 
     def test_ray_intersect_segment_returns_false(self):
         p = Pt(2, 2)
-        e = AcocEdge(Pt(1, 1), Pt(1, 3))
+        e = MatrixEdge(Pt(1, 1), Pt(1, 3))
         self.assertFalse(rc.ray_intersect_segment(p, e))
 
 

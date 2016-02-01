@@ -15,9 +15,9 @@ from acoc import acoc_plotter as plotter
 SAVE = False
 SAVE_PHEROMONE_VALUES = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-SHOW_PLOT = False
+SHOW_PLOT = True
 clf_config = {
-    'ant_count':    1500,
+    'ant_count':    200,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -30,8 +30,8 @@ clf_config = {
     'granularity':  10
 }
 
-clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER, 'live_plot'))
-data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['r_5000']
+clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER))
+data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
 
 
 def run():

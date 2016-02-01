@@ -82,7 +82,7 @@ def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_
         plt.show()
 
 
-def plot_data(data, subplot=None, show=False):
+def plot_data(data, subplot=None, show=False, png=True):
     ax = subplot if subplot is not None else plt
     if data.shape[0] > 2:
         temp = data.T

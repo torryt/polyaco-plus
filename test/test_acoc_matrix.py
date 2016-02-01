@@ -3,7 +3,7 @@ import unittest
 from acoc import acoc_matrix as am
 from acoc.acoc_matrix import AcocMatrix
 from acoc.vertex import Vertex
-from acoc.edge import MatrixEdge
+from acoc.edge import MatrixEdge, PolygonEdge
 
 
 class TestEdge(unittest.TestCase):
@@ -20,6 +20,33 @@ class TestEdge(unittest.TestCase):
         set_y = {edge_b_c}.union([edge_c_d])
         result = set_x ^ set_y
         self.assertTrue(result == {edge_a_b}.union([edge_c_d]))
+
+    def test_matrix_edge_in_polygon_edge_array_returns_true(self):
+        vertex_a = Vertex(1, 1)
+        vertex_b = Vertex(2, 1)
+
+        mtx_edge = MatrixEdge(vertex_a, vertex_b)
+        ply_edge = PolygonEdge(vertex_a, vertex_b)
+        ply_list = [ply_edge]
+        self.assertTrue(mtx_edge in ply_list)
+
+    def test_edge_in_polygon_different_vertex_instances_returns_true(self):
+        vertex_a = Vertex(1, 1)
+        vertex_b = Vertex(2, 1)
+
+        mtx_edge = MatrixEdge(vertex_a, vertex_b)
+        ply_edge = PolygonEdge(Vertex(1, 1), Vertex(2, 1))
+        ply_list = [ply_edge]
+        self.assertTrue(mtx_edge in ply_list)
+
+    def test_matrix_edge_in_polygon_edge_array_returns_false(self):
+        vertex_a = Vertex(1, 1)
+        vertex_b = Vertex(2, 1)
+
+        mtx_edge = MatrixEdge(vertex_a, vertex_a)
+        ply_edge = PolygonEdge(vertex_a, vertex_b)
+        ply_list = [ply_edge]
+        self.assertFalse(mtx_edge in ply_list)
 
 
 class TestMatrix(unittest.TestCase):

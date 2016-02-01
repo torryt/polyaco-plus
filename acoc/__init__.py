@@ -164,7 +164,7 @@ class Classifier:
         return (cost**self.alpha) * (length_factor**self.beta), cost
 
     def put_pheromones(self, path, data, score):
-        unique_edges = get_unique_edges(path)
-        for edge in unique_edges:
-            pheromone_strength = edge.pheromone_strength + score
-            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max
+        for edge in path:
+            mtx_edge = self.matrix.edges[self.matrix.edges.index(edge)]
+            pheromone_strength = mtx_edge.pheromone_strength + score
+            mtx_edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max

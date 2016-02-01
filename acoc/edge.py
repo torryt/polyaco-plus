@@ -18,10 +18,11 @@ class BaseEdge:
         return hash((self.a, self.b))
 
 
+
 class PolygonEdge(BaseEdge):
-    def __init__(self, a, b, visited=False):
+    def __init__(self, a, b):
         super(PolygonEdge, self).__init__(a, b)
-        self.visited = visited
+        self.travel_count = 1
 
 
 class MatrixEdge(BaseEdge):

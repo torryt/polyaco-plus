@@ -3,14 +3,14 @@
 from __future__ import division
 
 import random
-from copy import copy
 import numpy as np
-from numpy.random.mtrand import choice
+from numpy.random.mtrand import choice as np_choice
 import math
 from numba import cuda
+import os.path as osp
 
 import utils
-# import acoc.acoc_plotter as plotter
+import acoc.acoc_plotter as plotter
 from acoc.acoc_matrix import AcocMatrix
 from acoc.ant import Ant
 from acoc.ray_cast import is_point_inside
@@ -28,24 +28,24 @@ def get_unique_edges(path):
 
 def get_random_weighted(edges):
     weights = normalize(np.array([e.pheromone_strength for e in edges]))
-    random_weighted_edge = choice(edges, p=weights)
-    return random_weighted_edge.start
+    random_weighted_edge = np_choice(edges, p=weights)
+    return random.choice([random_weighted_edge.a, random_weighted_edge.b])
 
 
-def get_global(matrix, current_best_polygon):
+def select_from_global_best(matrix, current_best_polygon):
     if len(current_best_polygon) != 0:
         select_edge = random.choice(current_best_polygon)
-        return select_edge.start
+        return random.choice([select_edge.a, select_edge.b])
     else:
         return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
 
-def get_chance_of_global(matrix, current_best_polygon):
+def select_with_chance_of_global_best(matrix, current_best_polygon):
     if len(current_best_polygon) != 0:
         # 50% probability for selecting a point from current best path
         if random.randint(0, 1) == 0:
             select_edge = random.choice(current_best_polygon)
-            return select_edge.start
+            return select_edge.a
         else:
             return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
     else:
@@ -75,11 +75,7 @@ def cost_function_cpu(points, edges):
 
 
 def polygon_to_array(polygon):
-    twins_removed = copy(polygon)
-    for edge in twins_removed:
-        if edge.twin in twins_removed:
-            twins_removed.remove(edge.twin)
-    return np.array([[[e.start.x, e.start.y], [e.target.x, e.target.y]] for e in twins_removed], dtype='float32')
+    return np.array([[[e.a.x, e.a.y], [e.b.x, e.b.y]] for e in polygon], dtype='float32')
 
 
 class Classifier:
@@ -97,59 +93,53 @@ class Classifier:
         self.granularity = config['granularity']
         self.gpu = config['gpu']
         self.granularity = config['granularity']
+        self.matrix = None
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
         dropped = 0
         current_best_polygon = []
         current_best_score = 0
-        matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
+        self.matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
 
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
-                start_vertex = matrix.vertices[0]
+                start_vertex = self.matrix.vertices[0]
             elif self.ant_init == 'weighted':
-                start_vertex = get_random_weighted(matrix.edges)
+                start_vertex = get_random_weighted(self.matrix.edges)
             elif self.ant_init == 'on_global_best':
-                start_vertex = get_global(matrix, current_best_polygon)
+                start_vertex = select_from_global_best(self.matrix, current_best_polygon)
             elif self.ant_init == 'chance_of_global_best':
-                start_vertex = get_chance_of_global(matrix, current_best_polygon)
+                start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
             else:  # Random
-                start_vertex = matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
+                start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
 
             _ant = Ant(start_vertex)
-            edge = _ant.move_ant()
-            _ant.edges_travelled.append(edge)
-            ant_at_target = ant_is_stuck = False
+            _ant.move_ant()
 
-            while not ant_at_target and not ant_is_stuck:
-                if _ant.current_edge.target == start_vertex or len(_ant.edges_travelled) > 10000:
-                    ant_at_target = True
-                else:
-                    edge = _ant.move_ant()
-                    if edge is None:
-                        ant_is_stuck = True
-                    else:
-                        _ant.edges_travelled.append(edge)
+            while not _ant.at_target and not _ant.is_stuck:
+                _ant.move_ant()
 
-            if ant_is_stuck:
+            if _ant.is_stuck:
                 dropped += 1
                 continue
             ant_score, ant_cost = self.score(_ant.edges_travelled, data)
             if ant_score > current_best_score:
                 current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
+                plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
+                                            save_folder=osp.join(self.save_folder, 'best_paths/'))
 
             self.put_pheromones(current_best_polygon, data, current_best_score)
             if self.decay_type == 'probabilistic':
-                self.reset_at_random(matrix)
+                self.reset_at_random(self.matrix)
             elif self.decay_type == 'gradual':
-                self.grad_pheromone_decay(matrix)
+                self.grad_pheromone_decay(self.matrix)
 
             ant_scores.append(ant_score)
 
-            # if plot and len(ant_scores) % 100 == 0:
-            #     plotter.plot_pheromones(matrix, data, self.tau_min, self.tau_max, True, self.save_folder)
+            if plot and len(ant_scores) % 50 == 0:
+                plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, True, osp.join(self.save_folder, 'live_plot/'))
 
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
 
@@ -179,7 +169,7 @@ class Classifier:
         return (cost**self.alpha) * (length_factor**self.beta), cost
 
     def put_pheromones(self, path, data, score):
-        unique_edges = get_unique_edges(path)
-        for edge in unique_edges:
-            pheromone_strength = edge.pheromone_strength + score
-            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max
+        for edge in path:
+            mtx_edge = self.matrix.edges[self.matrix.edges.index(edge)]
+            pheromone_strength = mtx_edge.pheromone_strength + score
+            mtx_edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max

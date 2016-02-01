@@ -1,30 +1,38 @@
 from copy import copy
-
 import numpy as np
 from numpy.random.mtrand import choice
 from utils import normalize
+
+from acoc.edge import PolygonEdge
 
 
 class Ant:
     def __init__(self, start_vertex):
         self.start_vertex = start_vertex
-        self.current_edge = None
+        self.prev_edge = None
+        self.current_vertex = start_vertex
         self.edges_travelled = []
+        self.is_stuck = False
+        self.at_target = False
 
     def move_ant(self):
-        edges_travelled = self.edges_travelled if len(self.edges_travelled) > 0 else None
-        if self.current_edge is None:
-            connected_edges = self.start_vertex.connected_edges
-        else:
-            connected_edges = copy(self.current_edge.target.connected_edges)
-            connected_edges.remove(self.current_edge.twin)
-        if edges_travelled is not None:
-            for e in edges_travelled:
-                if e in connected_edges:
-                    connected_edges.remove(e)
-        if len(connected_edges) == 0:
-            return None
+        connected_edges = copy(self.current_vertex.connected_edges)
+        if self.prev_edge:
+            connected_edges.remove(self.prev_edge)
+        [connected_edges.remove(e) for e in self.edges_travelled if e in connected_edges]
+        # [connected_edges.remove(e) for e in self.edges_travelled if e in connected_edges and (e.travel_count > 1)]
+
+        if len(connected_edges) == 0 or len(self.edges_travelled) > 10000:
+            self.is_stuck = True
+            return
         weights = normalize(np.array([e.pheromone_strength for e in connected_edges]))
         edge = choice(connected_edges, p=weights)
-        self.current_edge = edge
-        return edge
+        self.current_vertex = edge.a if self.current_vertex == edge.b else edge.b
+
+        if edge in self.edges_travelled:
+            self.edges_travelled[self.edges_travelled.index(edge)].travel_count += 1
+        else:
+            self.edges_travelled.append(PolygonEdge(edge.a, edge.b))
+        self.prev_edge = edge
+        if self.current_vertex == self.start_vertex:
+            self.at_target = True

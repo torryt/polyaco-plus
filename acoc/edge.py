@@ -1,7 +1,8 @@
-class BaseEdge:
-    def __init__(self, a, b):
+class Edge:
+    def __init__(self, a, b, pheromone_strength=0.1):
         self.a = a
         self.b = b
+        self.pheromone_strength = pheromone_strength
 
     def __repr__(self):
         return "a: ({}), b: ({})".format(self.a, self.b)
@@ -16,15 +17,3 @@ class BaseEdge:
 
     def __hash__(self):
         return hash((self.a, self.b))
-
-
-class PolygonEdge(BaseEdge):
-    def __init__(self, a, b):
-        super(PolygonEdge, self).__init__(a, b)
-        self.travel_count = 1
-
-
-class MatrixEdge(BaseEdge):
-    def __init__(self, a, b, pheromone_strength=0.1):
-        super(MatrixEdge, self).__init__(a, b)
-        self.pheromone_strength = pheromone_strength

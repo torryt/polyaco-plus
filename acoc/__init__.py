@@ -127,8 +127,10 @@ class Classifier:
             if ant_score > current_best_score:
                 current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
-                plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
-                                            save_folder=osp.join(self.save_folder, 'best_paths/'))
+                if plot:
+                    plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
+                                                save_folder=osp.join(self.save_folder, 'best_paths/'),
+                                                file_name='ant' + str(len(ant_scores)))
 
             self.put_pheromones(current_best_polygon, data, current_best_score)
             if self.decay_type == 'probabilistic':
@@ -139,10 +141,10 @@ class Classifier:
             ant_scores.append(ant_score)
 
             if plot and len(ant_scores) % 50 == 0:
-                plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, True, osp.join(self.save_folder, 'live_plot/'))
+                plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
+                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
 
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
-
         return ant_scores, current_best_polygon, dropped
 
     def reset_at_random(self, matrix):

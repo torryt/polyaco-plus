@@ -13,7 +13,7 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 
 SAVE = True
-SAVE_PHEROMONE_VALUES = True
+SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
@@ -31,11 +31,11 @@ clf_config = {
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER))
-data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
+data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['r_5000']
 
 
 def run():
-    ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONE_VALUES)
+    ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
     print(", Best ant score: {}".format(max(ant_scores)))
 
     if SAVE:

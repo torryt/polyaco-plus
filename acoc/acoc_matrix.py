@@ -2,7 +2,7 @@ from itertools import product
 
 import numpy as np
 
-from acoc.edge import MatrixEdge
+from acoc.edge import Edge
 from acoc.vertex import Vertex
 
 
@@ -44,12 +44,12 @@ def init_edges(vertices, tau_initial):
         vertices_in_row = [p for p in vertices if p.x > vertex.x and p.y == vertex.y]
         if len(vertices_in_row) > 0:
             next_east = min(vertices_in_row, key=lambda pos: pos.x)
-            edge = MatrixEdge(vertex, next_east, tau_initial)
+            edge = Edge(vertex, next_east, tau_initial)
             edges.append(edge)
         vertices_in_column = [p for p in vertices if p.y > vertex.y and p.x == vertex.x]
         if len(vertices_in_column) > 0:
             next_north = min(vertices_in_column, key=lambda pos: pos.y)
-            edge = MatrixEdge(vertex, next_north, tau_initial)
+            edge = Edge(vertex, next_north, tau_initial)
             edges.append(edge)
     return edges
 

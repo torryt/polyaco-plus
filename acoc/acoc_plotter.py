@@ -154,7 +154,7 @@ def plot_curves(curves, labels, y_axis_label='Score', show=False, loc='upper lef
     return f
 
 
-def plot_pheromones(matrix, data, tau_min, tau_max, file_name, save=True, folder_name='', ):
+def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, folder_name='', show=False):
     min_val = 0.1
     max_val = 15.0
 
@@ -170,11 +170,16 @@ def plot_pheromones(matrix, data, tau_min, tau_max, file_name, save=True, folder
     if data is not None:
         plot_data(data)
 
-    ax.axis([matrix.x_min_max[0] - .1,
-             matrix.x_min_max[1] + .1,
-             matrix.y_min_max[0] - .1,
-             matrix.y_min_max[1] + .1])
-    save_plot(fig, folder_name, file_name=file_name, eps=False)
+    margin_x = (matrix.x_min_max[1] - matrix.x_min_max[0]) / 10
+    margin_y = (matrix.y_min_max[1] - matrix.y_min_max[0]) / 10
+    ax.axis([matrix.x_min_max[0] - margin_x,
+             matrix.x_min_max[1] + margin_x,
+             matrix.y_min_max[0] - margin_y,
+             matrix.y_min_max[1] + margin_y])
+    if save:
+        save_plot(fig, folder_name, file_name=file_name, eps=False)
+    if show:
+        plt.show()
     plt.close(fig)
 
 

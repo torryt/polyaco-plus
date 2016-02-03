@@ -13,11 +13,11 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 
 SAVE = True
-SAVE_PHEROMONES_AND_BEST_PATHS = False
+SAVE_PHEROMONES_AND_BEST_PATHS = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
-    'ant_count':    1000,
+    'ant_count':    2000,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -27,7 +27,7 @@ clf_config = {
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
     'gpu':          True,
-    'granularity':  10
+    'granularity':  3
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER))

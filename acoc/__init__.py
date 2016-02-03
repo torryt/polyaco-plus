@@ -92,8 +92,8 @@ class Classifier:
         self.save_folder = save_folder
         self.granularity = config['granularity']
         self.gpu = config['gpu']
-        self.granularity = config['granularity']
         self.matrix = None
+        self.max_level = 4
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
@@ -103,6 +103,10 @@ class Classifier:
         current_best_score = 0
         self.matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
 
+        def plot_pheromones():
+            if plot:
+                plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
+                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
         while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
                 start_vertex = self.matrix.vertices[0]
@@ -115,6 +119,16 @@ class Classifier:
             else:  # Random
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
 
+            if (len(ant_scores) - last_level_up_or_best_ant) > 100:
+                plot_pheromones()
+                # Cannot have more than three levels because Matrix is a trilogy
+                if self.matrix.level <= self.max_level:
+                    print("\nWoop woop, leveling up to level {}".format(self.matrix.level))
+                    self.matrix.level_up(current_best_polygon)
+                current_best_score = self.score(current_best_polygon, data)
+                last_level_up_or_best_ant = len(ant_scores)
+                plot_pheromones()
+
             _ant = Ant(start_vertex)
             _ant.move_ant()
 
@@ -124,7 +138,7 @@ class Classifier:
             if _ant.is_stuck:
                 dropped += 1
                 continue
-            ant_score, ant_cost = self.score(_ant.edges_travelled, data)
+            ant_score = self.score(_ant.edges_travelled, data)
             if ant_score > current_best_score:
                 current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
@@ -134,13 +148,6 @@ class Classifier:
                                                 save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                 file_name='ant' + str(len(ant_scores)))
 
-            if (len(ant_scores) - last_level_up_or_best_ant) > 200:
-                # Cannot have more than three levels because Matrix is a trilogy
-                self.matrix = AcocMatrix(data, granularity=self.matrix.granularity * 2, old_matrix=self.matrix)
-                if self.matrix.level <= 3:
-                    self.matrix.level_up()
-                last_level_up_or_best_ant = len(ant_scores)
-
             self.put_pheromones(current_best_polygon, data, current_best_score)
             if self.decay_type == 'probabilistic':
                 self.reset_at_random(self.matrix)
@@ -148,10 +155,8 @@ class Classifier:
                 self.grad_pheromone_decay(self.matrix)
 
             ant_scores.append(ant_score)
+            plot_pheromones()
 
-            if plot and len(ant_scores) % 50 == 0:
-                plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
-                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
 
             utils.print_on_current_line("Ant: {}/{}".format(len(ant_scores), self.ant_count) + print_string)
         return ant_scores, current_best_polygon, dropped
@@ -177,10 +182,9 @@ class Classifier:
         # Handles very rare and weird error where length of polygon == 0
         except ZeroDivisionError:
             length_factor = 1
-        return (cost**self.alpha) * (length_factor**self.beta), cost
+        return (cost**self.alpha) * (length_factor**self.beta)
 
     def put_pheromones(self, path, data, score):
         for edge in path:
-            mtx_edge = self.matrix.edges[self.matrix.edges.index(edge)]
-            pheromone_strength = mtx_edge.pheromone_strength + score
-            mtx_edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max
+            pheromone_strength = edge.pheromone_strength + score
+            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max

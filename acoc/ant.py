@@ -16,7 +16,7 @@ class Ant:
         self.at_target = False
 
     def move_ant(self):
-        connected_edges = copy(self.current_vertex.connected_edges)
+        connected_edges = list(self.current_vertex.connected_edges)
         if self.prev_edge:
             connected_edges.remove(self.prev_edge)
         [connected_edges.remove(e) for e in self.edges_travelled if e in connected_edges]

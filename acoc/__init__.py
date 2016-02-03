@@ -99,6 +99,7 @@ class Classifier:
         ant_scores = []
         dropped = 0
         current_best_polygon = []
+        last_level_up_or_best_ant = 0
         current_best_score = 0
         self.matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
 
@@ -127,10 +128,18 @@ class Classifier:
             if ant_score > current_best_score:
                 current_best_polygon = _ant.edges_travelled
                 current_best_score = ant_score
+                last_level_up_or_best_ant = len(ant_scores)
                 if plot:
                     plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
                                                 save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                 file_name='ant' + str(len(ant_scores)))
+
+            if (len(ant_scores) - last_level_up_or_best_ant) > 200:
+                # Cannot have more than three levels because Matrix is a trilogy
+                self.matrix = AcocMatrix(data, granularity=self.matrix.granularity * 2, old_matrix=self.matrix)
+                if self.matrix.level <= 3:
+                    self.matrix.level_up()
+                last_level_up_or_best_ant = len(ant_scores)
 
             self.put_pheromones(current_best_polygon, data, current_best_score)
             if self.decay_type == 'probabilistic':

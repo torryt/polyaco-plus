@@ -1,3 +1,4 @@
+import math
 class Vertex:
     def __init__(self, x, y):
         self.x = x
@@ -8,7 +9,7 @@ class Vertex:
         return "x: {:.3f}, y: {:.3f}".format(self.x, self.y)
 
     def __eq__(self, other):
-        return (self.x, self.y) == (other.x, other.y)
+        return math.isclose(self.x, other.x) and math.isclose(self.y, other.y)
 
     def __ne__(self, other):
         return not self.__eq__(other)

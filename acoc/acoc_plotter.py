@@ -101,20 +101,22 @@ def plot_data(data, subplot=None, show=False):
         plt.show()
 
 
-def plot_matrix(matrix, subplot=None, show=False, with_vertices=True):
+def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False):
     ax = subplot if subplot is not None else plt
     for edge in matrix.edges:
         ax.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], '--', color='#CFCFCF')
     if with_vertices:
         for i, v in enumerate(matrix.vertices):
-            # if (i % 2 == 0 and i % 20 <= 9) or (i % 2 == 1 and i % 20 > 9):
-            if i % 2 == 0:
-                ax.plot(v.x, v.y, 'o', color='w')
-            else:
-                ax.plot(v.x, v.y, 'o', color='k')
+            ax.plot(v.x, v.y, 'o', color='w')
+
+    margin_x = (matrix.x_min_max[1] - matrix.x_min_max[0]) / 2
+    margin_y = (matrix.y_min_max[1] - matrix.y_min_max[0]) / 2
+    ax.axis([matrix.x_min_max[0] - margin_x, matrix.x_min_max[1] + margin_x,
+             matrix.y_min_max[0] - margin_y, matrix.y_min_max[1] + margin_y])
     if show:
-        ax.axis([matrix.x_min_max[0] - 1, matrix.x_min_max[1] + 1, matrix.y_min_max[0] - 1, matrix.y_min_max[1] + 1])
         plt.show()
+    if save:
+        save_plot(ax)
 
 
 def plot_path(path, subplot, color='k-'):

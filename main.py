@@ -17,7 +17,7 @@ SAVE_PHEROMONES_AND_BEST_PATHS = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
-    'ant_count':    2000,
+    'ant_count':    1000,
     'tau_min':      0.001,
     'tau_max':      1.0,
     'tau_init':     0.001,
@@ -27,16 +27,18 @@ clf_config = {
     'ant_init':     'weighted',
     'decay_type':   'probabilistic',
     'gpu':          True,
-    'granularity':  3
+    'granularity':  6,
+    'max_level':    2,
+    'convergence_rate': 500
 }
 
 clf = acoc.Classifier(clf_config, osp.join(SAVE_FOLDER))
-data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['r_5000']
+data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
 
 
 def run():
     ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
-    print(", Best ant score: {}".format(max(ant_scores)))
+    print("Best ant score: {}".format(max(ant_scores)))
 
     if SAVE:
         utils.save_object(ant_scores, SAVE_FOLDER, 'scores')

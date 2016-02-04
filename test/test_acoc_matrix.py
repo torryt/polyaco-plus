@@ -79,7 +79,7 @@ class TestVertex(unittest.TestCase):
         v1 = Vertex(0, 0)
         v2 = Vertex(1, 2)
         e = Edge(v1, v2)
-        am.connect_vertex_to_edges(v1, [e])
+        am.connect_vertices_to_edges([e])
 
         self.assertEqual(1, len([v for v in v1.connected_edges if v is not None]))
 
@@ -89,7 +89,7 @@ class TestVertex(unittest.TestCase):
         v3 = Vertex(-1, 0)
         e1 = Edge(v1, v2)
         e2 = Edge(v3, v1)
-        am.connect_vertex_to_edges(v1, [e1, e2])
+        am.connect_vertices_to_edges([e1, e2])
         self.assertEqual(2, len([v for v in v1.connected_edges if v is not None]))
 
     def test_connect_edges_to_vertex_should_be_sorted_right_left_up_down(self):
@@ -100,7 +100,7 @@ class TestVertex(unittest.TestCase):
         e_down = Edge(Vertex(0, -1), v)
 
         edges = [e_left, e_right, e_down, e_up]
-        am.connect_vertex_to_edges(v, edges)
+        am.connect_vertices_to_edges(edges)
         ce = v.connected_edges
         self.assertEqual(ce[DIRECTION['RIGHT']], e_right)
         self.assertEqual(ce[DIRECTION['LEFT']], e_left)

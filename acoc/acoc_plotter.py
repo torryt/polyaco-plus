@@ -1,10 +1,11 @@
 from __future__ import division
 import os
-from time import strftime
 from datetime import datetime
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
+
+from utils import generate_folder_name
 from utils.data_generator import gaussian_circle
 from config import SAVE_DIR
 
@@ -187,7 +188,7 @@ def save_plot(fig=None, parent_folder='', file_name=None, eps=True):
     if parent_folder != '':
         directory = os.path.join(SAVE_DIR, parent_folder)
     else:
-        directory = os.path.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
+        directory = generate_folder_name()
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5] if file_name is None else file_name

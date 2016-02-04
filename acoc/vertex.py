@@ -3,7 +3,7 @@ class Vertex:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.connected_edges = []
+        self.connected_edges = [None] * 4
 
     def __repr__(self):
         return "x: {:.3f}, y: {:.3f}".format(self.x, self.y)

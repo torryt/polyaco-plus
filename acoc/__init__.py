@@ -8,6 +8,9 @@ from numpy.random.mtrand import choice as np_choice
 import math
 from numba import cuda
 import os.path as osp
+import time
+from time import process_time
+from threading import Thread
 
 import utils
 import acoc.acoc_plotter as plotter
@@ -91,7 +94,7 @@ def polygon_length(polygon):
 
 class Classifier:
     def __init__(self, config, save_folder=''):
-        self.ant_count = config['ant_count']
+        self.run_time = config['run_time']
         self.tau_min = config['tau_min']
         self.tau_max = config['tau_max']
         self.tau_init = config['tau_init']
@@ -102,8 +105,8 @@ class Classifier:
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
         self.granularity = config['granularity']
-        if config['multi_leveling']:
-            self.multi_leveling = True
+        self.multi_level = config['multi_level']
+        if self.multi_level:
             self.max_level = config['max_level']
             self.convergence_rate = config['convergence_rate']
 
@@ -118,12 +121,22 @@ class Classifier:
         current_best_score = 0
         self.matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
 
+        t_start = process_time()
+
         def plot_pheromones():
             if plot:
                 plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
                                         save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
-        # is_converged = False
-        while len(ant_scores) < self.ant_count:
+
+        def print_status():
+            while process_time() - t_start < self.run_time:
+                utils.print_on_current_line(
+                    "Ant: {}, Time elapsed: {:.1f} seconds".format(
+                        len(ant_scores), process_time() - t_start) + print_string)
+                time.sleep(0.1)
+        Thread(target=print_status).start()
+
+        while process_time() - t_start < self.run_time:
             if self.ant_init == 'static':
                 start_vertex = self.matrix.vertices[0]
             elif self.ant_init == 'weighted':
@@ -134,12 +147,12 @@ class Classifier:
                 start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
             else:  # Random
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
-            if self.multi_leveling:
+            if self.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
                     plot_pheromones()
                     # Cannot have more than three levels because Matrix is a trilogy
                     if self.matrix.level <= self.max_level:
-                        print("\nWoop woop, leveling up to level {}. Granularity is now {}".
+                        print("\nLeveling up to level {}. Granularity is now {}".
                               format(self.matrix.level, self.matrix.granularity * 2 - 1))
                         self.matrix.level_up(current_best_polygon)
                         current_best_score = self.score(current_best_polygon, data)
@@ -176,8 +189,6 @@ class Classifier:
             elif self.decay_type == 'gradual':
                 self.grad_pheromone_decay(self.matrix)
             ant_scores.append(ant_score)
-
-            utils.print_on_current_line("Ant: {}".format(len(ant_scores)) + print_string)
         return ant_scores, current_best_polygon, dropped
 
     def reset_at_random(self, matrix):

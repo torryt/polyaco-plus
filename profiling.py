@@ -1,4 +1,4 @@
-from main import run
+from acoc_runner import run
 
 for _ in range(10):
     run()

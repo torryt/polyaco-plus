@@ -40,8 +40,8 @@ def run():
     plt.ylim(yy.min(), yy.max())
     plt.xticks(())
     plt.yticks(())
-    plt.savefig('svm_sandbox.eps')
+    # plt.savefig('svm_sandbox.eps')
 
-    # plt.show()
+    plt.show()
 
 run()

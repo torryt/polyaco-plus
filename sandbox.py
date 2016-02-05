@@ -5,7 +5,7 @@ from acoc import acoc_plotter as ap
 from utils.data_generator import gaussian_circle
 from utils import data_generator
 import acoc
-from main import run
+from acoc_runner import run
 import acoc.acoc_plotter as plotter
 from utils import data_generator as dg
 

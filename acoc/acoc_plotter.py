@@ -156,7 +156,7 @@ def plot_curves(curves, labels, y_axis_label='Score', show=False, loc='upper lef
 
 
 def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, folder_name='', show=False):
-    min_val = 0.1
+    min_val = 0.5
     max_val = 15.0
 
     plt.close()

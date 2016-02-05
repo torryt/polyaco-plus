@@ -63,15 +63,28 @@ class TestMatrix(unittest.TestCase):
         self.assertEqual(len(matrix.edges), 24)
 
     def test_all_edges_move_in_positive_direction_from_a_to_b(self):
-        matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
+        matrix = AcocMatrix([[0, 0], [1,1]], granularity=4)
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
 
     def test_all_edges_move_in_positive_direction_from_a_to_b_after_level_up(self):
-        matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
+        matrix = AcocMatrix([[0, 0], [1,1]], granularity=4)
         matrix.level_up()
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
+
+    def test_edge_length_x_is_equal_a_horizontal_edge_in_matrix(self):
+        matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
+        horiz_e = list(filter(lambda e: e.a.y == e.b.y, matrix.edges))[0]
+        e_len = horiz_e.b.x - horiz_e.a.x
+        self.assertEqual(e_len, matrix.edge_length_x)
+
+    def test_edge_length_x_is_equal_a_horizontal_edge_in_matrix_after_level_up(self):
+        matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
+        matrix.level_up()
+        horiz_e = list(filter(lambda e: e.a.y == e.b.y, matrix.edges))[0]
+        e_len = horiz_e.b.x - horiz_e.a.x
+        self.assertEqual(e_len, matrix.edge_length_x)
 
 
 class TestVertex(unittest.TestCase):

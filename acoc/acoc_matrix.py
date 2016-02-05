@@ -13,11 +13,14 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 
 class AcocMatrix:
     def __init__(self, data, tau_initial=1.0, granularity=10, old_matrix=None):
+        self.granularity = granularity
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
+        self.edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
+        self.edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
+
         self.tau_initial = tau_initial
         self.level = 1
-        self.granularity = granularity
 
         x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=int(self.granularity), endpoint=True)
         y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=int(self.granularity), endpoint=True)
@@ -30,19 +33,12 @@ class AcocMatrix:
         self.edges = create_edges(self.vertices, self.tau_initial)
         connect_vertices_to_edges(self.edges)
 
-    def add_to_plot(self, ax):
-        for edge in self.edges:
-            ax.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], '--', color='#CFCFCF')
-        for i, v in enumerate(self.vertices):
-            if i % 2 == 0:
-                ax.plot(v.x, v.y, 'o', color='w')
-            else:
-                ax.plot(v.x, v.y, 'o', color='k')
-        ax.axis([self.x_min_max[0] - 1, self.x_min_max[1] + 1, self.y_min_max[0] - 1, self.y_min_max[1] + 1])
-
     def level_up(self, polygon=None):
         self.level += 1
         self.granularity = self.granularity * 2 - 1
+        self.edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
+        self.edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
+
         new_edges = []
         new_vertices = []
 
@@ -58,7 +54,6 @@ class AcocMatrix:
                     polygon.remove(edge)
                     polygon.extend(new_edges[-2:])
         self.edges = new_edges
-
         connect_vertices_to_edges(self.edges)
 
         def has_no_vertical_edges(v):
@@ -121,18 +116,18 @@ if __name__ == "__main__":
     save = True
     show = False
     plot = False
-    data = np.array([[[0, 0]], [[1, 1]]])
-    mtrx = AcocMatrix(data, granularity=3)
+    dt = np.array([[[0, 0]], [[1, 1]]])
+    mtrx = AcocMatrix(dt, granularity=3)
     pol = mtrx.edges[:4]
     mtrx.edges[1].pheromone_strength = 5
     mtrx.edges[0].pheromone_strength = 3
     save_folder = generate_folder_name()
     if plot:
-        plot_pheromones(mtrx, data, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
+        plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
         plot_matrix(mtrx, show=show, save=save)
     for i in range(5):
         mtrx.level_up(pol)
         print("Level {}: Granularity {}, edges {}, vertices {}".format(i + 1, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
         if plot:
             plot_matrix(mtrx, show=show, save=save)
-            plot_pheromones(mtrx, data, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
+            plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)

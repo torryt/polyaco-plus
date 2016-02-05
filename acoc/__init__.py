@@ -78,6 +78,17 @@ def polygon_to_array(polygon):
     return np.array([[[e.a.x, e.a.y], [e.b.x, e.b.y]] for e in polygon], dtype='float32')
 
 
+def polygon_length(polygon):
+    x_edge = next(e for e in polygon if e.a.y == e.b.y)
+    x_edge_length = x_edge.b.x - x_edge.a.x
+    x_edges_count = len([1 for e in polygon if e.a.y == e.b.y])
+
+    y_edge = next(e for e in polygon if e.a.x == e.b.x)
+    y_edge_length = y_edge.b.y - y_edge.a.y
+    y_edges_count = len(polygon) - x_edges_count
+    return (x_edges_count * x_edge_length) + (y_edges_count * y_edge_length)
+
+
 class Classifier:
     def __init__(self, config, save_folder=''):
         self.ant_count = config['ant_count']
@@ -91,8 +102,11 @@ class Classifier:
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
         self.granularity = config['granularity']
-        self.max_level = config['max_level']
-        self.convergence_rate = config['convergence_rate']
+        if config['multi_leveling']:
+            self.multi_leveling = True
+            self.max_level = config['max_level']
+            self.convergence_rate = config['convergence_rate']
+
         self.gpu = config['gpu']
         self.matrix = None
 
@@ -108,8 +122,8 @@ class Classifier:
             if plot:
                 plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
                                         save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
-        is_converged = False
-        while not is_converged:
+        # is_converged = False
+        while len(ant_scores) < self.ant_count:
             if self.ant_init == 'static':
                 start_vertex = self.matrix.vertices[0]
             elif self.ant_init == 'weighted':
@@ -120,20 +134,21 @@ class Classifier:
                 start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
             else:  # Random
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
-
-            if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
-                plot_pheromones()
-                # Cannot have more than three levels because Matrix is a trilogy
-                if self.matrix.level <= self.max_level:
-                    print("\nWoop woop, leveling up to level {}".format(self.matrix.level))
-                    self.matrix.level_up(current_best_polygon)
-                    current_best_score = self.score(current_best_polygon, data)
-                    last_level_up_or_best_ant = len(ant_scores)
+            if self.multi_leveling:
+                if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
                     plot_pheromones()
-                else:
-                    is_converged = False
-                    print("\nConverged. Is exploding! Run away!!!")
-                    break
+                    # Cannot have more than three levels because Matrix is a trilogy
+                    if self.matrix.level <= self.max_level:
+                        print("\nWoop woop, leveling up to level {}. Granularity is now {}".
+                              format(self.matrix.level, self.matrix.granularity * 2 - 1))
+                        self.matrix.level_up(current_best_polygon)
+                        current_best_score = self.score(current_best_polygon, data)
+                        last_level_up_or_best_ant = len(ant_scores)
+                        plot_pheromones()
+                    else:
+                        is_converged = False
+                        print("\nConverged. Is exploding! Run away!!!")
+                        break
 
             _ant = Ant(start_vertex)
             _ant.move_ant()
@@ -150,6 +165,7 @@ class Classifier:
                 current_best_score = ant_score
                 last_level_up_or_best_ant = len(ant_scores)
                 if plot:
+                    plot_pheromones()
                     plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
                                                 save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                 file_name='ant' + str(len(ant_scores)))
@@ -159,10 +175,7 @@ class Classifier:
                 self.reset_at_random(self.matrix)
             elif self.decay_type == 'gradual':
                 self.grad_pheromone_decay(self.matrix)
-
             ant_scores.append(ant_score)
-            if len(ant_scores) % 50 == 0:
-                plot_pheromones()
 
             utils.print_on_current_line("Ant: {}".format(len(ant_scores)) + print_string)
         return ant_scores, current_best_polygon, dropped
@@ -184,7 +197,7 @@ class Classifier:
         else:
             cost = cost_function_cpu(data.T, edges)
         try:
-            length_factor = 1/len(polygon)
+            length_factor = 1 / polygon_length(polygon)
         # Handles very rare and weird error where length of polygon == 0
         except ZeroDivisionError:
             length_factor = 1

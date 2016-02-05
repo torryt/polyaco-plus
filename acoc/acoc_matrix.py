@@ -74,13 +74,6 @@ class AcocMatrix:
         connect_vertices_to_edges(self.edges)
 
 
-def find_vertex(x, y, vertices):
-    try:
-        return filter(lambda v: v == Vertex(x, y), vertices).__next__()
-    except StopIteration:
-        return None
-
-
 def connect_vertices_to_edges(edges):
     for e in edges:
         # if horizontal edge

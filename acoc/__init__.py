@@ -115,13 +115,14 @@ class Classifier:
 
     def classify(self, data, plot=False, print_string=''):
         ant_scores = []
-        dropped = 0
         current_best_polygon = []
         last_level_up_or_best_ant = 0
         current_best_score = 0
         self.matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
+        best_ant_history = np.empty(int(self.run_time))
 
         t_start = process_time()
+        t_elapsed = 0
 
         def plot_pheromones():
             if plot:
@@ -129,14 +130,20 @@ class Classifier:
                                         save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
 
         def print_status():
-            while process_time() - t_start < self.run_time:
+            while t_elapsed < self.run_time:
                 utils.print_on_current_line(
                     "Ant: {}, Time elapsed: {:.1f} seconds".format(
                         len(ant_scores), process_time() - t_start) + print_string)
                 time.sleep(0.1)
-        Thread(target=print_status).start()
 
-        while process_time() - t_start < self.run_time:
+        def log_best_ants():
+            while t_elapsed < self.run_time:
+                best_ant_history[int(t_elapsed)] = current_best_score
+                time.sleep(1)
+        Thread(target=print_status).start()
+        Thread(target=log_best_ants).start()
+
+        while t_elapsed < self.run_time:
             if self.ant_init == 'static':
                 start_vertex = self.matrix.vertices[0]
             elif self.ant_init == 'weighted':
@@ -169,9 +176,6 @@ class Classifier:
             while not _ant.at_target and not _ant.is_stuck:
                 _ant.move_ant()
 
-            if _ant.is_stuck:
-                dropped += 1
-                continue
             ant_score = self.score(_ant.edges_travelled, data)
             if ant_score > current_best_score:
                 current_best_polygon = _ant.edges_travelled
@@ -189,7 +193,9 @@ class Classifier:
             elif self.decay_type == 'gradual':
                 self.grad_pheromone_decay(self.matrix)
             ant_scores.append(ant_score)
-        return ant_scores, current_best_polygon, dropped
+            t_elapsed = process_time() - t_start
+
+        return ant_scores, current_best_polygon, best_ant_history
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:

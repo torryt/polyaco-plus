@@ -17,7 +17,7 @@ SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
-    'run_time':         20,     # Algorithm runtime in seconds
+    'run_time':         3,     # Algorithm runtime in seconds
     'tau_min':          0.001,
     'tau_max':          1.0,
     'tau_init':         0.001,
@@ -28,7 +28,7 @@ clf_config = {
     'decay_type':       'probabilistic',
     'gpu':              True,
     'granularity':      3,
-    'multi_level':   True,
+    'multi_level':      True,
     'max_level':        3,
     'convergence_rate': 500
 }
@@ -42,7 +42,7 @@ def run(**kwargs):
     clf = acoc.Classifier(conf, SAVE_FOLDER)
     data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
 
-    ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
+    ant_scores, polygon, best_ant_history = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
     print(", Best ant score: {}".format(max(ant_scores)))
 
     if SAVE:
@@ -54,7 +54,7 @@ def run(**kwargs):
         matrix = AcocMatrix(data)
         plotter.plot_path_with_data(polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
         plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
-    return max(ant_scores)
+    return best_ant_history
 
 if __name__ == "__main__":
     runs = 1

@@ -42,7 +42,7 @@ def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, sav
         plt.show()
 
 
-def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
+def plot_ant_scores(ant_scores, save=False, show=False, save_folder='', file_name=None):
     fig = plt.figure()
     fig.suptitle("ant scores")
     ax = fig.add_subplot(111)
@@ -51,7 +51,7 @@ def plot_ant_scores(ant_scores, save=False, show=False, save_folder=''):
     ax.plot(x, y, 'k-')
     ax.axis([0, len(ant_scores), min(ant_scores), max(ant_scores)])
     if save:
-        save_plot(fig, save_folder)
+        save_plot(fig, save_folder, file_name=file_name)
     if show:
         plt.show()
 

@@ -117,9 +117,11 @@ class Classifier:
         ant_scores = []
         current_best_polygon = []
         last_level_up_or_best_ant = 0
-        current_best_score = 0
         self.matrix = AcocMatrix(data, tau_initial=self.tau_init, granularity=self.granularity)
-        best_ant_history = np.empty(int(self.run_time))
+
+        current_best_score = 0
+        best_ant_history = [None] * self.run_time
+        best_ant_history[0] = current_best_score
 
         t_start = process_time()
         t_elapsed = 0
@@ -131,17 +133,21 @@ class Classifier:
 
         def print_status():
             while t_elapsed < self.run_time:
-                utils.print_on_current_line(
-                    "Ant: {}, Time elapsed: {:.1f} seconds".format(
-                        len(ant_scores), process_time() - t_start) + print_string)
+                if self.multi_level:
+                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds, Level {}".format(
+                        len(ant_scores), process_time() - t_start, self.matrix.level) + print_string
+                else:
+                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds".format(
+                        len(ant_scores), process_time() - t_start) + print_string
+                utils.print_on_current_line(to_print)
                 time.sleep(0.1)
 
-        def log_best_ants():
+        def update_history():
             while t_elapsed < self.run_time:
                 best_ant_history[int(t_elapsed)] = current_best_score
                 time.sleep(1)
         Thread(target=print_status).start()
-        Thread(target=log_best_ants).start()
+        Thread(target=update_history).start()
 
         while t_elapsed < self.run_time:
             if self.ant_init == 'static':
@@ -165,10 +171,6 @@ class Classifier:
                         current_best_score = self.score(current_best_polygon, data)
                         last_level_up_or_best_ant = len(ant_scores)
                         plot_pheromones()
-                    else:
-                        is_converged = False
-                        print("\nConverged. Is exploding! Run away!!!")
-                        break
 
             _ant = Ant(start_vertex)
             _ant.move_ant()
@@ -195,6 +197,9 @@ class Classifier:
             ant_scores.append(ant_score)
             t_elapsed = process_time() - t_start
 
+        for i, e in enumerate(best_ant_history):
+            if e is None:
+                best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
         return ant_scores, current_best_polygon, best_ant_history
 
     def reset_at_random(self, matrix):

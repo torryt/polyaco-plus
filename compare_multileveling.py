@@ -3,31 +3,37 @@ from datetime import datetime
 import os.path as osp
 
 from acoc import acoc_plotter as plotter
-from acoc_runner import run, clf_config
+from main import run, clf_config
 from config import SAVE_DIR
 
 SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
-runs = 3
+runs = 5
 
-with_multi = np.empty((runs, clf_config['run_time']))
-no_multi = np.empty((runs, clf_config['run_time']))
+with_multi = []
+no_multi = []
 for i in range(runs):
     print("\nRun {}/{}\n".format(i + 1, runs))
 
-    with_multi[i] = run(multi_level=True)
-    no_multi[i] = run(multi_level=False, granularity=17)
+    with_multi.append(run(multi_level=True))
+    no_multi.append(run(multi_level=False, granularity=33))
 
-np.set_printoptions(precision=3)
-plotter.plot_ant_scores(with_multi.mean(0).tolist(), save=True, save_folder=SAVE_FOLDER)
-plotter.plot_ant_scores(no_multi.mean(0).tolist(), save=True, save_folder=SAVE_FOLDER)
+with_multi_mean = np.array(with_multi).mean(0).tolist()
+no_multi_mean = np.array(no_multi).mean(0).tolist()
 
-with open(osp.join(full_dir, "with_multileveling.txt"), "w") as text_file:
-    print(with_multi.mean(0), file=text_file)
 
-with open(osp.join(full_dir, "without_multileveling.txt"), "w") as text_file:
-    print(no_multi.mean(0), file=text_file)
+def np_list_to_csv_string(npl):
+    return ",".join(list(map(lambda f: "{:.4f}".format(f), npl)))
 
-print("\nMean best result with multi-leveling: {}".format(with_multi.mean(0)))
-print("Mean best result without multi-leveling: {}".format(no_multi.mean(0)))
+w_multi_str = np_list_to_csv_string(with_multi_mean)
+no_multi_str = np_list_to_csv_string(no_multi_mean)
+
+plotter.plot_ant_scores(with_multi_mean, save=True, save_folder=SAVE_FOLDER, file_name='with_multi-leveling')
+plotter.plot_ant_scores(no_multi_mean, save=True, save_folder=SAVE_FOLDER, file_name='without_multi-leveling')
+
+with open(osp.join(full_dir, "results.csv"), "w") as text_file:
+    print(w_multi_str + '\n' + no_multi_str, file=text_file)
+
+print("\nMean best result with multi-leveling: {}".format(w_multi_str))
+print("Mean best result without multi-leveling: {}".format(no_multi_str))

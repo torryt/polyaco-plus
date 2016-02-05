@@ -20,8 +20,8 @@ for i in range(runs):
     no_multi[i] = run(multi_level=False, granularity=17)
 
 np.set_printoptions(precision=3)
-plotter.plot_ant_scores(with_multi.mean(0), save=True, save_folder=SAVE_FOLDER)
-plotter.plot_ant_scores(no_multi.mean(0), save=True, save_folder=SAVE_FOLDER)
+plotter.plot_ant_scores(with_multi.mean(0).tolist(), save=True, save_folder=SAVE_FOLDER)
+plotter.plot_ant_scores(no_multi.mean(0).tolist(), save=True, save_folder=SAVE_FOLDER)
 
 with open(osp.join(full_dir, "with_multileveling.txt"), "w") as text_file:
     print(with_multi.mean(0), file=text_file)

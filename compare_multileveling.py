@@ -1,9 +1,7 @@
 import numpy as np
 from datetime import datetime
 import os.path as osp
-import os
 import pickle
-import json
 
 import utils
 import acoc

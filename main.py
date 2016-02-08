@@ -42,7 +42,7 @@ def run(**kwargs):
     clf = acoc.Classifier(conf, SAVE_FOLDER)
     data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
 
-    ant_scores, polygon, best_ant_history = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
+    ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
     print(", Best ant score: {}".format(max(ant_scores)))
 
     if SAVE:
@@ -54,7 +54,6 @@ def run(**kwargs):
         matrix = AcocMatrix(data)
         plotter.plot_path_with_data(polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
         plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
-    return best_ant_history
 
 if __name__ == "__main__":
     runs = 1

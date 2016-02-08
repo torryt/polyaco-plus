@@ -2,15 +2,29 @@ import numpy as np
 from datetime import datetime
 import os.path as osp
 import os
+import pickle
 
+import acoc
 from acoc import acoc_plotter as plotter
-from main import run, clf_config
-from config import SAVE_DIR
+from config import SAVE_DIR, CLF_CONFIG
 
 SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
 if not osp.exists(full_dir):
     os.makedirs(full_dir)
+
+
+def run(**kwargs):
+    conf = dict(CLF_CONFIG)
+    for k, v in kwargs.items():
+        conf[k] = v
+
+    clf = acoc.Classifier(conf, SAVE_FOLDER)
+    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
+
+    ant_scores, _, best_ant_history = clf.classify(data)
+    print(", Best ant score: {}".format(max(ant_scores)))
+    return best_ant_history
 
 runs = 5
 with_multi = []

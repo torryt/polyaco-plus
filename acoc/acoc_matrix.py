@@ -20,7 +20,7 @@ class AcocMatrix:
         self.edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
 
         self.tau_initial = tau_initial
-        self.level = 1
+        self.level = 0
 
         x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=int(self.granularity), endpoint=True)
         y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=int(self.granularity), endpoint=True)
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     from acoc.acoc_plotter import plot_pheromones, plot_matrix
     from utils import generate_folder_name
 
-    save = True
+    save = False
     show = False
     plot = False
     dt = np.array([[[0, 0]], [[1, 1]]])

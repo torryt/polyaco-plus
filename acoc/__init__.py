@@ -163,10 +163,7 @@ class Classifier:
             if self.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
                     plot_pheromones()
-                    # Cannot have more than three levels because Matrix is a trilogy
                     if self.matrix.level <= self.max_level:
-                        # print("\nLeveling up to level {}. Granularity is now {}".
-                        #       format(self.matrix.level, self.matrix.granularity * 2 - 1))
                         self.matrix.level_up(current_best_polygon)
                         current_best_score = self.score(current_best_polygon, data)
                         last_level_up_or_best_ant = len(ant_scores)

@@ -29,7 +29,7 @@ clf_config = {
     'gpu':              True,
     'granularity':      3,
     'multi_level':      True,
-    'max_level':        4,
+    'max_level':        None,
     'convergence_rate': 800
 }
 

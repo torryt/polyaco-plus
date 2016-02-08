@@ -1,16 +1,18 @@
 import numpy as np
 from datetime import datetime
 import os.path as osp
+import os
 
 from acoc import acoc_plotter as plotter
 from main import run, clf_config
 from config import SAVE_DIR
 
 SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
-runs = 5
+if not osp.exists(full_dir):
+    os.makedirs(full_dir)
 
+runs = 5
 with_multi = []
 no_multi = []
 for i in range(runs):

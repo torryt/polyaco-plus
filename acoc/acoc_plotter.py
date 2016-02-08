@@ -2,6 +2,9 @@ from __future__ import division
 import os
 from datetime import datetime
 import numpy as np
+# import matplotlib
+# matplotlib.use('Agg')
+
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
 
@@ -9,7 +12,6 @@ from utils import generate_folder_name
 from utils.data_generator import gaussian_circle
 from config import SAVE_DIR
 
-# matplotlib.use('Agg')
 CLASS_ONE_COLOR = '#FFFFFF'
 CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'

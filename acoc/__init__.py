@@ -162,37 +162,37 @@ class Classifier:
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
             if self.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
-                    plot_pheromones()
-                    if self.matrix.level <= self.max_level:
+                    if self.max_level is None or self.matrix.level < self.max_level:
+                        plot_pheromones()
                         self.matrix.level_up(current_best_polygon)
                         current_best_score = self.score(current_best_polygon, data)
                         last_level_up_or_best_ant = len(ant_scores)
-                        plot_pheromones()
 
             _ant = Ant(start_vertex)
             _ant.move_ant()
 
             while not _ant.at_target and not _ant.is_stuck:
                 _ant.move_ant()
+            if _ant.at_target:
+                ant_score = self.score(_ant.edges_travelled, data)
+                if ant_score > current_best_score:
+                    current_best_polygon = _ant.edges_travelled
+                    current_best_score = ant_score
+                    last_level_up_or_best_ant = len(ant_scores)
 
-            ant_score = self.score(_ant.edges_travelled, data)
-            if ant_score > current_best_score:
-                current_best_polygon = _ant.edges_travelled
-                current_best_score = ant_score
-                last_level_up_or_best_ant = len(ant_scores)
-                if plot:
-                    plot_pheromones()
-                    plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
-                                                save_folder=osp.join(self.save_folder, 'best_paths/'),
-                                                file_name='ant' + str(len(ant_scores)))
+                    if plot:
+                        plot_pheromones()
+                        plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
+                                                    save_folder=osp.join(self.save_folder, 'best_paths/'),
+                                                    file_name='ant' + str(len(ant_scores)))
 
-            self.put_pheromones(current_best_polygon, data, current_best_score)
-            if self.decay_type == 'probabilistic':
-                self.reset_at_random(self.matrix)
-            elif self.decay_type == 'gradual':
-                self.grad_pheromone_decay(self.matrix)
-            ant_scores.append(ant_score)
-            t_elapsed = process_time() - t_start
+                self.put_pheromones(current_best_polygon, data, current_best_score)
+                if self.decay_type == 'probabilistic':
+                    self.reset_at_random(self.matrix)
+                elif self.decay_type == 'gradual':
+                    self.grad_pheromone_decay(self.matrix)
+                ant_scores.append(ant_score)
+                t_elapsed = process_time() - t_start
 
         for i, e in enumerate(best_ant_history):
             if e is None:
@@ -215,15 +215,14 @@ class Classifier:
             cost = cost_function_gpu(data.T, edges)
         else:
             cost = cost_function_cpu(data.T, edges)
-        try:
-            length_factor = 1 / polygon_length(polygon)
+        # try:
+        length_factor = 1 / polygon_length(polygon)
         # Handles very rare and weird error where length of polygon == 0
-        except ZeroDivisionError:
-            length_factor = 1
+        # except ZeroDivisionError:
+        #     length_factor = 1
         return (cost**self.alpha) * (length_factor**self.beta)
 
     def put_pheromones(self, path, data, score):
         for edge in path:
-            mtx_edge = self.matrix.edges[self.matrix.edges.index(edge)]
-            pheromone_strength = mtx_edge.pheromone_strength + score
-            mtx_edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max
+            pheromone_strength = edge.pheromone_strength + score
+            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max

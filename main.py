@@ -15,9 +15,9 @@ from acoc import acoc_plotter as plotter
 SAVE = False
 SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-SHOW_PLOT = False
+SHOW_PLOT = True
 clf_config = {
-    'run_time':         20,     # Algorithm runtime in seconds
+    'run_time':         5,      # Algorithm runtime in seconds
     'tau_min':          0.001,
     'tau_max':          1.0,
     'tau_init':         0.001,
@@ -27,10 +27,11 @@ clf_config = {
     'ant_init':         'weighted',
     'decay_type':       'probabilistic',
     'gpu':              True,
-    'granularity':      3,
-    'multi_level':      True,
+    'granularity':      10,
+    'multi_level':      False,
     'max_level':        None,
-    'convergence_rate': 800
+    'convergence_rate': 800,
+    'data_set':         'semicircle_gaussian'
 }
 
 
@@ -40,7 +41,7 @@ def run(**kwargs):
         conf[k] = v
 
     clf = acoc.Classifier(conf, SAVE_FOLDER)
-    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
+    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[conf['data_set']]
 
     ant_scores, polygon, _ = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
     print(", Best ant score: {}".format(max(ant_scores)))
@@ -56,7 +57,4 @@ def run(**kwargs):
         plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
 
 if __name__ == "__main__":
-    runs = 1
-    cpu_time = timeit('run()', setup='from __main__ import run', number=runs)
-
-    print("Total runtime (averaged over {} runs): {:.6f} seconds\n\n".format(runs, cpu_time / runs))
+    run()

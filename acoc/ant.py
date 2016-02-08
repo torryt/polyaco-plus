@@ -16,19 +16,19 @@ class Ant:
         self.at_target = False
 
     def move_ant(self):
-        connected_edges = [ce for ce in self.current_vertex.connected_edges if ce is not None]
+        available_edges = [ce for ce in self.current_vertex.connected_edges if ce is not None]
         if self.prev_edge:
-            connected_edges.remove(self.prev_edge)
-        [connected_edges.remove(e) for e in self.edges_travelled if e in connected_edges]
+            available_edges.remove(self.prev_edge)
+        [available_edges.remove(e) for e in available_edges if e in self.edges_travelled]
 
-        if len(connected_edges) == 0 or len(self.edges_travelled) > 10000:
+        if len(available_edges) == 0 or len(self.edges_travelled) > 10000:
             self.is_stuck = True
             return
-        weights = normalize(np.array([e.pheromone_strength for e in connected_edges]))
-        edge = choice(connected_edges, p=weights)
+        weights = normalize(np.array([e.pheromone_strength for e in available_edges]))
+        edge = choice(available_edges, p=weights)
         self.current_vertex = edge.a if self.current_vertex != edge.a else edge.b
 
-        self.edges_travelled.append(Edge(edge.a, edge.b))
+        self.edges_travelled.append(edge)
         self.prev_edge = edge
         if self.current_vertex == self.start_vertex:
             self.at_target = True

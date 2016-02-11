@@ -51,7 +51,9 @@ ray_intersect_segment_vectorized = np.vectorize(ray_intersect_segment, excluded=
 
 @cuda.jit
 def ray_intersect_segment_cuda(P, E, result):
-    point_index, edge_index = cuda.grid(2)
+    point_index = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
+    edge_index = cuda.blockIdx.y
+
     p = P[point_index]
     e = E[edge_index]
 

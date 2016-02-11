@@ -147,7 +147,7 @@ def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='up
 def plot_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
     f = plt.figure()
     ax = f.add_subplot(111)
-    plt.xlabel("Ants")
+    plt.xlabel("Time (seconds)")
     plt.ylabel(y_axis_label)
     for i, c in enumerate(curves):
         ax.plot(range(c.shape[0]), c, label=labels[i])

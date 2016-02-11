@@ -56,9 +56,10 @@ def select_with_chance_of_global_best(matrix, current_best_polygon):
 
 
 def cost_function_gpu(points, edges):
-    threads_per_block = (16, 16)
-    blocks_per_grid_x = math.ceil(points.shape[0] / threads_per_block[0])
-    blocks_per_grid_y = math.ceil(edges.shape[0] / threads_per_block[0])
+    threads_per_block = 128
+    blocks_per_grid_x = math.ceil(points.shape[0] / threads_per_block)
+    blocks_per_grid_y = math.ceil(edges.shape[0])
+
     blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
     result = np.empty((points.shape[0], edges.shape[0]), dtype=bool)
 
@@ -94,6 +95,7 @@ def polygon_length(polygon):
 
 class Classifier:
     def __init__(self, config, save_folder=''):
+        self.config = config
         self.run_time = config['run_time']
         self.tau_min = config['tau_min']
         self.tau_max = config['tau_max']
@@ -114,6 +116,7 @@ class Classifier:
         self.matrix = None
 
     def classify(self, data, plot=False, print_string=''):
+        cuda.to_device(data.T)
         ant_scores = []
         current_best_polygon = []
         last_level_up_or_best_ant = 0
@@ -197,7 +200,7 @@ class Classifier:
         for i, e in enumerate(best_ant_history):
             if e is None:
                 best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
-        return ant_scores, current_best_polygon, best_ant_history
+        return best_ant_history, current_best_polygon,
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:

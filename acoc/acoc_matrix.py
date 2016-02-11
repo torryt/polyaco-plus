@@ -115,12 +115,14 @@ if __name__ == "__main__":
     mtrx.edges[1].pheromone_strength = 5
     mtrx.edges[0].pheromone_strength = 3
     save_folder = generate_folder_name()
+    print("Level {}: Granularity {}, edges {}, vertices {}".format(mtrx.level, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
+
     if plot:
         plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
         plot_matrix(mtrx, show=show, save=save)
-    for i in range(5):
+    for i in range(6):
         mtrx.level_up(pol)
-        print("Level {}: Granularity {}, edges {}, vertices {}".format(i + 1, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
+        print("Level {}: Granularity {}, edges {}, vertices {}".format(mtrx.level, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
         if plot:
             plot_matrix(mtrx, show=show, save=save)
             plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)

@@ -12,6 +12,8 @@ from utils import generate_folder_name
 from utils.data_generator import gaussian_circle
 from config import SAVE_DIR
 
+COLORS = ['#0097E8', '#FFCB70', '#9AEDB0']
+
 CLASS_ONE_COLOR = '#FFFFFF'
 CLASS_TWO_COLOR = '#0097E8'
 EDGE_COLOR = '#1A1A1A'
@@ -20,18 +22,14 @@ EDGE_COLOR = '#1A1A1A'
 def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, save_folder=''):
     n_groups = len(labels)  # number of experiments run
 
-    means_cpu = cpu_results
-    means_gpu = gpu_results
-
     fig, ax = plt.subplots()
-
     index = np.arange(n_groups)
     bar_width = 0.35
 
     opacity = 0.4
     error_config = {'ecolor': '0.3'}
-    plt.bar(index, means_cpu, bar_width, alpha=opacity, color='b', error_kw=error_config, label='cpu')
-    plt.bar(index + bar_width, means_gpu, bar_width, alpha=opacity, color='r', error_kw=error_config, label='gpu')
+    plt.bar(index, cpu_results, bar_width, alpha=opacity, color='b', error_kw=error_config, label='cpu')
+    plt.bar(index + bar_width, gpu_results, bar_width, alpha=opacity, color='r', error_kw=error_config, label='gpu')
 
     plt.xlabel('Experiment values')
     plt.ylabel('Time spent')
@@ -42,6 +40,28 @@ def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, sav
         save_plot(fig, save_folder)
     if show:
         plt.show()
+    plt.clf()
+
+
+def plot_bar_chart(data, xvalues, labels, save_folder, file_name):
+    fig, ax = plt.subplots()
+
+    index = np.arange(len(xvalues))
+    bar_width = 0.15
+
+    rects = []
+    for i in range(data.shape[0]):
+        rects.append(plt.bar(index + bar_width * i, data[i], bar_width,
+                            color=COLORS[i],
+                            log=True
+                            )[0])
+    plt.ylabel('Time (seconds)')
+    plt.xlabel('Size of dataset')
+    plt.title('')
+    plt.xticks(index + bar_width * (data.shape[0] / 2), xvalues)
+    plt.legend(rects, labels, loc='upper left')
+
+    save_plot(fig, save_folder, file_name)
 
 
 def plot_ant_scores(ant_scores, save=False, show=False, save_folder='', file_name=None):
@@ -167,7 +187,7 @@ def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, 
     plt.title("Pheromones")
     for edge in matrix.edges:
         line = ax.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], 'k-')
-        lw = edge.pheromone_strength*((max_val - min_val) / (tau_max - tau_min))
+        lw = edge.pheromone_strength * ((max_val - min_val) / (tau_max - tau_min))
         plt.setp(line, lw=lw)
 
     if data is not None:
@@ -223,6 +243,7 @@ def main():
     plot_data(points, ax)
     save_plot(fig)
     # plt.show()
+
 
 if __name__ == "__main__":
     main()

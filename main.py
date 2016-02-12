@@ -26,7 +26,7 @@ clf_config = {
     'beta':             0.01,
     'ant_init':         'weighted',
     'decay_type':       'probabilistic',
-    'gpu':              True,
+    'gpu':              False,
     'granularity':      3,
     'multi_level':      True,
     'max_level':        None,

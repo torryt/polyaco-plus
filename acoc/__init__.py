@@ -6,7 +6,7 @@ import random
 import numpy as np
 from numpy.random.mtrand import choice as np_choice
 import math
-from numba import cuda
+from numba import cuda, jit
 import os.path as osp
 import time
 from time import process_time
@@ -78,8 +78,11 @@ def cost_function_gpu(points, edges):
     return score / points.shape[0]
 
 
-def cost_function_cpu(points, edges):
-    is_inside = np.array([ray_cast.is_point_inside(p, edges) for p in points])
+@jit
+def cost_function_jit(points, edges):
+    is_inside = np.empty((points.shape[0]))
+    for i in range(points.shape[0]):
+        is_inside[i] = ray_cast.is_point_inside_jit(points[i], edges)
     score = np.sum(np.logical_xor(is_inside, points[:, 2]))
     return score / points.shape[0]
 
@@ -223,7 +226,7 @@ class Classifier:
         if self.gpu:
             cost = cost_function_gpu(data.T, edges)
         else:
-            cost = cost_function_cpu(data.T, edges)
+            cost = cost_function(data.T, edges)
         # try:
         length_factor = 1 / polygon_length(polygon)
         # Handles very rare and weird error where length of polygon == 0

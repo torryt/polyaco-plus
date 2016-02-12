@@ -55,6 +55,12 @@ def select_with_chance_of_global_best(matrix, current_best_polygon):
         return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
 
+def cost_function(points, edges):
+    is_inside = np.array([ray_cast.is_point_inside(p, edges) for p in points])
+    score = np.sum(np.logical_xor(is_inside, points[:, 2]))
+    return score / points.shape[0]
+
+
 def cost_function_gpu(points, edges):
     threads_per_block = 128
     blocks_per_grid_x = math.ceil(points.shape[0] / threads_per_block)

@@ -46,7 +46,6 @@ def ray_intersect_segment(p, e):
         return m_blue >= m_red
 
 ray_intersect_segment_device = cuda.jit(ray_intersect_segment, device=True)
-ray_intersect_segment_vectorized = np.vectorize(ray_intersect_segment, excluded='p')
 
 
 @cuda.jit
@@ -54,13 +53,13 @@ def ray_intersect_segment_cuda(P, E, result):
     point_index = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
     edge_index = cuda.blockIdx.y
 
-    p = P[point_index]
-    e = E[edge_index]
-
-    if edge_index < E.shape[0] and point_index < P.shape[0]:
+    if point_index < P.shape[0]:
+        p = P[point_index]
+        e = E[edge_index]
         result[point_index][edge_index] = ray_intersect_segment_device(p, e)
 
 
 def is_point_inside(point, solution):
     return odd(sum(ray_intersect_segment(point, edge)
                    for edge in solution))
+

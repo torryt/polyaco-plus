@@ -11,7 +11,7 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    100,
+    'ant_count':    10,
     'number_runs':  1,
     'tau_min':      0.001,
     'tau_max':      1.0,
@@ -76,19 +76,14 @@ def performance(parameter_name, values, config=CONFIG):
         # results[index, 1], drop[index, 1] = run((parameter_name, v), ('gpu', False))
         # utils.clear_current_line()
 
-    # print("Results: \n{}".format(results))
-    # Print uten CPU resultater
+    print("Results: \n{}".format(results))
     print("Number of dropped solutions: \n " + "GPU: " + format(drop[:, 0]))
     gpu_results = tuple(results[:, 0])
     # cpu_results = tuple(results[:, 1])
     exp_name = tuple(values)
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
-    utils.save_string_to_file(
-            "Number of dropped solutions:" + "\n GPU: " + format(drop[:, 0]) + " \n CPU: " + format(drop[:, 1]) +
-            "\n Results: \n{}".format(results) + "\n" + parameter_name + " : " + str(exp_name),
-            save_folder, 'results_' + parameter_name + '.txt')
 
-    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=True, show=True, save_folder=save_folder)
+    acoc_plotter.plot_bar_graph(gpu_results, 0, exp_name, save=False, show=True, save_folder=SAVE_DIR)
 
 if __name__ == "__main__":
     performance('granularity', [10])

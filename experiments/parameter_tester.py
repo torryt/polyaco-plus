@@ -11,17 +11,22 @@ import utils
 from config import SAVE_DIR
 
 CONFIG = {
-    'ant_count':    3000,
-    'number_runs':  50,
-    'tau_min':      0.001,
-    'tau_max':      1.0,
-    'tau_init':     0.001,
-    'rho':          0.02,
-    'alpha':        1,
-    'beta':         0.1,
-    'ant_init':     'weighted',
-    'decay_type':   'probabilistic',
-    'data_set':     'rectangle_small'
+    'run_time':         10,
+    'number_runs':      5,
+    'tau_min':          0.001,
+    'tau_max':          1.0,
+    'tau_init':         0.001,
+    'rho':              0.02,
+    'alpha':            1,
+    'beta':             0.01,
+    'ant_init':         'weighted',
+    'decay_type':       'probabilistic',
+    'gpu':              True,
+    'granularity':      3,
+    'multi_level':      True,
+    'max_level':        None,
+    'convergence_rate': 800,
+    'data_set':         'semicircle_gaussian'
 }
 
 
@@ -33,9 +38,7 @@ def run(*args):
     number_runs = config['number_runs']
 
     clf = acoc.Classifier(config)
-    all_ant_scores = np.zeros((number_runs, config['ant_count']))
-    all_polygons = np.zeros((number_runs, config['ant_count']))
-    all_costs = np.zeros((number_runs, config['ant_count']))
+    all_ant_scores = np.zeros((number_runs, config['run_time']))
 
     for i in range(number_runs):
         iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
@@ -44,7 +47,7 @@ def run(*args):
         utils.print_on_current_line(iter_string)
         all_ant_scores[i, :] = ant_scores
 
-    return all_ant_scores.mean(0), all_polygons.mean(0), all_costs.mean(0)
+    return all_ant_scores.mean(0)
 
 
 def parameter_tester(parameter_name, values, config=CONFIG):
@@ -59,14 +62,10 @@ def parameter_tester(parameter_name, values, config=CONFIG):
 
     plt.clf()
     all_scores = []
-    all_costs = []
-    all_polygon_lengths = []
     for index, v in enumerate(values):
         print("Run {} with value {}".format(index+1, v))
-        scores, polygons, costs = run((parameter_name, v))
+        scores = run((parameter_name, v))
         all_scores.append(scores)
-        all_costs.append(costs)
-        all_polygon_lengths.append(polygons)
         utils.print_on_current_line('')
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
     labels = [parameter_name + '=' + str(v) for v in values]
@@ -75,12 +74,9 @@ def parameter_tester(parameter_name, values, config=CONFIG):
         utils.save_object(data, save_folder, 'data_' + typ)
         fig = acoc_plotter.plot_curves(data, labels, ylabel)
         acoc_plotter.save_plot(fig, save_folder, 'noise_' + typ)
-        acoc_plotter.save_plot(acoc_plotter.plot_smooth_curves(data, labels, ylabel), save_folder, 'smooth_' + typ)
+        # acoc_plotter.save_plot(acoc_plotter.plot_smooth_curves(data, labels, ylabel), save_folder, 'smooth_' + typ)
 
-    results = [(all_scores, 'score', 'Score'),
-               (all_costs, 'cost', 'Cost'),
-               (all_polygon_lengths, 'length', 'Length of Polygon')]
-    [save_results(*obj) for obj in results]
+    save_results(all_scores, 'best_score', 'Best score')
 
 if __name__ == "__main__":
 

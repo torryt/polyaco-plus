@@ -4,6 +4,7 @@ import time
 import numpy as np
 
 import acoc
+from acoc import acoc_plotter
 import utils
 from utils import data_generator as dg
 from utils import generate_folder_name
@@ -67,30 +68,43 @@ def benchmark(parameter_name, values, config=CONFIG):
     utils.save_string_to_file(result_str, save_folder, 'results.txt')
 
 
-def benchmark_cost_function(data_size):
+def benchmark_cost_function(data_sizes):
     polygon = pickle.load(open('../utils/good_path_for_rectangle.pickle', 'rb'))
 
     save_folder = generate_folder_name()
-    iterations = 100
-    results = np.empty((len(data_size), iterations, 2), dtype=float)
+    iterations = 10
+    results = np.empty((len(data_sizes), iterations, 3), dtype=float)
 
-    for i, dsize in enumerate(data_size):
-        data = dg.generate_rectangle_set(data_size)
+    for i, dsize in enumerate(data_sizes):
+        data = dg.generate_rectangle_set(dsize)
 
         print("\nRun {} with value {}".format(i+1, dsize))
+
+        # Compile functions and warm up GPU
+        acoc.cost_function_jit(data.T, polygon)
+        acoc.cost_function_gpu(data.T, polygon)
+
         for j in range(iterations):
             utils.print_on_current_line('Iteration {}/{}'.format(j, iterations))
+            start_cpu = time.clock()
+            acoc.cost_function(data.T, polygon)
+            end_cpu = time.clock()
+            results[i][j][0] = end_cpu - start_cpu
+
+            start_jit = time.clock()
+            acoc.cost_function_jit(data.T, polygon)
+            end_jit = time.clock()
+            results[i][j][1] = end_jit - start_jit
+
             start_gpu = time.clock()
             acoc.cost_function_gpu(data.T, polygon)
             end_gpu = time.clock()
-            results[i][j][0] = end_gpu - start_gpu
+            results[i][j][2] = end_gpu - start_gpu
 
-            start_cpu = time.clock()
-            acoc.cost_function_cpu(data.T, polygon)
-            end_cpu = time.clock()
-            results[i][j][1] = end_cpu - start_cpu
+    mean_results = np.mean(results, axis=1).T
+    acoc_plotter.plot_bar_chart(mean_results, data_sizes, ['CPython', 'JIT', 'GPU'], save_folder, 'results')
 
-    mean_results = np.mean(results, axis=1)
+    np.set_printoptions(precision=7, suppress=False)
     print("\nResults: \n{}".format(mean_results))
     utils.save_object(mean_results, save_folder, 'results')
 
@@ -99,4 +113,5 @@ if __name__ == "__main__":
     # benchmark('granularity', [10, 20, 30, 40, 50, 100])
     # benchmark('data_set', ['r_50', 'r_500', 'r_5000', 'r_50000', 'r_500000'])
     # benchmark('data_set', ['r_50', 'r_500', 'r_5000'])
-    benchmark_cost_function([100, 1000, 10000, 100000])
+    benchmark_cost_function([1000, 10000, 100000, 1000000])
+    # benchmark_cost_function([1000])

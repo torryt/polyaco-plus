@@ -3,13 +3,13 @@ import os
 from datetime import datetime
 import numpy as np
 import matplotlib
+
 matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
 
 from utils import generate_folder_name
-from utils.data_generator import gaussian_circle
 from config import SAVE_DIR
 
 COLORS = ['#0097E8', '#FFCB70', '#9AEDB0']
@@ -43,21 +43,25 @@ def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, sav
     plt.clf()
 
 
-def plot_bar_chart(data, xvalues, labels, save_folder, file_name):
+def plot_bar_chart_gpu_benchmark(data, xvalues, labels, save_folder=None, file_name=None):
     fig, ax = plt.subplots()
 
     index = np.arange(len(xvalues))
     bar_width = 0.15
-
     rects = []
     for i in range(data.shape[0]):
-        rects.append(plt.bar(index + bar_width * i, data[i], bar_width,
+        rects.append(ax.bar(index + bar_width * i, data[i], bar_width,
                             color=COLORS[i],
                             log=True
                             )[0])
+    hide_top_and_right_axis(ax)
+
+    ax.yaxis.grid(color='gray', linestyle='dashed')
+    ax.set_axisbelow(True)
     plt.ylabel('Time (seconds)')
     plt.xlabel('Size of dataset')
-    plt.title('')
+    plt.axis([-0.2, len(xvalues) - 0.35, np.amin(data) / 2, np.amax(data) * 2])
+    plt.title('GPU benchmarking')
     plt.xticks(index + bar_width * (data.shape[0] / 2), xvalues)
     plt.legend(rects, labels, loc='upper left')
 
@@ -207,10 +211,10 @@ def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, 
 
 
 def save_plot(fig=None, parent_folder='', file_name=None, eps=True):
-    if parent_folder != '':
+    if parent_folder is not None:
         directory = os.path.join(SAVE_DIR, parent_folder)
     else:
-        directory = generate_folder_name()
+        directory = os.path.join(SAVE_DIR, generate_folder_name())
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5] if file_name is None else file_name
@@ -233,16 +237,9 @@ def hide_top_and_right_axis(ax):
 
 def main():
     # points = uniform_rectangle((2, 4), (2, 4), 500)
-    points = gaussian_circle(10.0, 500, 0)
-    points2 = gaussian_circle(5.0, 500, 1)
-    points = np.concatenate((points, points2), axis=1)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    hide_top_and_right_axis(ax)
-    # plt.axis('off')
-    plot_data(points, ax)
-    save_plot(fig)
-    # plt.show()
+    import pickle
+    d = pickle.load(open('/Users/torrytufteland/Dropbox/Guro og Torry/experiments/02.15, gpu server/results.pickle', 'rb'))
+    plot_bar_chart_gpu_benchmark(d, [1000, 10000, 100000, 1000000], ['CPython', 'JIT', 'GPU'], file_name='results')
 
 
 if __name__ == "__main__":

@@ -102,7 +102,7 @@ def benchmark_cost_function(data_sizes):
             results[i][j][2] = end_gpu - start_gpu
 
     mean_results = np.mean(results, axis=1).T
-    acoc_plotter.plot_bar_chart(mean_results, data_sizes, ['CPython', 'JIT', 'GPU'], save_folder, 'results')
+    acoc_plotter.plot_bar_chart_gpu_benchmark(mean_results, data_sizes, ['CPython', 'JIT', 'GPU'], save_folder, 'results')
 
     np.set_printoptions(precision=7, suppress=False)
     print("\nResults: \n{}".format(mean_results))

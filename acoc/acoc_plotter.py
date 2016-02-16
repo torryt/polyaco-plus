@@ -4,7 +4,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib
 
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -26,15 +26,17 @@ def plot_bar_graph(gpu_results, cpu_results, labels, save=False, show=False, sav
     index = np.arange(n_groups)
     bar_width = 0.35
 
-    opacity = 0.4
     error_config = {'ecolor': '0.3'}
-    plt.bar(index, cpu_results, bar_width, alpha=opacity, color='b', error_kw=error_config, label='cpu')
-    plt.bar(index + bar_width, gpu_results, bar_width, alpha=opacity, color='r', error_kw=error_config, label='gpu')
+    plt.bar(index, cpu_results, bar_width, color=COLORS[0], error_kw=error_config, label='CPython')
+    plt.bar(index + bar_width, gpu_results, bar_width, color=COLORS[2], error_kw=error_config, label='GPU')
 
-    plt.xlabel('Experiment values')
-    plt.ylabel('Time spent')
+    hide_top_and_right_axis(ax)
+    ax.yaxis.grid(color='gray', linestyle='dashed')
+    ax.set_axisbelow(True)
+    plt.xlabel(r'Grid granularity ($\mu$)')
+    plt.ylabel('Time spent on 1500 ants')
     plt.xticks(index + bar_width, labels)
-    plt.legend()
+    plt.legend(loc='upper left')
     plt.tight_layout()
     if save:
         save_plot(fig, save_folder)
@@ -61,7 +63,7 @@ def plot_bar_chart_gpu_benchmark(data, xvalues, labels, save_folder=None, file_n
     plt.ylabel('Time (seconds)')
     plt.xlabel('Size of dataset')
     plt.axis([-0.2, len(xvalues) - 0.35, np.amin(data) / 2, np.amax(data) * 2])
-    plt.title('GPU benchmarking')
+    plt.title('Benchmark of cost function')
     plt.xticks(index + bar_width * (data.shape[0] / 2), xvalues)
     plt.legend(rects, labels, loc='upper left')
 

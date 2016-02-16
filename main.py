@@ -17,7 +17,7 @@ SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 clf_config = {
-    'run_time':         40,      # Algorithm runtime in seconds
+    'run_time':         200,      # Algorithm runtime in seconds
     'tau_min':          0.001,
     'tau_max':          1.0,
     'tau_init':         0.001,
@@ -27,8 +27,8 @@ clf_config = {
     'ant_init':         'weighted',
     'decay_type':       'probabilistic',
     'gpu':              False,
-    'granularity':      3,
-    'multi_level':      True,
+    'granularity':      100,
+    'multi_level':      False,
     'max_level':        None,
     'convergence_rate': 800,
     'data_set':         'semicircle_gaussian'
@@ -58,8 +58,8 @@ def run(**kwargs):
     return max(ant_scores)
 
 if __name__ == "__main__":
-    run()
-    # scores = []
-    # for _ in range(10):
-    #     scores.append(run())
-    # print("Average best score: {}".format(sum(scores) / len(scores)))
+    # run()
+    scores = []
+    for _ in range(5):
+        scores.append(run())
+    print("Average best score: {}".format(sum(scores) / len(scores)))

@@ -41,6 +41,7 @@ def run(**kwargs):
         conf[k] = v
 
     clf = acoc.Classifier(conf, SAVE_FOLDER)
+    # Loads a sample data set from a pickle file.
     data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[conf['data_set']]
 
     ant_scores, polygon = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)

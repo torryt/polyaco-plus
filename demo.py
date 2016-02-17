@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import numpy as np
 
 import pickle
 from datetime import datetime
-from timeit import timeit
 
 import acoc
 import utils
+from config import CLASSIFIER_CONFIG
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 
@@ -16,27 +15,10 @@ SAVE = False
 SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
-clf_config = {
-    'run_time':         200,      # Algorithm runtime in seconds
-    'tau_min':          0.001,
-    'tau_max':          1.0,
-    'tau_init':         0.001,
-    'rho':              0.02,
-    'alpha':            1,
-    'beta':             0.01,
-    'ant_init':         'weighted',
-    'decay_type':       'probabilistic',
-    'gpu':              False,
-    'granularity':      100,
-    'multi_level':      False,
-    'max_level':        None,
-    'convergence_rate': 800,
-    'data_set':         'semicircle_gaussian'
-}
 
 
 def run(**kwargs):
-    conf = dict(clf_config)
+    conf = dict(CLASSIFIER_CONFIG)
     for k, v in kwargs.items():
         conf[k] = v
 

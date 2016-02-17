@@ -6,20 +6,20 @@ import pickle
 import utils
 import acoc
 from acoc import acoc_plotter as plotter
-from config import SAVE_DIR, CLF_CONFIG
+from config import SAVE_DIR, CLASSIFIER_CONFIG
 
 SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
 
-CLF_CONFIG['runs'] = 10
-CLF_CONFIG['run_time'] = 700
+CLASSIFIER_CONFIG['runs'] = 10
+CLASSIFIER_CONFIG['run_time'] = 700
 
-CLF_CONFIG['max_level'] = 3
-CLF_CONFIG['max_level_granularity'] = 17
+CLASSIFIER_CONFIG['max_level'] = 3
+CLASSIFIER_CONFIG['max_level_granularity'] = 17
 
 
 def run(**kwargs):
-    conf = dict(CLF_CONFIG)
+    conf = dict(CLASSIFIER_CONFIG)
     for k, v in kwargs.items():
         conf[k] = v
 
@@ -32,8 +32,8 @@ def run(**kwargs):
 
 with_multi = []
 no_multi = []
-for i in range(CLF_CONFIG['runs']):
-    print("\nRun {}/{}\n".format(i + 1, CLF_CONFIG['runs']))
+for i in range(CLASSIFIER_CONFIG['runs']):
+    print("\nRun {}/{}\n".format(i + 1, CLASSIFIER_CONFIG['runs']))
 
     with_multi.append(run(multi_level=True))
     no_multi.append(run(multi_level=False, granularity=33))
@@ -54,7 +54,7 @@ utils.save_object(results, SAVE_FOLDER, 'results')
 plotter.plot_ant_scores(with_multi_mean, save=True, save_folder=SAVE_FOLDER, file_name='with_multi-leveling')
 plotter.plot_ant_scores(no_multi_mean, save=True, save_folder=SAVE_FOLDER, file_name='without_multi-leveling')
 utils.save_string_to_file(w_multi_str + '\n' + no_multi_str, SAVE_FOLDER, 'results.csv')
-utils.save_dict(CLF_CONFIG, SAVE_FOLDER, 'config.json')
+utils.save_dict(CLASSIFIER_CONFIG, SAVE_FOLDER, 'config.json')
 
 print("\nMean best result with multi-leveling: {}".format(w_multi_str))
 print("Mean best result without multi-leveling: {}".format(no_multi_str))

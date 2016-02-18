@@ -8,7 +8,7 @@ import os
 
 SAVE_DIR = os.path.expanduser('~') + '/experiments/'
 
-CLF_CONFIG = {
+CLASSIFIER_CONFIG = {
     'run_time':         20,     # Algorithm runtime in seconds
     'tau_min':          0.001,
     'tau_max':          1.0,

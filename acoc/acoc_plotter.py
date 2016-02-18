@@ -12,7 +12,7 @@ from scipy.signal import savgol_filter
 from utils import generate_folder_name
 from config import SAVE_DIR
 
-COLORS = ['#0097E8', '#FFCB70', '#9AEDB0']
+COLORS = ['#0097E8', '#FFCB70', '#9AEDB0', '#C500E8']
 
 CLASS_ONE_COLOR = '#FFFFFF'
 CLASS_TWO_COLOR = '#0097E8'

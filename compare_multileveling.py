@@ -14,8 +14,8 @@ from config import SAVE_DIR, CLASSIFIER_CONFIG
 SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
 
-CLASSIFIER_CONFIG['runs'] = 20
-CLASSIFIER_CONFIG['run_time'] = 100
+CLASSIFIER_CONFIG['runs'] = 1
+CLASSIFIER_CONFIG['run_time'] = 5
 CLASSIFIER_CONFIG['max_level'] = 4
 CLASSIFIER_CONFIG['max_level_granularity'] = 33
 
@@ -32,35 +32,38 @@ def run(**kwargs):
     print(", Best ant score: {}".format(max(best_ant_history)))
     return best_ant_history
 
-with_multi = []
-high_gran = []
-low_gran = []
+
+configurations = [
+    {'label': 'With multi-leveling', 'multi_level': True},
+    {'label': r'$\mu = 3$', 'multi_level': False, 'granularity': 3},
+    {'label': r'$\mu = 9$', 'multi_level': False, 'granularity': 9},
+    {'label': r'$\mu = 33$', 'multi_level': False, 'granularity': 33}
+]
+
+results = [[] for i in range(len(configurations))]
 for i in range(CLASSIFIER_CONFIG['runs']):
     print("\nRun {}/{}\n".format(i + 1, CLASSIFIER_CONFIG['runs']))
+    for j, c in enumerate(configurations):
+        results[j].append(run(**c))
 
-    with_multi.append(run(multi_level=True))
-    high_gran.append(run(multi_level=False, granularity=33))
-    low_gran.append(run(multi_level=False, granularity=3))
+mean_results = np.array(results).mean(1).tolist()
 
 
 def np_list_to_csv_string(npl):
     return ",".join(list(map(lambda f: "{:.4f}".format(f), npl)))
 
-results = []
 csv = []
-for arr in [with_multi, high_gran, low_gran]:
-    l = np.array(arr).mean(0).tolist()
-    csv.append(np_list_to_csv_string(l))
-    results.append(l)
+for arr in mean_results:
+    csv.append(np_list_to_csv_string(arr))
 
-
-utils.save_object(results, SAVE_FOLDER, 'results')
+utils.save_object(mean_results, SAVE_FOLDER, 'results')
 utils.save_string_to_file("\n".join(csv), SAVE_FOLDER, 'results.csv')
 utils.save_dict(CLASSIFIER_CONFIG, SAVE_FOLDER, 'config.json')
 
-data = np.array(results)
+
+data = np.array(mean_results)
 x = range(data.shape[1])
-labels = ['With multi-leveling', 'High granularity', 'Low granularity']
+labels = [c['label'] for c in configurations]
 fig, ax = plt.subplots()
 
 plotter.hide_top_and_right_axis(ax)
@@ -68,10 +71,9 @@ ax.yaxis.grid(color='gray')
 ax.set_xlabel('Time (seconds)')
 ax.set_ylabel('Best polygon solution')
 
-l1, = ax.plot(x, data[0], plotter.COLORS[0], label=labels[0])
-l2, = ax.plot(x, data[1], plotter.COLORS[1], label=labels[1])
-l3, = ax.plot(x, data[2], plotter.COLORS[2], label=labels[2])
-
+lines = []
+for i in range(len(configurations)):
+    lines.append(ax.plot(x, data[i], plotter.COLORS[i], label=labels[i]))
 
 plt.legend(labels, loc='lower right')
 plotter.save_plot(fig, SAVE_FOLDER, 'results')

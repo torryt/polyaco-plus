@@ -5,6 +5,7 @@ import pickle
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+from cycler import cycler
 
 import utils
 import acoc
@@ -15,7 +16,7 @@ SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
 
 CLASSIFIER_CONFIG['runs'] = 1
-CLASSIFIER_CONFIG['run_time'] = 5
+CLASSIFIER_CONFIG['run_time'] = 10
 CLASSIFIER_CONFIG['max_level'] = 4
 CLASSIFIER_CONFIG['max_level_granularity'] = 33
 
@@ -34,11 +35,19 @@ def run(**kwargs):
 
 
 configurations = [
-    {'label': 'With multi-leveling', 'multi_level': True},
+    {'label': 'With multi-leveling', 'multi_level': True, 'granularity': 3},
     {'label': r'$\mu = 3$', 'multi_level': False, 'granularity': 3},
-    {'label': r'$\mu = 9$', 'multi_level': False, 'granularity': 9},
-    {'label': r'$\mu = 33$', 'multi_level': False, 'granularity': 33}
+    {'label': r'$\mu = 5$', 'multi_level': False, 'granularity': 5},
+    {'label': r'$\mu = 10$', 'multi_level': False, 'granularity': 10},
+    {'label': r'$\mu = 15$', 'multi_level': False, 'granularity': 15},
+    {'label': r'$\mu = 30$', 'multi_level': False, 'granularity': 30},
+    {'label': r'$\mu = 60$', 'multi_level': False, 'granularity': 60}
 ]
+
+labels = [r'$\mu = {}$'.format(c['granularity']) if not c['multi_level'] else 'With multi-level' for c in configurations]
+
+print("Warming up...")
+run(run_time=5)
 
 results = [[] for i in range(len(configurations))]
 for i in range(CLASSIFIER_CONFIG['runs']):
@@ -63,23 +72,20 @@ utils.save_dict(CLASSIFIER_CONFIG, SAVE_FOLDER, 'config.json')
 
 data = np.array(mean_results)
 x = range(data.shape[1])
-labels = [c['label'] for c in configurations]
 fig, ax = plt.subplots()
 
 plotter.hide_top_and_right_axis(ax)
 ax.yaxis.grid(color='gray')
 ax.set_xlabel('Time (seconds)')
 ax.set_ylabel('Best polygon solution')
+ax.set_prop_cycle(cycler('color', ['c', 'm', 'y', 'k', 'r', 'g', 'b']))
 
 lines = []
 for i in range(len(configurations)):
-    lines.append(ax.plot(x, data[i], plotter.COLORS[i], label=labels[i]))
+    lines.append(ax.plot(x, data[i], label=labels[i]))
 
 plt.legend(labels, loc='lower right')
 plotter.save_plot(fig, SAVE_FOLDER, 'results')
 
 # plt.show()
 #fig1.savefig('fig1.eps')
-
-print("\nMean best result with multi-leveling: {}".format(csv[0]))
-print("Mean best result without multi-leveling: {}".format(csv[1]))

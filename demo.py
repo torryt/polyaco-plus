@@ -11,8 +11,8 @@ from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
 
 
-SAVE = False
-SAVE_PHEROMONES_AND_BEST_PATHS = True
+SAVE = True
+SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 
@@ -43,6 +43,6 @@ def run(**kwargs):
 if __name__ == "__main__":
     # run()
     scores = []
-    for _ in range(1):
+    for _ in range(5):
         scores.append(run())
     print("Average best score: {}".format(sum(scores) / len(scores)))

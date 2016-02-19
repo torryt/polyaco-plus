@@ -8,7 +8,6 @@ matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
-
 from utils import generate_folder_name
 from config import SAVE_DIR
 

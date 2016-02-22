@@ -5,6 +5,7 @@ import pickle
 from datetime import datetime
 
 import acoc
+import acoc.polygon
 import utils
 from config import CLASSIFIER_CONFIG
 from acoc.acoc_matrix import AcocMatrix
@@ -31,7 +32,7 @@ def run(**kwargs):
 
     if SAVE:
         utils.save_object(ant_scores, SAVE_FOLDER, 'scores')
-        utils.save_object(acoc.polygon_to_array(polygon), SAVE_FOLDER, 'path')
+        utils.save_object(acoc.polygon.polygon_to_array(polygon), SAVE_FOLDER, 'path')
         utils.save_dict(conf, SAVE_FOLDER, 'config.txt')
 
     if SAVE or SHOW_PLOT:
@@ -43,6 +44,6 @@ def run(**kwargs):
 if __name__ == "__main__":
     # run()
     scores = []
-    for _ in range(5):
+    for _ in range(1):
         scores.append(run())
     print("Average best score: {}".format(sum(scores) / len(scores)))

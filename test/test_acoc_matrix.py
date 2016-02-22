@@ -77,14 +77,23 @@ class TestMatrix(unittest.TestCase):
         matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
         horiz_e = list(filter(lambda e: e.a.y == e.b.y, matrix.edges))[0]
         e_len = horiz_e.b.x - horiz_e.a.x
-        self.assertEqual(e_len, matrix.edge_length_x)
+        self.assertEqual(e_len, matrix.init_edge_length_x)
 
     def test_edge_length_x_is_equal_a_horizontal_edge_in_matrix_after_level_up(self):
         matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
         matrix.level_up()
         horiz_e = list(filter(lambda e: e.a.y == e.b.y, matrix.edges))[0]
         e_len = horiz_e.b.x - horiz_e.a.x
-        self.assertEqual(e_len, matrix.edge_length_x)
+        self.assertEqual(e_len, matrix.init_edge_length_x / 2)
+
+    def test_first_vertex_is_smallest_vertex(self):
+        matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
+        first_v = matrix.vertices[0]
+        smallest_x = min(matrix.vertices, key=lambda v: v.x).x
+        smallest_y = min(matrix.vertices, key=lambda v: v.y).y
+
+        self.assertEqual(first_v.x, smallest_x)
+        self.assertEqual(first_v.y, smallest_y)
 
 
 class TestVertex(unittest.TestCase):

@@ -2,6 +2,7 @@ from collections import namedtuple
 import sys
 from numba import cuda, jit
 import numpy as np
+import math
 
 _eps = 0.00001
 _huge = sys.float_info.max
@@ -59,10 +60,31 @@ def ray_intersect_segment_cuda(P, E, result):
         result[point_index][edge_index] = ray_intersect_segment_device(p, e)
 
 
+def is_points_inside_cuda(points, solution):
+    threads_per_block = 128
+    blocks_per_grid_x = math.ceil(points.shape[0] / threads_per_block)
+    blocks_per_grid_y = math.ceil(solution.shape[0])
+
+    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
+    result = np.empty((points.shape[0], solution.shape[0]), dtype=bool)
+
+    p_points = cuda.to_device(points)
+    p_edges = cuda.to_device(solution)
+    ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](p_points, p_edges, result)
+
+    return odd(np.sum(result, axis=1))
+
+
 def is_point_inside(point, solution):
     return odd(sum(ray_intersect_segment(point, edge)
                    for edge in solution))
 
+
+def any_point_inside(points, solution):
+    for p in points:
+        if is_point_inside(p, solution):
+            return True
+    return False
 
 @jit
 def is_point_inside_jit(point, solution):

@@ -2,7 +2,7 @@ import unittest
 
 from acoc.edge import Edge
 from acoc.vertex import Vertex
-from acoc import polygon_length
+from acoc.polygon import polygon_length
 
 
 class TestPolygon(unittest.TestCase):

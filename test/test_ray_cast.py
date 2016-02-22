@@ -6,10 +6,10 @@ import math
 from acoc import ray_cast as rc
 from acoc.ray_cast import Pt
 from acoc.edge import Edge
+from acoc.vertex import Vertex
 
 
 class TestPointInside(unittest.TestCase):
-
     def test_ray_intersect_segment_returns_true(self):
         p = [0, 1]
         e = [[1, 1], [1, 3]]
@@ -22,7 +22,6 @@ class TestPointInside(unittest.TestCase):
 
 
 class TestRayIntersectSegmentCuda(unittest.TestCase):
-
     def get_data(self):
         P = np.array([[1, 1]], dtype='float32')
         e1 = [[1, 0], [1, 3]]
@@ -48,7 +47,6 @@ class TestRayIntersectSegmentCuda(unittest.TestCase):
 
 
 class TestIsPointInsideCuda(unittest.TestCase):
-
     def test_function_returns_array_of_floats(self):
         points = np.array([[1, 1], [2, 2]], dtype='float32')
         e1 = [[1, 0], [1, 3]]
@@ -56,15 +54,13 @@ class TestIsPointInsideCuda(unittest.TestCase):
         edges = np.array([e1, e2], dtype='float32')
         threads_per_block = points.shape[0]
         blocks_per_grid = 1
-        result = np.empty((points.shape[0],edges.shape[0]), dtype=bool)
+        result = np.empty((points.shape[0], edges.shape[0]), dtype=bool)
         rc.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](points, edges, result)
         self.assertTrue(type(result[0][0]) is np.bool_, 'Type is not {} but "{}" '.format(np.bool_, type(result[0][0])))
 
 
 class TestCudaGrid(unittest.TestCase):
-
     def test_grid_fills_all_values(self):
-
         @cuda.jit
         def make_true(arr):
             x, y = cuda.grid(2)
@@ -81,3 +77,21 @@ class TestCudaGrid(unittest.TestCase):
 
         # Assert whether all values evaluate to true
         self.assertTrue(np.all(arr), 'Not all values in array is True: \n{}'.format(arr))
+
+
+class TestAnyPointInside(unittest.TestCase):
+    def setUp(self):
+        self.edges = np.array([[[0, 0], [1, 0]],
+                               [[0, 0], [0, 1]],
+                               [[1, 0], [1, 1]],
+                               [[0, 1], [1, 1]]])
+
+    def test_returns_true_if_one_point_inside(self):
+        points = np.array([[0.5, 0.5], [1.0, 2.0]])
+        result = rc.any_point_inside(points, self.edges)
+        self.assertTrue(result)
+
+    def test_returns_false_if_no_point_inside(self):
+        points = np.array([[2.0, 0.5], [1.0, 2.0]])
+        result = rc.any_point_inside(points, self.edges)
+        self.assertFalse(result)

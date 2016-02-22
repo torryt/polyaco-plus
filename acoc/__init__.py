@@ -2,22 +2,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 
-import random
-import numpy as np
-from numpy.random.mtrand import choice as np_choice
-import math
-from numba import cuda, jit
 import os.path as osp
+import random
 import time
-from time import process_time
 from threading import Thread
+from time import process_time
 
-import utils
+import numpy as np
+from numba import cuda, jit
+from numpy.random.mtrand import choice as np_choice
+
 import acoc.acoc_plotter as plotter
+import utils
+from acoc import ray_cast
 from acoc.acoc_matrix import AcocMatrix
 from acoc.ant import Ant
+from acoc.polygon import polygon_to_array, polygon_length
 from acoc.ray_cast import is_point_inside
-from acoc import ray_cast
 from utils import normalize
 
 odd = np.vectorize(ray_cast.odd)
@@ -62,18 +63,7 @@ def cost_function(points, edges):
 
 
 def cost_function_gpu(points, edges):
-    threads_per_block = 128
-    blocks_per_grid_x = math.ceil(points.shape[0] / threads_per_block)
-    blocks_per_grid_y = math.ceil(edges.shape[0])
-
-    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
-    result = np.empty((points.shape[0], edges.shape[0]), dtype=bool)
-
-    p_points = cuda.to_device(points)
-    p_edges = cuda.to_device(edges)
-    ray_cast.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](p_points, p_edges, result)
-
-    is_inside = odd(np.sum(result, axis=1))
+    is_inside = ray_cast.is_points_inside_cuda(points, edges)
     score = np.sum(np.logical_xor(is_inside, points[:, 2]))
     return score / points.shape[0]
 
@@ -85,21 +75,6 @@ def cost_function_jit(points, edges):
         is_inside[i] = ray_cast.is_point_inside_jit(points[i], edges)
     score = np.sum(np.logical_xor(is_inside, points[:, 2]))
     return score / points.shape[0]
-
-
-def polygon_to_array(polygon):
-    return np.array([[[e.a.x, e.a.y], [e.b.x, e.b.y]] for e in polygon], dtype='float32')
-
-
-def polygon_length(polygon):
-    x_edge = next(e for e in polygon if e.a.y == e.b.y)
-    x_edge_length = x_edge.b.x - x_edge.a.x
-    x_edges_count = len([1 for e in polygon if e.a.y == e.b.y])
-
-    y_edge = next(e for e in polygon if e.a.x == e.b.x)
-    y_edge_length = y_edge.b.y - y_edge.a.y
-    y_edges_count = len(polygon) - x_edges_count
-    return (x_edges_count * x_edge_length) + (y_edges_count * y_edge_length)
 
 
 class Classifier:

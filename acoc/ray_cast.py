@@ -81,7 +81,7 @@ def is_point_inside(point, solution):
 
 
 def any_point_inside(points, solution):
-    for p in points:
+    for p in points.T:
         if is_point_inside(p, solution):
             return True
     return False

@@ -3,10 +3,13 @@ from itertools import product
 import numpy as np
 import math
 from itertools import repeat
+from copy import copy
 
+import acoc.acoc_plotter as plotter
 from acoc.edge import Edge
 from acoc.vertex import Vertex
 from acoc.ray_cast import any_point_inside
+from acoc.polygon import polygon_to_array
 
 
 DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
@@ -15,6 +18,7 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 class AcocMatrix:
     def __init__(self, data, tau_initial=1.0, granularity=10, old_matrix=None):
         self.granularity = granularity
+        self.data = data
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
         self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
@@ -22,6 +26,7 @@ class AcocMatrix:
 
         self.tau_initial = tau_initial
         self.level = 0
+        self.max_level = 2
 
         x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=2, endpoint=True)
         y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=2, endpoint=True)
@@ -32,17 +37,64 @@ class AcocMatrix:
         # The number of edges |E| depends on number of vertices with the following formula |E| = y(x-1) + x(y-1)
         # Example: A 4x4 matrix will generate 4(4-1) + 4(4-1) = 24
         self.edges = create_edges(self.vertices, self.tau_initial)
+        new_edges, remove_edges = self.increase_section_granularity(copy(self.edges), 0)
+        self.edges = set(new_edges) - set(remove_edges)
 
-        increase_section_granularity(data, self.edges)
-        connect_vertices_to_edges(self.edges)
+    def increase_section_granularity(self, section, level):
+
+        if level == self.max_level:
+            return
+
+        if any_point_inside(self.data, polygon_to_array(section)):
+            new_edges = []
+            remove_edges = []
+
+            # Cut edges in two
+            for edge in section:
+                v_mid = Vertex(((edge.a.x + edge.b.x) / 2), ((edge.a.y + edge.b.y) / 2))
+                self.vertices.append(v_mid)
+                new_edges.extend([Edge(edge.a, v_mid, edge.pheromone_strength),
+                                  Edge(v_mid, edge.b, edge.pheromone_strength)])
+
+            remove_edges.extend(section)
+            connect_edges_to_vertices(new_edges)
+            v_lower_left = section[0].a
+            v_down = v_lower_left.connected_edges[DIRECTION['RIGHT']].b
+            v_right = v_down.connected_edges[DIRECTION['RIGHT']].b.connected_edges[DIRECTION['UP']].b
+            v_left = v_lower_left.connected_edges[DIRECTION['UP']].b
+            v_up = v_left.connected_edges[DIRECTION['UP']].b.connected_edges[DIRECTION['RIGHT']].b
+            v_center = Vertex(v_down.x, v_left.y)
+
+            new_edges.extend([Edge(v_down, v_center, pheromone_strength=self.tau_initial),
+                               Edge(v_left, v_center, pheromone_strength=self.tau_initial),
+                               Edge(v_center, v_right, pheromone_strength=self.tau_initial),
+                               Edge(v_center, v_up, pheromone_strength=self.tau_initial)])
+            self.vertices.append(v_center)
+            connect_edges_to_vertices(new_edges)
+
+            corners = [v_lower_left,
+                       v_down,
+                       v_left,
+                       v_center]
+
+            subsections = []
+            for c in corners:
+                subsections.append([
+                    c.connected_edges[DIRECTION['RIGHT']],
+                    c.connected_edges[DIRECTION['RIGHT']].b.connected_edges[DIRECTION['UP']],
+                    c.connected_edges[DIRECTION['UP']].b.connected_edges[DIRECTION['RIGHT']],
+                    c.connected_edges[DIRECTION['UP']]
+                ])
+
+            for sbs in subsections:
+                result = self.increase_section_granularity(sbs, level+1)
+                if result is not None:
+                    new_edges.extend(result[0])
+                    remove_edges.extend(result[1])
+            return new_edges, remove_edges
 
 
-def increase_section_granularity(data, section):
-    if any_point_inside(data, section):
-        pass
-
-
-def connect_vertices_to_edges(edges):
+def connect_edges_to_vertices(edges):
     for e in edges:
         # if horizontal edge
         if e.a.y == e.b.y:

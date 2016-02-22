@@ -4,7 +4,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib
 
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -124,7 +124,14 @@ def plot_data(data, subplot=None, show=False):
              np.amax(data[0]) + .2,
              np.amin(data[1]) - .2,
              np.amax(data[1]) + .2])
+    if show:
+        plt.show()
 
+
+def plot_matrix_and_data(matrix, data, show=False):
+    fig, ax = plt.subplots()
+    plot_matrix(matrix, ax)
+    plot_data(data, ax)
     if show:
         plt.show()
 

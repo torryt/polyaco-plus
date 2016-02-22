@@ -1,10 +1,12 @@
 import unittest
+import numpy as np
 
 from acoc import acoc_matrix as am
 from acoc.acoc_matrix import AcocMatrix
 from acoc.acoc_matrix import DIRECTION
 from acoc.vertex import Vertex
 from acoc.edge import Edge
+import acoc.acoc_plotter as plotter
 
 
 class TestEdge(unittest.TestCase):
@@ -96,12 +98,26 @@ class TestMatrix(unittest.TestCase):
         self.assertEqual(first_v.y, smallest_y)
 
 
+class TestMatrixIncreaseSectionGranularity(unittest.TestCase):
+    def test_show_two_sections_increase(self):
+        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 2, 3]]))
+        plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertEqual(len(matrix.vertices), 19)
+        self.assertEqual(len(matrix.edges), 28)
+
+    def test_show_three_section_increase_show(self):
+        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 1, 3]]))
+        plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertEqual(len(matrix.vertices), 19)
+        self.assertEqual(len(matrix.edges), 12)
+
+
 class TestVertex(unittest.TestCase):
     def test_connect_edges_to_vertex_should_be_1(self):
         v1 = Vertex(0, 0)
         v2 = Vertex(1, 2)
         e = Edge(v1, v2)
-        am.connect_vertices_to_edges([e])
+        am.connect_edges_to_vertices([e])
 
         self.assertEqual(1, len([v for v in v1.connected_edges if v is not None]))
 
@@ -111,7 +127,7 @@ class TestVertex(unittest.TestCase):
         v3 = Vertex(-1, 0)
         e1 = Edge(v1, v2)
         e2 = Edge(v3, v1)
-        am.connect_vertices_to_edges([e1, e2])
+        am.connect_edges_to_vertices([e1, e2])
         self.assertEqual(2, len([v for v in v1.connected_edges if v is not None]))
 
     def test_connect_edges_to_vertex_should_be_sorted_right_left_up_down(self):
@@ -122,7 +138,7 @@ class TestVertex(unittest.TestCase):
         e_down = Edge(Vertex(0, -1), v)
 
         edges = [e_left, e_right, e_down, e_up]
-        am.connect_vertices_to_edges(edges)
+        am.connect_edges_to_vertices(edges)
         ce = v.connected_edges
         self.assertEqual(ce[DIRECTION['RIGHT']], e_right)
         self.assertEqual(ce[DIRECTION['LEFT']], e_left)

@@ -7,6 +7,7 @@ from acoc import ray_cast as rc
 from acoc.ray_cast import Pt
 from acoc.edge import Edge
 from acoc.vertex import Vertex
+from acoc.polygon import polygon_to_array
 
 
 class TestPointInside(unittest.TestCase):
@@ -81,10 +82,15 @@ class TestCudaGrid(unittest.TestCase):
 
 class TestAnyPointInside(unittest.TestCase):
     def setUp(self):
-        self.edges = np.array([[[0, 0], [1, 0]],
-                               [[0, 0], [0, 1]],
-                               [[1, 0], [1, 1]],
-                               [[0, 1], [1, 1]]])
+        vs = [Vertex(0, 0),
+              Vertex(1, 0),
+              Vertex(0, 1),
+              Vertex(1, 1)]
+        self.edges = polygon_to_array(
+            [Edge(vs[0], vs[1]),
+             Edge(vs[0], vs[2]),
+             Edge(vs[1], vs[3]),
+             Edge(vs[2], vs[3])])
 
     def test_returns_true_if_one_point_inside(self):
         points = np.array([[0.5, 0.5], [1.0, 2.0]])

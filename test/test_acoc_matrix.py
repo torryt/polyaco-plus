@@ -53,24 +53,18 @@ class TestEdge(unittest.TestCase):
 
 
 class TestMatrix(unittest.TestCase):
-
     def test_granularity_4_should_return_matrix_with_24_edges_and_16_vertices(self):
         matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
         self.assertEqual(len(matrix.vertices), 16)
         self.assertEqual(len(matrix.edges), 24)
 
-    def test_granularity_10_should_return_matrix_with_180_edges_and_100_vertices(self):
-        matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
-        self.assertEqual(len(matrix.vertices), 16)
-        self.assertEqual(len(matrix.edges), 24)
-
     def test_all_edges_move_in_positive_direction_from_a_to_b(self):
-        matrix = AcocMatrix([[0, 0], [1,1]], granularity=4)
+        matrix = AcocMatrix([[0, 0], [1,1]])
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
 
     def test_all_edges_move_in_positive_direction_from_a_to_b_after_level_up(self):
-        matrix = AcocMatrix([[0, 0], [1,1]], granularity=4)
+        matrix = AcocMatrix([[0, 0], [1, 1]])
         matrix.level_up()
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
@@ -99,17 +93,35 @@ class TestMatrix(unittest.TestCase):
 
 
 class TestMatrixIncreaseSectionGranularity(unittest.TestCase):
+    def setUp(self):
+        self.show = False
+
     def test_show_two_sections_increase(self):
-        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 2, 3]]))
-        plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 2, 3]]), max_level=2)
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
         self.assertEqual(len(matrix.vertices), 19)
         self.assertEqual(len(matrix.edges), 28)
 
-    def test_show_three_section_increase_show(self):
-        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 1, 3]]))
-        plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 19)
-        self.assertEqual(len(matrix.edges), 12)
+    def test_show_three_section_increase(self):
+        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 1, 3]]), max_level=2)
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertEqual(len(matrix.vertices), 22)
+        self.assertEqual(len(matrix.edges), 34)
+
+    def test_show_four_level_matrix(self):
+        matrix = AcocMatrix(np.array([[0, 1], [0, 1]]), max_level=4)
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertEqual(len(matrix.vertices), 39)
+        self.assertEqual(len(matrix.edges), 60)
+
+    def test_that_it_runs_at_all(self):
+        matrix = AcocMatrix(np.array([[0, 1], [0, 1]]), max_level=6)
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertTrue(matrix is not None)
 
 
 class TestVertex(unittest.TestCase):

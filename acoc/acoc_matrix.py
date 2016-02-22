@@ -16,17 +16,15 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 
 
 class AcocMatrix:
-    def __init__(self, data, tau_initial=1.0, granularity=10, old_matrix=None):
-        self.granularity = granularity
+    def __init__(self, data, tau_initial=1.0, max_level=3):
         self.data = data
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
-        self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
-        self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
+        self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0])
+        self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0])
 
         self.tau_initial = tau_initial
-        self.level = 0
-        self.max_level = 2
+        self.max_level = max_level
 
         x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=2, endpoint=True)
         y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=2, endpoint=True)
@@ -38,10 +36,10 @@ class AcocMatrix:
         # Example: A 4x4 matrix will generate 4(4-1) + 4(4-1) = 24
         self.edges = create_edges(self.vertices, self.tau_initial)
         new_edges, remove_edges = self.increase_section_granularity(copy(self.edges), 0)
-        self.edges = set(new_edges) - set(remove_edges)
+        self.edges = list(set(new_edges) - set(remove_edges))
+        connect_edges_to_vertices(self.edges)
 
     def increase_section_granularity(self, section, level):
-
         if level == self.max_level:
             return
 
@@ -52,7 +50,10 @@ class AcocMatrix:
             # Cut edges in two
             for edge in section:
                 v_mid = Vertex(((edge.a.x + edge.b.x) / 2), ((edge.a.y + edge.b.y) / 2))
-                self.vertices.append(v_mid)
+                if v_mid not in self.vertices:
+                    self.vertices.append(v_mid)
+                else:
+                    v_mid = next(v for v in self.vertices if v == v_mid)
                 new_edges.extend([Edge(edge.a, v_mid, edge.pheromone_strength),
                                   Edge(v_mid, edge.b, edge.pheromone_strength)])
 

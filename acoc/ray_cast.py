@@ -80,10 +80,16 @@ def is_point_inside(point, solution):
                    for edge in solution))
 
 
-def any_point_inside(points, solution):
+def points_of_both_classes_inside(points, solution):
+    has_class_a = has_class_b = False
     for p in points.T:
         if is_point_inside(p, solution):
-            return True
+            if p[2] == 0:
+                has_class_a = True
+            else:
+                has_class_b = True
+            if has_class_a and has_class_b:
+                return True
     return False
 
 @jit

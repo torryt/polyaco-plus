@@ -90,12 +90,14 @@ class Classifier:
         self.ant_init = config['ant_init']
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
-        self.granularity = config['granularity']
         self.multi_level = config['multi_level']
+
+        self.granularity = config['granularity']
+        self.nest_grid = config['nest_grid']
         self.max_level = config['max_level']
         if self.multi_level:
             self.convergence_rate = config['convergence_rate']
-
+            self.granularity = 3
         self.gpu = config['gpu']
         self.matrix = None
 
@@ -104,7 +106,12 @@ class Classifier:
         ant_scores = []
         current_best_polygon = []
         last_level_up_or_best_ant = 0
-        self.matrix = AcocMatrix(data, tau_initial=self.tau_init, max_level=self.max_level)
+        self.matrix = AcocMatrix(data,
+                                 tau_initial=self.tau_init,
+                                 granularity=self.granularity,
+                                 nest_grid=self.nest_grid,
+                                 max_level=self.max_level)
+        plotter.plot_matrix_and_data(self.matrix, data, show=True)
 
         current_best_score = 0
         best_ant_history = [None] * self.run_time

@@ -94,7 +94,7 @@ class TestMatrix(unittest.TestCase):
 
 class TestMatrixIncreaseSectionGranularity(unittest.TestCase):
     def setUp(self):
-        self.show = False
+        self.show = True
 
     def test_show_two_sections_increase(self):
         matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 2, 3]]), max_level=2)
@@ -118,7 +118,7 @@ class TestMatrixIncreaseSectionGranularity(unittest.TestCase):
         self.assertEqual(len(matrix.edges), 60)
 
     def test_that_it_runs_at_all(self):
-        matrix = AcocMatrix(np.array([[0, 1], [0, 1]]), max_level=6)
+        matrix = AcocMatrix(np.array([[0, 1], [0, 1]]), max_level=5)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
         self.assertTrue(matrix is not None)

@@ -8,7 +8,7 @@ from copy import copy
 import acoc.acoc_plotter as plotter
 from acoc.edge import Edge
 from acoc.vertex import Vertex
-from acoc.ray_cast import any_point_inside
+from acoc.ray_cast import points_of_both_classes_inside
 from acoc.polygon import polygon_to_array
 
 
@@ -16,18 +16,19 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 
 
 class AcocMatrix:
-    def __init__(self, data, tau_initial=1.0, max_level=3):
+    def __init__(self, data, tau_initial=1.0, granularity=10, nest_grid=False, max_level=3):
         self.data = data
+
+        self.granularity = 2 if nest_grid else granularity
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
         self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0])
         self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0])
-
         self.tau_initial = tau_initial
-        self.max_level = max_level
+        self.level = 0
 
-        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=2, endpoint=True)
-        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=2, endpoint=True)
+        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=self.granularity, endpoint=True)
+        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=self.granularity, endpoint=True)
 
         coordinates = list(product(x_coord, y_coord))
         self.vertices = [Vertex(x, y) for x, y in coordinates]
@@ -35,15 +36,55 @@ class AcocMatrix:
         # The number of edges |E| depends on number of vertices with the following formula |E| = y(x-1) + x(y-1)
         # Example: A 4x4 matrix will generate 4(4-1) + 4(4-1) = 24
         self.edges = create_edges(self.vertices, self.tau_initial)
-        new_edges, remove_edges = self.increase_section_granularity(copy(self.edges), 0)
-        self.edges = list(set(new_edges) - set(remove_edges))
+
+        if nest_grid:
+            new_edges, remove_edges = self.increase_section_granularity(copy(self.edges), max_level+1)
+            self.edges = list(set(new_edges) - set(remove_edges))
+        connect_edges_to_vertices(self.edges)
+
+    def level_up(self, polygon=None):
+        self.level += 1
+        self.granularity = self.granularity * 2 - 1
+
+        new_edges = []
+        new_vertices = []
+
+        for edge in self.edges:
+            v_mid = Vertex(((edge.a.x + edge.b.x) / 2), ((edge.a.y + edge.b.y) / 2))
+            self.vertices.append(v_mid)
+            new_vertices.append(v_mid)
+
+            new_edges.extend([Edge(edge.a, v_mid, edge.pheromone_strength),
+                              Edge(v_mid, edge.b, edge.pheromone_strength)])
+            if polygon:
+                if edge in polygon:
+                    polygon.remove(edge)
+                    polygon.extend(new_edges[-2:])
+        self.edges = new_edges
+        connect_edges_to_vertices(self.edges)
+
+        def has_no_vertical_edges(v):
+            return v.connected_edges[DIRECTION['UP']] is None and \
+                   v.connected_edges[DIRECTION['DOWN']] is None
+        vcs = filter(lambda v: has_no_vertical_edges(v) and v.y < self.y_min_max[1], new_vertices)
+        for v_down in vcs:
+            v_right = v_down.connected_edges[DIRECTION['RIGHT']].b.connected_edges[DIRECTION['UP']].b
+            v_left = v_down.connected_edges[DIRECTION['LEFT']].a.connected_edges[DIRECTION['UP']].b
+            v_up = v_left.connected_edges[DIRECTION['UP']].b.connected_edges[DIRECTION['RIGHT']].b
+            v_mid = Vertex(v_down.x, (v_up.y + v_down.y) / 2)
+
+            self.edges.extend([Edge(v_down, v_mid, pheromone_strength=self.tau_initial),
+                               Edge(v_left, v_mid, pheromone_strength=self.tau_initial),
+                               Edge(v_mid, v_right, pheromone_strength=self.tau_initial),
+                               Edge(v_mid, v_up, pheromone_strength=self.tau_initial)])
+            self.vertices.append(v_mid)
         connect_edges_to_vertices(self.edges)
 
     def increase_section_granularity(self, section, level):
-        if level == self.max_level:
+        if level == 0:
             return
 
-        if any_point_inside(self.data, polygon_to_array(section)):
+        if points_of_both_classes_inside(self.data, polygon_to_array(section)):
             new_edges = []
             remove_edges = []
 
@@ -88,7 +129,7 @@ class AcocMatrix:
                 ])
 
             for sbs in subsections:
-                result = self.increase_section_granularity(sbs, level+1)
+                result = self.increase_section_granularity(sbs, level-1)
                 if result is not None:
                     new_edges.extend(result[0])
                     remove_edges.extend(result[1])

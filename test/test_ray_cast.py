@@ -80,7 +80,7 @@ class TestCudaGrid(unittest.TestCase):
         self.assertTrue(np.all(arr), 'Not all values in array is True: \n{}'.format(arr))
 
 
-class TestAnyPointInside(unittest.TestCase):
+class TestPointsOfBothClassesInside(unittest.TestCase):
     def setUp(self):
         vs = [Vertex(0, 0),
               Vertex(1, 0),
@@ -94,10 +94,10 @@ class TestAnyPointInside(unittest.TestCase):
 
     def test_returns_true_if_one_point_inside(self):
         points = np.array([[0.5, 0.5], [1.0, 2.0]])
-        result = rc.any_point_inside(points, self.edges)
+        result = rc.points_of_both_classes_inside(points, self.edges)
         self.assertTrue(result)
 
     def test_returns_false_if_no_point_inside(self):
         points = np.array([[2.0, 0.5], [1.0, 2.0]])
-        result = rc.any_point_inside(points, self.edges)
+        result = rc.points_of_both_classes_inside(points, self.edges)
         self.assertFalse(result)

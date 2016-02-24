@@ -94,31 +94,32 @@ class TestMatrix(unittest.TestCase):
 
 class TestMatrixIncreaseSectionGranularity(unittest.TestCase):
     def setUp(self):
-        self.show = True
+        self.show = False
+        self.data = np.array([[0, 0, 2, 3], [0, 0.5, 2, 3], [0, 1, 0, 1]])
 
     def test_show_two_sections_increase(self):
-        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 2, 3]]), max_level=2)
+        matrix = AcocMatrix(self.data, max_level=2, nest_grid=True)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 19)
-        self.assertEqual(len(matrix.edges), 28)
+        self.assertEqual(len(matrix.vertices), 24)
+        self.assertEqual(len(matrix.edges), 36)
 
     def test_show_three_section_increase(self):
-        matrix = AcocMatrix(np.array([[0, 1, 2, 3], [0, 1, 1, 3]]), max_level=2)
+        matrix = AcocMatrix(self.data, max_level=2, nest_grid=True)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 22)
-        self.assertEqual(len(matrix.edges), 34)
+        self.assertEqual(len(matrix.vertices), 24)
+        self.assertEqual(len(matrix.edges), 36)
 
     def test_show_four_level_matrix(self):
-        matrix = AcocMatrix(np.array([[0, 1], [0, 1]]), max_level=4)
+        matrix = AcocMatrix(self.data, max_level=4, nest_grid=True)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 39)
-        self.assertEqual(len(matrix.edges), 60)
+        self.assertEqual(len(matrix.vertices), 24)
+        self.assertEqual(len(matrix.edges), 36)
 
     def test_that_it_runs_at_all(self):
-        matrix = AcocMatrix(np.array([[0, 1], [0, 1]]), max_level=5)
+        matrix = AcocMatrix(self.data, max_level=5, nest_grid=True)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
         self.assertTrue(matrix is not None)

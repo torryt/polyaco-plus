@@ -22,8 +22,8 @@ class AcocMatrix:
         self.granularity = 2 if nest_grid else granularity
         self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
         self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
-        self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0])
-        self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0])
+        self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
+        self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
         self.tau_initial = tau_initial
         self.level = 0
 
@@ -38,8 +38,9 @@ class AcocMatrix:
         self.edges = create_edges(self.vertices, self.tau_initial)
 
         if nest_grid:
-            new_edges, remove_edges = self.increase_section_granularity(copy(self.edges), max_level+1)
-            self.edges = list(set(new_edges) - set(remove_edges))
+            result = self.increase_section_granularity(copy(self.edges), max_level+1)
+            if result is not None:
+                self.edges = list(set(result[0]) - set(result[1]))
         connect_edges_to_vertices(self.edges)
 
     def level_up(self, polygon=None):

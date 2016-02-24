@@ -92,12 +92,17 @@ class TestPointsOfBothClassesInside(unittest.TestCase):
              Edge(vs[1], vs[3]),
              Edge(vs[2], vs[3])])
 
-    def test_returns_true_if_one_point_inside(self):
+    def test_returns_false_if_one_point_inside(self):
         points = np.array([[0.5, 0.5], [1.0, 2.0]])
         result = rc.points_of_both_classes_inside(points, self.edges)
-        self.assertTrue(result)
+        self.assertFalse(result)
 
     def test_returns_false_if_no_point_inside(self):
         points = np.array([[2.0, 0.5], [1.0, 2.0]])
         result = rc.points_of_both_classes_inside(points, self.edges)
         self.assertFalse(result)
+
+    def test_returns_true_if_two_points_of_different_classes_inside(self):
+        points = np.array([[0.5, 0.5], [0.7, 0.5], [0, 1]])
+        result = rc.points_of_both_classes_inside(points, self.edges)
+        self.assertTrue(result)

@@ -111,7 +111,6 @@ class Classifier:
                                  granularity=self.granularity,
                                  nest_grid=self.nest_grid,
                                  max_level=self.max_level)
-        plotter.plot_matrix_and_data(self.matrix, data, show=True)
 
         current_best_score = 0
         best_ant_history = [None] * self.run_time
@@ -123,7 +122,7 @@ class Classifier:
         def plot_pheromones():
             if plot:
                 plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
-                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
+                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'), title="Ant {}".format(len(ant_scores)))
 
         def print_status():
             while t_elapsed < self.run_time:
@@ -175,7 +174,6 @@ class Classifier:
                     last_level_up_or_best_ant = len(ant_scores)
 
                     if plot:
-                        plot_pheromones()
                         plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
                                                     save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                     file_name='ant' + str(len(ant_scores)))

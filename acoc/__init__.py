@@ -94,7 +94,7 @@ class Classifier:
 
         self.granularity = config['granularity']
         self.nest_grid = config['nest_grid']
-        self.max_level = config['max_level']
+        self.max_level = config['max_level'] + 1 if self.nest_grid else config['max_level']
         if self.multi_level:
             self.granularity = 3
         self.convergence_rate = config['convergence_rate']
@@ -152,12 +152,15 @@ class Classifier:
                 start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
             else:  # Random
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
-            if self.nest_grid:
+            if self.nest_grid or self.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
-                    plot_pheromones()
-                    self.matrix.level_up_nested(current_best_polygon)
-                    last_level_up_or_best_ant = len(ant_scores)
-
+                    if self.max_level is None or self.matrix.level < self.max_level:
+                        plot_pheromones()
+                        if self.nest_grid:
+                            self.matrix.level_up_nested(current_best_polygon)
+                        else:
+                            self.matrix.level_up(current_best_polygon)
+                        last_level_up_or_best_ant = len(ant_scores)
             _ant = Ant(start_vertex)
             _ant.move_ant()
 

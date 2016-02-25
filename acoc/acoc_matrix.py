@@ -99,6 +99,7 @@ class AcocMatrix:
         self.edges = list((set(new_edges) | set(self.edges)) - set(remove_edges))
         self.sections = new_sections
         self.level += 1
+        connect_edges_to_vertices(self.edges)
 
     def increase_section_granularity(self, section, best_polygon=None):
         if points_of_both_classes_inside(self.data, polygon_to_array(section)):

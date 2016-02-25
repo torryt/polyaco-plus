@@ -1,37 +1,22 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import pickle
 from datetime import datetime
 import os.path as osp
 
 import acoc
 from acoc import acoc_plotter
+from matplotlib import pyplot as plt
+
 import utils
 
-from config import SAVE_DIR
+from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CONFIG = {
-    'run_time':         10,
-    'number_runs':      5,
-    'tau_min':          0.001,
-    'tau_max':          1.0,
-    'tau_init':         0.001,
-    'rho':              0.02,
-    'alpha':            1,
-    'beta':             0.01,
-    'ant_init':         'weighted',
-    'decay_type':       'probabilistic',
-    'gpu':              True,
-    'granularity':      3,
-    'multi_level':      True,
-    'max_level':        None,
-    'convergence_rate': 800,
-    'data_set':         'semicircle_gaussian'
-}
+CLASSIFIER_CONFIG['number_runs'] = 20
+CLASSIFIER_CONFIG['run_time'] = 30
 
 
 def run(*args):
-    config = dict(CONFIG)
+    config = dict(CLASSIFIER_CONFIG)
     for conf in args:
         config[conf[0]] = conf[1]
     data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
@@ -50,7 +35,7 @@ def run(*args):
     return all_ant_scores.mean(0)
 
 
-def parameter_tester(parameter_name, values, config=CONFIG):
+def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
     save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
     iterator = 0
     full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
@@ -82,11 +67,11 @@ if __name__ == "__main__":
 
     # parameter_tester('tau_min', [0.001, 0.01, 0.1])
     # parameter_tester('tau_max', [0.1, 1.0, 10.0, 100.0])
-    parameter_tester('beta', [0, 0.01, 0.1, 1.0])
+    # parameter_tester('beta', [0, 0.01, 0.1, 1.0])
 
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
     # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
     # parameter_tester('decay_type', ['probabilistic', 'gradual'])
     # parameter_tester('tau_init', [CONFIG['tau_max'], CONFIG['tau_min']])
-    # parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
+    parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
     # parameter_tester('iterations', [1, 2, 5, 10])

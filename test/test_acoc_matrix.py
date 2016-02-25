@@ -163,6 +163,27 @@ class TestLevelUpNested(unittest.TestCase):
         self.assertEqual(new_vertex_count - old_vertex_count, 9)
 
 
+class TestIncreaseSectionGranularity(unittest.TestCase):
+    def setUp(self):
+        self.show = False
+        self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
+
+    def test_increase_section_granularity_preserves_pheromones_on_new_edges(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        edge = matrix.edges[0]
+        edge_start = edge.a
+        strength = 10
+        edge.pheromone_strength = strength
+        matrix.level_up_nested(best_polygon=[edge])
+
+        new_edge = edge_start.connected_edges[DIRECTION['UP']]
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertEqual(new_edge.pheromone_strength, strength)
+        next_new_edge = new_edge.b.connected_edges[DIRECTION['UP']]
+        self.assertEqual(next_new_edge.pheromone_strength, strength)
+
+
 class TestVertex(unittest.TestCase):
     def test_connect_edges_to_vertex_should_be_1(self):
         v1 = Vertex(0, 0)

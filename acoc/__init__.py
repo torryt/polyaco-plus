@@ -96,8 +96,8 @@ class Classifier:
         self.nest_grid = config['nest_grid']
         self.max_level = config['max_level']
         if self.multi_level:
-            self.convergence_rate = config['convergence_rate']
             self.granularity = 3
+        self.convergence_rate = config['convergence_rate']
         self.gpu = config['gpu']
         self.matrix = None
 
@@ -109,8 +109,7 @@ class Classifier:
         self.matrix = AcocMatrix(data,
                                  tau_initial=self.tau_init,
                                  granularity=self.granularity,
-                                 nest_grid=self.nest_grid,
-                                 max_level=self.max_level)
+                                 nest_grid=self.nest_grid)
 
         current_best_score = 0
         best_ant_history = [None] * self.run_time
@@ -153,13 +152,11 @@ class Classifier:
                 start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
             else:  # Random
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
-            if self.multi_level:
+            if self.nest_grid:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
-                    if self.max_level is None or self.matrix.level < self.max_level:
-                        plot_pheromones()
-                        self.matrix.level_up(current_best_polygon)
-                        current_best_score = self.score(current_best_polygon, data)
-                        last_level_up_or_best_ant = len(ant_scores)
+                    plot_pheromones()
+                    self.matrix.level_up_nested(current_best_polygon)
+                    last_level_up_or_best_ant = len(ant_scores)
 
             _ant = Ant(start_vertex)
             _ant.move_ant()
@@ -172,11 +169,11 @@ class Classifier:
                     current_best_polygon = _ant.edges_travelled
                     current_best_score = ant_score
                     last_level_up_or_best_ant = len(ant_scores)
-
                     if plot:
                         plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
                                                     save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                     file_name='ant' + str(len(ant_scores)))
+                        plot_pheromones()
 
                 self.put_pheromones(current_best_polygon, data, current_best_score)
                 if self.decay_type == 'probabilistic':

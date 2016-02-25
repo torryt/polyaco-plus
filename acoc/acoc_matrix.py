@@ -16,7 +16,7 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 
 
 class AcocMatrix:
-    def __init__(self, data, tau_initial=1.0, granularity=10, nest_grid=False, max_level=3):
+    def __init__(self, data, tau_initial=1.0, granularity=10, nest_grid=False, nest_grid_initial=False):
         self.data = data
 
         self.granularity = 2 if nest_grid else granularity
@@ -25,6 +25,7 @@ class AcocMatrix:
         self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
         self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
         self.tau_initial = tau_initial
+        self.sections = []
         self.level = 0
 
         x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=self.granularity, endpoint=True)
@@ -36,14 +37,11 @@ class AcocMatrix:
         # The number of edges |E| depends on number of vertices with the following formula |E| = y(x-1) + x(y-1)
         # Example: A 4x4 matrix will generate 4(4-1) + 4(4-1) = 24
         self.edges = create_edges(self.vertices, self.tau_initial)
-
-        if nest_grid:
-            result = self.increase_section_granularity(copy(self.edges), max_level+1)
-            if result is not None:
-                self.edges = list(set(result[0]) - set(result[1]))
         connect_edges_to_vertices(self.edges)
+        if nest_grid:
+            self.level_up_nested()
 
-    def level_up(self, polygon=None):
+    def level_up(self, best_polygon=None):
         self.level += 1
         self.granularity = self.granularity * 2 - 1
 
@@ -57,10 +55,10 @@ class AcocMatrix:
 
             new_edges.extend([Edge(edge.a, v_mid, edge.pheromone_strength),
                               Edge(v_mid, edge.b, edge.pheromone_strength)])
-            if polygon:
-                if edge in polygon:
-                    polygon.remove(edge)
-                    polygon.extend(new_edges[-2:])
+            if best_polygon:
+                if edge in best_polygon:
+                    best_polygon.remove(edge)
+                    best_polygon.extend(new_edges[-2:])
         self.edges = new_edges
         connect_edges_to_vertices(self.edges)
 
@@ -81,10 +79,28 @@ class AcocMatrix:
             self.vertices.append(v_mid)
         connect_edges_to_vertices(self.edges)
 
-    def increase_section_granularity(self, section, level):
-        if level == 0:
-            return
+    def not_leveled_sections(self):
+        if self.level == 0:
+            return [copy(self.edges)]
+        else:
+            return self.sections
 
+    def level_up_nested(self, best_polygon=None):
+        sections = self.not_leveled_sections()
+        new_sections, new_edges, remove_edges = ([] for _ in range(3))
+
+        for s in sections:
+            result = self.increase_section_granularity(s, best_polygon)
+            if result is not None:
+                new_sections.extend(result[0])
+                new_edges.extend(result[1])
+                remove_edges.extend(result[2])
+
+        self.edges = list((set(new_edges) | set(self.edges)) - set(remove_edges))
+        self.sections = new_sections
+        self.level += 1
+
+    def increase_section_granularity(self, section, best_polygon=None):
         if points_of_both_classes_inside(self.data, polygon_to_array(section)):
             new_edges = []
             remove_edges = []
@@ -98,6 +114,10 @@ class AcocMatrix:
                     v_mid = next(v for v in self.vertices if v == v_mid)
                 new_edges.extend([Edge(edge.a, v_mid, edge.pheromone_strength),
                                   Edge(v_mid, edge.b, edge.pheromone_strength)])
+                if best_polygon:
+                    if edge in best_polygon:
+                        best_polygon.remove(edge)
+                        best_polygon.extend(new_edges[-2:])
 
             remove_edges.extend(section)
             connect_edges_to_vertices(new_edges)
@@ -128,13 +148,7 @@ class AcocMatrix:
                     c.connected_edges[DIRECTION['UP']].b.connected_edges[DIRECTION['RIGHT']],
                     c.connected_edges[DIRECTION['UP']]
                 ])
-
-            for sbs in subsections:
-                result = self.increase_section_granularity(sbs, level-1)
-                if result is not None:
-                    new_edges.extend(result[0])
-                    remove_edges.extend(result[1])
-            return new_edges, remove_edges
+            return subsections, new_edges, remove_edges
 
 
 def connect_edges_to_vertices(edges):

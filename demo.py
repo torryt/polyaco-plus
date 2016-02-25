@@ -13,7 +13,7 @@ from acoc import acoc_plotter as plotter
 
 
 SAVE = True
-SAVE_PHEROMONES_AND_BEST_PATHS = False
+SAVE_PHEROMONES_AND_BEST_PATHS = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 

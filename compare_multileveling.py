@@ -15,10 +15,9 @@ from config import SAVE_DIR, CLASSIFIER_CONFIG
 SAVE_FOLDER = 'ML_' + datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 full_dir = osp.join(SAVE_DIR, SAVE_FOLDER)
 
-CLASSIFIER_CONFIG['runs'] = 5
+CLASSIFIER_CONFIG['runs'] = 50
 CLASSIFIER_CONFIG['run_time'] = 100
-CLASSIFIER_CONFIG['max_level'] = 3
-CLASSIFIER_CONFIG['max_level_granularity'] = 17
+CLASSIFIER_CONFIG['max_level'] = None
 
 
 def run(**kwargs):
@@ -35,9 +34,9 @@ def run(**kwargs):
 
 
 configurations = [
-    {'label': 'Combined naive and nested', 'nest_grid': True, 'multi-level': False},
-    # {'label': 'Gridception', 'nest_grid': True, 'multi_level': False},
-    # {'label': r'$\mu = 17$', 'granularity': 17, 'nest_grid': False, 'multi_level': False}
+    {'label': 'Multi-level with nested grid', 'nest_grid': True, 'multi-level': False},
+    {'label': 'Naive multi-level', 'nest_grid': False, 'multi-level': True}
+
 ]
 labels = [c['label'] for c in configurations]
 

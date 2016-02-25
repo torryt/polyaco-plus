@@ -94,9 +94,14 @@ class Classifier:
 
         self.granularity = config['granularity']
         self.nest_grid = config['nest_grid']
-        self.max_level = config['max_level'] + 1 if self.nest_grid else config['max_level']
+
+        if self.nest_grid and config['max_level'] is not None:
+            self.max_level = config['max_level'] + 1
+        else:
+            self.max_level = config['max_level']
         if self.multi_level:
             self.granularity = 3
+
         self.convergence_rate = config['convergence_rate']
         self.gpu = config['gpu']
         self.matrix = None

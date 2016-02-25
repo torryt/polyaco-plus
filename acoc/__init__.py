@@ -130,7 +130,7 @@ class Classifier:
 
         def print_status():
             while t_elapsed < self.run_time:
-                if self.multi_level:
+                if self.multi_level or self.nest_grid:
                     to_print = "Ant: {}, Time elapsed: {:.1f} seconds, Level {}".format(
                         len(ant_scores), process_time() - t_start, self.matrix.level) + print_string
                 else:

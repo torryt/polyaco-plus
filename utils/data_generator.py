@@ -101,11 +101,7 @@ def generate_various_sized_rectangles(sizes):
 
 def get_iris():
     from sklearn import datasets
-    iris = datasets.load_iris()
-    iris = np.append(iris.data.T[0:2], np.array([iris.target]), axis=0)
-    data = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
-    data['iris'] = iris
-    pickle.dump(data, open('data_sets.pickle', 'wb'))
+    return datasets.load_iris()
 
 
 def load_data():

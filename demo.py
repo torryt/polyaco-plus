@@ -10,7 +10,7 @@ import utils
 from config import CLASSIFIER_CONFIG
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
-
+from utils.data_generator import get_iris
 
 SAVE = True
 SAVE_PHEROMONES_AND_BEST_PATHS = True
@@ -25,9 +25,13 @@ def run(**kwargs):
 
     clf = acoc.Classifier(conf, SAVE_FOLDER)
     # Loads a sample data set from a pickle file.
-    data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[conf['data_set']]
+    iris = get_iris()
 
-    ant_scores, polygon = clf.classify(data, SAVE_PHEROMONES_AND_BEST_PATHS)
+    # Use only data samples from 2 out of 3 classes
+    data = iris.data[:100]
+    target = iris.target[:100]
+
+    ant_scores, polygon = clf.classify(data, target, SAVE_PHEROMONES_AND_BEST_PATHS)
     print(", Best ant score: {}".format(max(ant_scores)))
 
     if SAVE:

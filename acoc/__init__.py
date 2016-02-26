@@ -106,10 +106,10 @@ class Classifier:
         self.gpu = config['gpu']
         self.matrix = None
 
-    def classify(self, data, plot=False, print_string=''):
-        cuda.to_device(data.T)
+    def classify(self, data, target, plot=False, print_string=''):
+        cuda.to_device(data)
         ant_scores = []
-        current_best_polygon = []
+        current_best_ant = []
         last_level_up_or_best_ant = 0
         self.matrix = AcocMatrix(data,
                                  tau_initial=self.tau_init,
@@ -152,9 +152,9 @@ class Classifier:
             elif self.ant_init == 'weighted':
                 start_vertex = get_random_weighted(self.matrix.edges)
             elif self.ant_init == 'on_global_best':
-                start_vertex = select_from_global_best(self.matrix, current_best_polygon)
+                start_vertex = select_from_global_best(self.matrix, current_best_ant)
             elif self.ant_init == 'chance_of_global_best':
-                start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
+                start_vertex = select_with_chance_of_global_best(self.matrix, current_best_ant)
             else:  # Random
                 start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
             if self.nest_grid or self.multi_level:
@@ -162,9 +162,9 @@ class Classifier:
                     if self.max_level is None or self.matrix.level < self.max_level:
                         plot_pheromones()
                         if self.nest_grid:
-                            self.matrix.level_up_nested(current_best_polygon)
+                            self.matrix.level_up_nested(current_best_ant)
                         else:
-                            self.matrix.level_up(current_best_polygon)
+                            self.matrix.level_up(current_best_ant)
                         last_level_up_or_best_ant = len(ant_scores)
             _ant = Ant(start_vertex)
             _ant.move_ant()
@@ -174,16 +174,16 @@ class Classifier:
             if _ant.at_target:
                 ant_score = self.score(_ant.edges_travelled, data)
                 if ant_score > current_best_score:
-                    current_best_polygon = _ant.edges_travelled
+                    current_best_ant = _ant.edges_travelled
                     current_best_score = ant_score
                     last_level_up_or_best_ant = len(ant_scores)
                     if plot:
-                        plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
+                        plotter.plot_path_with_data(current_best_ant, data, self.matrix, save=True,
                                                     save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                     file_name='ant' + str(len(ant_scores)))
                         plot_pheromones()
 
-                self.put_pheromones(current_best_polygon, data, current_best_score)
+                self.put_pheromones(current_best_ant, data, current_best_score)
                 if self.decay_type == 'probabilistic':
                     self.reset_at_random(self.matrix)
                 elif self.decay_type == 'gradual':
@@ -194,7 +194,7 @@ class Classifier:
         for i, e in enumerate(best_ant_history):
             if e is None:
                 best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
-        return best_ant_history, current_best_polygon,
+        return best_ant_history, current_best_ant,
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:

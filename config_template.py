@@ -16,8 +16,6 @@ CLASSIFIER_CONFIG = {
     'rho':              0.02,
     'alpha':            1,
     'beta':             0.01,
-    'ant_init':         'weighted',
-    'decay_type':       'probabilistic',
     'gpu':              True,
     'granularity':      3,
     'multi_level':      True,

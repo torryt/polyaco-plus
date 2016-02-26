@@ -11,6 +11,7 @@ from time import process_time
 import numpy as np
 from numba import cuda, jit
 from numpy.random.mtrand import choice as np_choice
+from itertools import combinations
 
 import acoc.acoc_plotter as plotter
 import utils
@@ -87,8 +88,6 @@ class Classifier:
         self.rho = config['rho']
         self.alpha = config['alpha']
         self.beta = config['beta']
-        self.ant_init = config['ant_init']
-        self.decay_type = config['decay_type']
         self.save_folder = save_folder
         self.multi_level = config['multi_level']
 
@@ -104,9 +103,20 @@ class Classifier:
 
         self.convergence_rate = config['convergence_rate']
         self.gpu = config['gpu']
-        self.matrix = None
+        self.plot = config['plot']
 
-    def classify(self, data, target, plot=False, print_string=''):
+    def classify(self, data, target):
+        dims = data.shape[1]
+        planes = list(combinations(range(dims), 2))
+        print("Planes: {}".format(planes))
+
+        scores = []
+        for plane in planes:
+            plane_data = np.concatenate((np.take(data, list(plane), axis=1), np.array([target]).T), axis=1)
+            scores.append(self.classify_plane(plane_data, print_string=', Plane {}'.format(plane))[0][-1])
+        return scores
+
+    def classify_plane(self, data, print_string=''):
         cuda.to_device(data)
         ant_scores = []
         current_best_ant = []
@@ -124,7 +134,7 @@ class Classifier:
         t_elapsed = 0
 
         def plot_pheromones():
-            if plot:
+            if self.plot:
                 plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
                                         save=True, folder_name=osp.join(self.save_folder, 'pheromones/'), title="Ant {}".format(len(ant_scores)))
 
@@ -147,17 +157,8 @@ class Classifier:
         Thread(target=update_history).start()
 
         while t_elapsed < self.run_time:
-            if self.ant_init == 'static':
-                start_vertex = self.matrix.vertices[0]
-            elif self.ant_init == 'weighted':
-                start_vertex = get_random_weighted(self.matrix.edges)
-            elif self.ant_init == 'on_global_best':
-                start_vertex = select_from_global_best(self.matrix, current_best_ant)
-            elif self.ant_init == 'chance_of_global_best':
-                start_vertex = select_with_chance_of_global_best(self.matrix, current_best_ant)
-            else:  # Random
-                start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
-            if self.nest_grid or self.multi_level:
+            start_vertex = get_random_weighted(self.matrix.edges)
+            if self.multi_level or self.nest_grid:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
                     if self.max_level is None or self.matrix.level < self.max_level:
                         plot_pheromones()
@@ -177,24 +178,21 @@ class Classifier:
                     current_best_ant = _ant.edges_travelled
                     current_best_score = ant_score
                     last_level_up_or_best_ant = len(ant_scores)
-                    if plot:
+                    if self.plot:
                         plotter.plot_path_with_data(current_best_ant, data, self.matrix, save=True,
                                                     save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                     file_name='ant' + str(len(ant_scores)))
                         plot_pheromones()
 
                 self.put_pheromones(current_best_ant, data, current_best_score)
-                if self.decay_type == 'probabilistic':
-                    self.reset_at_random(self.matrix)
-                elif self.decay_type == 'gradual':
-                    self.grad_pheromone_decay(self.matrix)
+                self.reset_at_random(self.matrix)
                 ant_scores.append(ant_score)
                 t_elapsed = process_time() - t_start
 
         for i, e in enumerate(best_ant_history):
             if e is None:
                 best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
-        return best_ant_history, current_best_ant,
+        return best_ant_history, current_best_ant
 
     def reset_at_random(self, matrix):
         for edge in matrix.edges:

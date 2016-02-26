@@ -10,12 +10,15 @@ import utils
 from config import CLASSIFIER_CONFIG
 from acoc.acoc_matrix import AcocMatrix
 from acoc import acoc_plotter as plotter
-from utils.data_generator import get_iris
+from sklearn import datasets
 
-SAVE = True
-SAVE_PHEROMONES_AND_BEST_PATHS = True
+SAVE = False
+SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
+
+CLASSIFIER_CONFIG['plot'] = SAVE_PHEROMONES_AND_BEST_PATHS
+CLASSIFIER_CONFIG['run_time'] = 10
 
 
 def run(**kwargs):
@@ -25,29 +28,18 @@ def run(**kwargs):
 
     clf = acoc.Classifier(conf, SAVE_FOLDER)
     # Loads a sample data set from a pickle file.
-    iris = get_iris()
+    iris = datasets.load_iris()
 
     # Use only data samples from 2 out of 3 classes
     data = iris.data[:100]
     target = iris.target[:100]
 
-    ant_scores, polygon = clf.classify(data, target, SAVE_PHEROMONES_AND_BEST_PATHS)
-    print(", Best ant score: {}".format(max(ant_scores)))
+    scores = clf.classify(data, target)
+    print("\n{}".format(scores))
+    return sum(scores) / len(scores)
 
-    if SAVE:
-        utils.save_object(ant_scores, SAVE_FOLDER, 'scores')
-        utils.save_object(acoc.polygon.polygon_to_array(polygon), SAVE_FOLDER, 'path')
-        utils.save_dict(conf, SAVE_FOLDER, 'config.txt')
-
-    if SAVE or SHOW_PLOT:
-        matrix = AcocMatrix(data)
-        plotter.plot_path_with_data(polygon, data, matrix, save=SAVE, save_folder=SAVE_FOLDER, show=SHOW_PLOT)
-        plotter.plot_ant_scores(ant_scores, save=SAVE, show=SHOW_PLOT, save_folder=SAVE_FOLDER)
-    return max(ant_scores)
 
 if __name__ == "__main__":
     # run()
-    scores = []
     for _ in range(1):
-        scores.append(run())
-    print("Average best score: {}".format(sum(scores) / len(scores)))
+        print("\nFinal score: {}".format(run()))

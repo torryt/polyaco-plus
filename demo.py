@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pickle
 from datetime import datetime
+
+from sklearn import datasets
 
 import acoc
 import acoc.polygon
-import utils
 from config import CLASSIFIER_CONFIG
-from acoc.acoc_matrix import AcocMatrix
-from acoc import acoc_plotter as plotter
-from sklearn import datasets
 
 SAVE = False
 SAVE_PHEROMONES_AND_BEST_PATHS = False
@@ -26,7 +23,7 @@ def run(**kwargs):
     for k, v in kwargs.items():
         conf[k] = v
 
-    clf = acoc.Classifier(conf, SAVE_FOLDER)
+    clf = acoc.PolyACO(conf, SAVE_FOLDER)
     # Loads a sample data set from a pickle file.
     iris = datasets.load_iris()
 
@@ -34,7 +31,7 @@ def run(**kwargs):
     data = iris.data[:100]
     target = iris.target[:100]
 
-    scores = clf.classify(data, target)
+    scores = clf.train(data, target)
     print("\n{}".format(scores))
     return sum(scores) / len(scores)
 

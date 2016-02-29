@@ -78,7 +78,7 @@ def cost_function_jit(points, edges):
     return score / points.shape[0]
 
 
-class Classifier:
+class PolyACO:
     def __init__(self, config, save_folder=''):
         self.config = config
         self.run_time = config['run_time']
@@ -105,7 +105,7 @@ class Classifier:
         self.gpu = config['gpu']
         self.plot = config['plot']
 
-    def classify(self, data, target):
+    def train(self, data, target):
         dims = data.shape[1]
         planes = list(combinations(range(dims), 2))
         print("Planes: {}".format(planes))
@@ -113,10 +113,10 @@ class Classifier:
         scores = []
         for plane in planes:
             plane_data = np.concatenate((np.take(data, list(plane), axis=1), np.array([target]).T), axis=1)
-            scores.append(self.classify_plane(plane_data, print_string=', Plane {}'.format(plane))[0][-1])
+            scores.append(self._train_plane(plane_data, print_string=', Plane {}'.format(plane))[0][-1])
         return scores
 
-    def classify_plane(self, data, print_string=''):
+    def _train_plane(self, data, print_string=''):
         cuda.to_device(data)
         ant_scores = []
         current_best_ant = []
@@ -173,7 +173,7 @@ class Classifier:
             while not _ant.at_target and not _ant.is_stuck:
                 _ant.move_ant()
             if _ant.at_target:
-                ant_score = self.score(_ant.edges_travelled, data)
+                ant_score = self._score(_ant.edges_travelled, data)
                 if ant_score > current_best_score:
                     current_best_ant = _ant.edges_travelled
                     current_best_score = ant_score
@@ -184,8 +184,8 @@ class Classifier:
                                                     file_name='ant' + str(len(ant_scores)))
                         plot_pheromones()
 
-                self.put_pheromones(current_best_ant, data, current_best_score)
-                self.reset_at_random(self.matrix)
+                self._put_pheromones(current_best_ant, data, current_best_score)
+                self._reset_at_random(self.matrix)
                 ant_scores.append(ant_score)
                 t_elapsed = process_time() - t_start
 
@@ -194,17 +194,17 @@ class Classifier:
                 best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
         return best_ant_history, current_best_ant
 
-    def reset_at_random(self, matrix):
+    def _reset_at_random(self, matrix):
         for edge in matrix.edges:
             rand_num = random.random()
             if rand_num < self.rho:
                 edge.pheromone_strength = self.tau_min
 
-    def grad_pheromone_decay(self, matrix):
+    def _grad_pheromone_decay(self, matrix):
         for edge in matrix.edges:
             edge.pheromone_strength *= 1-self.rho
 
-    def score(self, polygon, data):
+    def _score(self, polygon, data):
         edges = polygon_to_array(polygon)
         if self.gpu:
             cost = cost_function_gpu(data.T, edges)
@@ -217,7 +217,7 @@ class Classifier:
         #     length_factor = 1
         return (cost**self.alpha) * (length_factor**self.beta)
 
-    def put_pheromones(self, path, data, score):
+    def _put_pheromones(self, path, data, score):
         for edge in path:
             pheromone_strength = edge.pheromone_strength + score
             edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max

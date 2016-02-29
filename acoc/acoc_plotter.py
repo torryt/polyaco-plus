@@ -245,10 +245,10 @@ def hide_top_and_right_axis(ax):
 
 def main():
     # points = uniform_rectangle((2, 4), (2, 4), 500)
-    import pickle
-    d = pickle.load(open('/Users/torrytufteland/Dropbox/Guro og Torry/experiments/02.15, gpu server/results.pickle', 'rb'))
-    plot_bar_chart_gpu_benchmark(d, [1000, 10000, 100000, 1000000], ['CPython', 'JIT', 'GPU'], file_name='results')
-
+    # import pickle
+    # d = pickle.load(open('/Users/torrytufteland/Dropbox/Guro og Torry/experiments/02.15, gpu server/results.pickle', 'rb'))
+    # plot_bar_chart_gpu_benchmark(d, [1000, 10000, 100000, 1000000], ['CPython', 'JIT', 'GPU'], file_name='results')
+    pass
 
 if __name__ == "__main__":
     main()

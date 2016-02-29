@@ -111,8 +111,6 @@ class Classifier:
                                  granularity=self.granularity,
                                  nest_grid=self.nest_grid,
                                  max_level=self.max_level)
-        plotter.plot_matrix_and_data(self.matrix, data, show=True)
-
         current_best_score = 0
         best_ant_history = [None] * self.run_time
         best_ant_history[0] = current_best_score

@@ -69,7 +69,7 @@ class PolyACO:
 
         def plot_pheromones():
             if self.config.plot:
-                plotter.plot_pheromones(self.matrix, data, self.config.tau_min, self.config.tau_max, file_name='ant' + str(len(ant_scores)),
+                plotter.plot_pheromones(self.matrix, data.T, self.config.tau_min, self.config.tau_max, file_name='ant' + str(len(ant_scores)),
                                         save=True, folder_name=osp.join(self.save_folder, 'pheromones/'), title="Ant {}".format(len(ant_scores)))
 
         def print_status():
@@ -115,7 +115,7 @@ class PolyACO:
                                                     file_name='ant' + str(len(ant_scores)))
                         # plot_pheromones()
 
-                self._put_pheromones(current_best_ant, data, current_best_score)
+                self._put_pheromones(current_best_ant, current_best_score)
                 self._reset_at_random(self.matrix)
                 ant_scores.append(ant_score)
                 t_elapsed = process_time() - t_start
@@ -138,17 +138,14 @@ class PolyACO:
     def _score(self, polygon, data):
         edges = polygon_to_array(polygon)
         if self.config.gpu:
-            cost = cost_function_gpu(data.T, edges)
+            cost = cost_function_gpu(data, edges)
         else:
-            cost = cost_function(data.T, edges)
+            cost = cost_function(data, edges)
         # try:
         length_factor = 1 / polygon_length(polygon)
-        # Handles very rare and weird error where length of polygon == 0
-        # except ZeroDivisionError:
-        #     length_factor = 1
         return (cost**self.config.alpha) * (length_factor**self.config.beta)
 
-    def _put_pheromones(self, path, data, score):
+    def _put_pheromones(self, path, score):
         for edge in path:
             pheromone_strength = edge.pheromone_strength + score
             edge.pheromone_strength = pheromone_strength if pheromone_strength < self.config.tau_max else self.config.tau_max

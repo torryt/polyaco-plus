@@ -18,8 +18,8 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 class AcocMatrix:
     def __init__(self, data, tau_initial=1.0):
         self.data = data
-        self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
-        self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
+        self.x_min_max = np.amin(data[:, 0]) - .1, np.amax(data[:, 0]) + .1
+        self.y_min_max = np.amin(data[:, 1]) - .1, np.amax(data[:, 1]) + .1
         self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0])
         self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0])
         self.tau_initial = tau_initial
@@ -146,20 +146,20 @@ if __name__ == "__main__":
     save = False
     show = False
     plot = False
-    dt = np.array([[[0, 0]], [[1, 1]]])
-    mtrx = AcocMatrix(dt, granularity=3)
+    dt = np.array([[0, 0, 0], [0, 0, 1], [1, 1, 1]])
+    mtrx = AcocMatrix(dt)
     pol = mtrx.edges[:4]
     mtrx.edges[1].pheromone_strength = 5
     mtrx.edges[0].pheromone_strength = 3
     save_folder = generate_folder_name()
-    print("Level {}: Granularity {}, edges {}, vertices {}".format(mtrx.level, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
+    print("Level {}: Edges {}, vertices {}".format(mtrx.level, len(mtrx.edges), len(mtrx.vertices)))
 
     if plot:
         plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
         plot_matrix(mtrx, show=show, save=save)
     for i in range(6):
         mtrx.level_up(pol)
-        print("Level {}: Granularity {}, edges {}, vertices {}".format(mtrx.level, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
+        print("Level {}: Edges {}, vertices {}".format(mtrx.level, len(mtrx.edges), len(mtrx.vertices)))
         if plot:
             plot_matrix(mtrx, show=show, save=save)
             plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)

@@ -54,12 +54,12 @@ class TestEdge(unittest.TestCase):
 
 class TestMatrix(unittest.TestCase):
     def test_all_edges_move_in_positive_direction_from_a_to_b(self):
-        matrix = AcocMatrix(np.array([[0, 0], [1, 1], [0, 0]]))
+        matrix = AcocMatrix(np.array([[0, 0, 0], [1, 1, 1]]))
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
 
     def test_all_edges_move_in_positive_direction_from_a_to_b_after_level_up(self):
-        matrix = AcocMatrix(np.array([[0, 0], [1, 1], [0, 0]]))
+        matrix = AcocMatrix(np.array([[0, 0, 0], [1, 1, 1]]))
         matrix.level_up()
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
@@ -77,7 +77,7 @@ class TestMatrix(unittest.TestCase):
 class TestLevelUpNested(unittest.TestCase):
     def setUp(self):
         self.show = False
-        self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
+        self.data = np.array([[0, 0, 0], [0, 0, 1], [1, 1, 0]])
 
     def test_level_up_nested_increase_number_of_edges(self):
         matrix = AcocMatrix(self.data)
@@ -121,7 +121,7 @@ class TestLevelUpNested(unittest.TestCase):
         self.assertEqual(new_vertex_count - old_vertex_count, 5*5)
 
     def test_level_up_nested_increase_number_of_vertices_by_10_in_other_data_set(self):
-        self.data = np.array([[0, 0, 3, 3], [0, 0, 3, 3], [0, 1, 0, 1]])
+        self.data = np.array([[0, 0, 0], [0, 0, 1], [3, 3, 0], [3, 3, 1]])
         matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
         if self.show:
@@ -133,7 +133,8 @@ class TestLevelUpNested(unittest.TestCase):
         self.assertEqual(new_vertex_count - old_vertex_count, 10)
 
     def test_level_up_nested_increase_number_of_vertices_by_9_in_adjacent_sections_set(self):
-        self.data = np.array([[0, 0, 0, 0, 3], [0, 0, 3, 3, 3], [0, 1, 0, 1, 1]])
+        self.data = np.array([[0, 0, 0], [0, 0, 1], [3, 0, 0], [3, 0, 1], [3, 3, 1]])
+
         matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
         if self.show:
@@ -148,7 +149,7 @@ class TestLevelUpNested(unittest.TestCase):
 class TestIncreaseSectionGranularity(unittest.TestCase):
     def setUp(self):
         self.show = False
-        self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
+        self.data = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 1], [2, 1, 1]])
 
     def test_increase_section_granularity_preserves_pheromones_on_new_edges(self):
         matrix = AcocMatrix(self.data)

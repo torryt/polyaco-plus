@@ -4,6 +4,7 @@
 from datetime import datetime
 from sklearn import datasets
 from copy import copy
+import numpy as np
 
 import acoc
 import acoc.polygon
@@ -15,7 +16,7 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 
 CLASSIFIER_CONFIG.plot = SAVE_PHEROMONES_AND_BEST_PATHS
-CLASSIFIER_CONFIG.run_time = 10
+CLASSIFIER_CONFIG.run_time = 15
 
 
 def run(**kwargs):
@@ -33,11 +34,13 @@ def run(**kwargs):
     clf = acoc.PolyACO(data.shape[1], conf, SAVE_FOLDER)
     clf.train(data, target)
     results = clf.evaluate(data)
-    return results
+
+    classification_score = (np.equal(results, target).sum() / len(results)) * 100
+    return classification_score
 
 
 
 if __name__ == "__main__":
     # run()
     for _ in range(1):
-        print("\nFinal score: {}".format(run()))
+        print("\nFinal classification score: {}%".format(run()))

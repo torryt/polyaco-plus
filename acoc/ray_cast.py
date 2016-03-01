@@ -81,7 +81,7 @@ def is_point_inside(point, solution):
 
 def points_of_both_classes_inside(points, solution):
     has_class_a = has_class_b = False
-    for p in points.T:
+    for p in points:
         if is_point_inside(p, solution):
             if p[2] == 0:
                 has_class_a = True

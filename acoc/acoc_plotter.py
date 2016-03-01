@@ -94,7 +94,7 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
         save_plot(fig, save_folder, eps=False, file_name=file_name)
     if show:
         plt.show()
-    plt.clf()
+    plt.close(fig)
 
 
 def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_folder=''):
@@ -112,6 +112,7 @@ def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_
 
 
 def plot_data(data, subplot=None, show=False):
+    data = data.T
     ax = subplot if subplot is not None else plt
     if data.shape[0] > 2:
         temp = data.T

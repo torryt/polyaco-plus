@@ -2,7 +2,6 @@ import os
 import pickle
 import sys
 import json
-import os.path as osp
 from os import path as osp
 from time import strftime
 from datetime import datetime

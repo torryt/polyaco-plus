@@ -53,37 +53,19 @@ class TestEdge(unittest.TestCase):
 
 
 class TestMatrix(unittest.TestCase):
-    def test_granularity_4_should_return_matrix_with_24_edges_and_16_vertices(self):
-        matrix = AcocMatrix([[[0, 0]], [[1,1]]], granularity=4)
-        self.assertEqual(len(matrix.vertices), 16)
-        self.assertEqual(len(matrix.edges), 24)
-
     def test_all_edges_move_in_positive_direction_from_a_to_b(self):
-        matrix = AcocMatrix([[0, 0], [1,1]])
+        matrix = AcocMatrix(np.array([[0, 0], [1, 1], [0, 0]]))
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
 
     def test_all_edges_move_in_positive_direction_from_a_to_b_after_level_up(self):
-        matrix = AcocMatrix([[0, 0], [1, 1]])
+        matrix = AcocMatrix(np.array([[0, 0], [1, 1], [0, 0]]))
         matrix.level_up()
         is_positive = map(lambda e: e.b.x >= e.a.x and e.b.y >= e.a.y, matrix.edges)
         self.assertTrue(all(is_positive))
 
-    def test_edge_length_x_is_equal_a_horizontal_edge_in_matrix(self):
-        matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
-        horiz_e = list(filter(lambda e: e.a.y == e.b.y, matrix.edges))[0]
-        e_len = horiz_e.b.x - horiz_e.a.x
-        self.assertEqual(e_len, matrix.init_edge_length_x)
-
-    def test_edge_length_x_is_equal_a_horizontal_edge_in_matrix_after_level_up(self):
-        matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
-        matrix.level_up()
-        horiz_e = list(filter(lambda e: e.a.y == e.b.y, matrix.edges))[0]
-        e_len = horiz_e.b.x - horiz_e.a.x
-        self.assertEqual(e_len, matrix.init_edge_length_x / 2)
-
     def test_first_vertex_is_smallest_vertex(self):
-        matrix = AcocMatrix([[0, 3, 5], [0, 3, 4]], granularity=10)
+        matrix = AcocMatrix(np.array([[0, 3, 5], [0, 3, 4], [0, 0, 0]]))
         first_v = matrix.vertices[0]
         smallest_x = min(matrix.vertices, key=lambda v: v.x).x
         smallest_y = min(matrix.vertices, key=lambda v: v.y).y
@@ -98,53 +80,53 @@ class TestLevelUpNested(unittest.TestCase):
         self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
 
     def test_level_up_nested_increase_number_of_edges(self):
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_edge_count = len(matrix.edges)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        matrix.level_up_nested()
+        matrix.level_up()
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
         new_edge_count = len(matrix.edges)
         self.assertGreater(new_edge_count, old_edge_count)
 
     def test_level_up_nested_increase_number_of_edges_with_8(self):
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_edge_count = len(matrix.edges)
-        matrix.level_up_nested()
+        matrix.level_up()
         new_edge_count = len(matrix.edges)
         self.assertEqual(new_edge_count - old_edge_count, 8)
 
     def test_level_up_one_section_increases_vertex_count_with_5(self):
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
-        matrix.level_up_nested()
+        matrix.level_up()
         new_vertex_count = len(matrix.vertices)
         self.assertEqual(new_vertex_count - old_vertex_count, 5)
 
     def test_level_up_two_times_increases_vertex_count_with_10(self):
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
-        matrix.level_up_nested()
-        matrix.level_up_nested()
+        matrix.level_up()
+        matrix.level_up()
         new_vertex_count = len(matrix.vertices)
         self.assertEqual(new_vertex_count - old_vertex_count, 10)
 
     def test_level_up_5_increase_vertex_count_with_5_times_5(self):
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
         for _ in range(5):
-            matrix.level_up_nested()
+            matrix.level_up()
         new_vertex_count = len(matrix.vertices)
         self.assertEqual(new_vertex_count - old_vertex_count, 5*5)
 
     def test_level_up_nested_increase_number_of_vertices_by_10_in_other_data_set(self):
         self.data = np.array([[0, 0, 3, 3], [0, 0, 3, 3], [0, 1, 0, 1]])
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        matrix.level_up_nested()
+        matrix.level_up()
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
         new_vertex_count = len(matrix.vertices)
@@ -152,11 +134,11 @@ class TestLevelUpNested(unittest.TestCase):
 
     def test_level_up_nested_increase_number_of_vertices_by_9_in_adjacent_sections_set(self):
         self.data = np.array([[0, 0, 0, 0, 3], [0, 0, 3, 3, 3], [0, 1, 0, 1, 1]])
-        matrix = AcocMatrix(self.data, nest_grid=True)
+        matrix = AcocMatrix(self.data)
         old_vertex_count = len(matrix.vertices)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        matrix.level_up_nested()
+        matrix.level_up()
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
         new_vertex_count = len(matrix.vertices)
@@ -169,16 +151,18 @@ class TestIncreaseSectionGranularity(unittest.TestCase):
         self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
 
     def test_increase_section_granularity_preserves_pheromones_on_new_edges(self):
-        matrix = AcocMatrix(self.data, nest_grid=True)
-        edge = matrix.edges[0]
-        edge_start = edge.a
+        matrix = AcocMatrix(self.data)
+        start_vertex = matrix.vertices[0]
+        up_edge = start_vertex.connected_edges[DIRECTION['UP']]
         strength = 10
-        edge.pheromone_strength = strength
-        matrix.level_up_nested(best_polygon=[edge])
+        up_edge.pheromone_strength = strength
+        matrix.level_up(best_polygon=[up_edge])
 
-        new_edge = edge_start.connected_edges[DIRECTION['UP']]
+        new_edge = start_vertex.connected_edges[DIRECTION['UP']]
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+
+        self.assertNotEqual(up_edge, new_edge, 'New matrix edge is equal to the old matrix edge. Should be shorter.')
         self.assertEqual(new_edge.pheromone_strength, strength)
         next_new_edge = new_edge.b.connected_edges[DIRECTION['UP']]
         self.assertEqual(next_new_edge.pheromone_strength, strength)

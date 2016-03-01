@@ -48,6 +48,15 @@ class TestRayIntersectSegmentCuda(unittest.TestCase):
 
 
 class TestIsPointInsideCuda(unittest.TestCase):
+    def setUp(self):
+        vs = [Vertex(0, 0), Vertex(1, 0), Vertex(1, 1), Vertex(0, 1)]
+        self.polygon = polygon_to_array([
+            Edge(vs[0], vs[1]),
+            Edge(vs[1], vs[2]),
+            Edge(vs[3], vs[2]),
+            Edge(vs[0], vs[3])
+        ])
+
     def test_function_returns_array_of_floats(self):
         points = np.array([[1, 1], [2, 2]], dtype='float32')
         e1 = [[1, 0], [1, 3]]
@@ -58,6 +67,17 @@ class TestIsPointInsideCuda(unittest.TestCase):
         result = np.empty((points.shape[0], edges.shape[0]), dtype=bool)
         rc.ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](points, edges, result)
         self.assertTrue(type(result[0][0]) is np.bool_, 'Type is not {} but "{}" '.format(np.bool_, type(result[0][0])))
+
+    def test_function_returns_array_of_size_equal_to_number_of_input_points(self):
+        data = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+        result = rc.is_points_inside_cuda(data, self.polygon)
+        self.assertEqual(result.shape[0], data.shape[0])
+
+    def test_function_returns_1_true_rest_false(self):
+        data = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+        result = rc.is_points_inside_cuda(data, self.polygon)
+        self.assertEqual(np.sum(result), 1)
+        self.assertEqual(np.sum(np.invert(result)), 3)
 
 
 class TestCudaGrid(unittest.TestCase):

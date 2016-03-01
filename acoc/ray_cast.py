@@ -71,7 +71,6 @@ def is_points_inside_cuda(points, solution):
     p_points = cuda.to_device(points)
     p_edges = cuda.to_device(solution)
     ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](p_points, p_edges, result)
-
     return odd(np.sum(result, axis=1))
 
 

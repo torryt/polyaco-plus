@@ -4,7 +4,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib
 
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -94,6 +94,7 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
         save_plot(fig, save_folder, eps=False, file_name=file_name)
     if show:
         plt.show()
+    plt.clf()
 
 
 def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_folder=''):

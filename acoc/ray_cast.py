@@ -91,6 +91,7 @@ def points_of_both_classes_inside(points, solution):
                 return True
     return False
 
+
 @jit
 def is_point_inside_jit(point, solution):
     intersects = np.empty(solution.shape[0])

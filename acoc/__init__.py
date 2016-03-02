@@ -12,10 +12,12 @@ import numpy as np
 from numba import cuda, jit
 from numpy.random.mtrand import choice as np_choice
 from itertools import combinations
+from copy import copy
 
 import acoc.acoc_plotter as plotter
 import utils
 from acoc import ray_cast
+from acoc.ray_cast import is_points_inside_cuda
 from acoc.acoc_matrix import AcocMatrix
 from acoc.ant import Ant
 from acoc.polygon import polygon_to_array, polygon_length, load_simple_polygon
@@ -27,32 +29,46 @@ odd = np.vectorize(ray_cast.odd)
 
 
 class PolyACO:
-    def __init__(self, dimensions, config=None, save_folder=None):
+    def __init__(self, dimensions, class_indices, config=None, save_folder=None):
         self.config = config if config is not None else CLASSIFIER_CONFIG
         self.save_folder = save_folder
 
+        self.class_indices = class_indices
         self.planes = list(combinations(range(dimensions), 2))
-        self.polygons = [load_simple_polygon()] * len(self.planes)
+        self.polygons = [[None] * len(class_indices)] * len(self.planes)
 
     def evaluate(self, test_data):
-        if self.polygons is None:
+        if self.polygons[0][0] is None:
             raise RuntimeError('PolyACO must be trained before evaluation')
-        plane_scores = []
-        for plane, poly in zip(self.planes, self.polygons):
-            plane_data = np.take(test_data, list(plane), axis=1)
-            plane_scores.append(ray_cast.is_points_inside_cuda(plane_data, polygon_to_array(poly)))
-        aggregated_scores = np.mean(np.array(plane_scores), axis=0)
-        predictions = [0 if v > 0.5 else 1 for v in list(aggregated_scores)]
+        inside = np.empty((len(self.planes), len(self.class_indices), test_data.shape[0]))
+        for i, plane in enumerate(self.polygons):
+            plane_data = np.take(test_data, list(self.planes[i]), axis=1)
+            for j, poly in enumerate(plane):
+                inside[i, j, :] = is_points_inside_cuda(plane_data, polygon_to_array(poly))
+        aggregated_scores = np.mean(inside, axis=0)
+        predictions = np.empty((test_data.shape[0]))
+        max_elements = np.argmax(aggregated_scores, axis=0)
+        for i in range(test_data.shape[0]):
+            predictions[i] = self.class_indices[max_elements[i]]
+
+        # predictions = aggregated_scores.max(axis=0).astype(int)
         return predictions
 
     def train(self, training_data, target):
-        self.polygons = []
-
         for i, plane in enumerate(self.planes):
-            plane_string = str(plane[0]) + str(plane[1])
-            plane_data = np.concatenate((np.take(training_data, list(plane), axis=1), np.array([target]).T), axis=1)
-            _polygon = self._train_plane(plane_data, plane_string, print_string=', Plane {}/{}'.format(i + 1, len(self.planes)))
-            self.polygons.append(_polygon)
+            for j, i_class in enumerate(self.class_indices):
+                plane_string = "{}{}_{}".format(plane[0], plane[1], i_class)
+
+                new_t = copy(target)
+                new_t[new_t != i_class] = -1
+                new_t[new_t == i_class] = 0
+                new_t[new_t == -1] = 1
+                plane_data = np.concatenate((np.take(training_data, list(plane), axis=1), np.array([new_t]).T), axis=1)
+                _polygon = self._train_plane(plane_data, plane_string,
+                                             print_string=', Plane {}/{}'.format(
+                                                 i * len(self.class_indices) + (j + 1),
+                                                 len(self.planes) * len(self.class_indices)))
+                self.polygons[i][j] = _polygon
 
     def _train_plane(self, data, plane_string, print_string=''):
         cuda.to_device(data)

@@ -1,4 +1,6 @@
 import numpy as np
+from acoc.edge import Edge
+from acoc.vertex import Vertex
 
 
 def polygon_to_array(polygon):
@@ -14,3 +16,14 @@ def polygon_length(polygon):
     y_edge_length = y_edge.b.y - y_edge.a.y
     y_edges_count = len(polygon) - x_edges_count
     return (x_edges_count * x_edge_length) + (y_edges_count * y_edge_length)
+
+
+def load_simple_polygon():
+    vs = [Vertex(0, 0),
+          Vertex(1, 0),
+          Vertex(0, 1),
+          Vertex(1, 1)]
+    return [Edge(vs[0], vs[1]),
+            Edge(vs[0], vs[2]),
+            Edge(vs[1], vs[3]),
+            Edge(vs[2], vs[3])]

@@ -11,12 +11,12 @@ import acoc.polygon
 from config import CLASSIFIER_CONFIG
 
 SAVE = False
-SAVE_PHEROMONES_AND_BEST_PATHS = True
+SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 SHOW_PLOT = False
 
 CLASSIFIER_CONFIG.plot = SAVE_PHEROMONES_AND_BEST_PATHS
-CLASSIFIER_CONFIG.run_time = 15
+CLASSIFIER_CONFIG.run_time = 0.1
 
 
 def run(**kwargs):

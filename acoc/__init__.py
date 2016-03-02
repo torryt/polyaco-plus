@@ -18,7 +18,7 @@ import utils
 from acoc import ray_cast
 from acoc.acoc_matrix import AcocMatrix
 from acoc.ant import Ant
-from acoc.polygon import polygon_to_array, polygon_length
+from acoc.polygon import polygon_to_array, polygon_length, load_simple_polygon
 from acoc.ray_cast import is_point_inside
 from utils import normalize
 from config import CLASSIFIER_CONFIG
@@ -32,7 +32,7 @@ class PolyACO:
         self.save_folder = save_folder
 
         self.planes = list(combinations(range(dimensions), 2))
-        self.polygons = None
+        self.polygons = [load_simple_polygon()] * len(self.planes)
 
     def evaluate(self, test_data):
         if self.polygons is None:
@@ -47,6 +47,7 @@ class PolyACO:
 
     def train(self, training_data, target):
         self.polygons = []
+
         for i, plane in enumerate(self.planes):
             plane_string = str(plane[0]) + str(plane[1])
             plane_data = np.concatenate((np.take(training_data, list(plane), axis=1), np.array([target]).T), axis=1)
@@ -61,16 +62,9 @@ class PolyACO:
         self.matrix = AcocMatrix(data, tau_initial=self.config.tau_init)
 
         current_best_score = 0
-        best_ant_history = [None] * self.config.run_time
-        best_ant_history[0] = current_best_score
 
         t_start = process_time()
         t_elapsed = 0
-
-        def plot_pheromones():
-            if self.config.plot:
-                plotter.plot_pheromones(self.matrix, data.T, self.config.tau_min, self.config.tau_max, file_name='ant' + str(len(ant_scores)),
-                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'), title="Ant {}".format(len(ant_scores)))
 
         def print_status():
             while t_elapsed < self.config.run_time:
@@ -83,19 +77,13 @@ class PolyACO:
                 utils.print_on_current_line(to_print)
                 time.sleep(0.1)
 
-        def update_history():
-            while t_elapsed < self.config.run_time:
-                best_ant_history[int(t_elapsed)] = current_best_score
-                time.sleep(1)
         Thread(target=print_status).start()
-        Thread(target=update_history).start()
 
         while t_elapsed < self.config.run_time:
             start_vertex = get_random_weighted(self.matrix.edges)
             if self.config.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.config.convergence_rate:
                     if self.config.max_level is None or self.matrix.level < self.config.max_level:
-                        # plot_pheromones()
                         self.matrix.level_up(current_best_ant)
                         last_level_up_or_best_ant = len(ant_scores)
             _ant = Ant(start_vertex)
@@ -113,16 +101,12 @@ class PolyACO:
                         plotter.plot_path_with_data(current_best_ant, data, self.matrix, save=True,
                                                     save_folder=osp.join(self.save_folder, 'best_paths/{}/'.format(plane_string)),
                                                     file_name='ant' + str(len(ant_scores)))
-                        # plot_pheromones()
 
                 self._put_pheromones(current_best_ant, current_best_score)
                 self._reset_at_random(self.matrix)
                 ant_scores.append(ant_score)
                 t_elapsed = process_time() - t_start
 
-        for i, e in enumerate(best_ant_history):
-            if e is None:
-                best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
         return current_best_ant
 
     def _reset_at_random(self, matrix):

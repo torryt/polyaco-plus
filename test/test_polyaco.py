@@ -12,21 +12,33 @@ class TestPolyAcoClass(unittest.TestCase):
     def test_3_dim_3_class_has_9_polygons(self):
         clf = acoc.PolyACO(3, [0, 1, 2])
         polygon_count = 0
-        for p in clf.polygons:
+        for p in clf.model:
             polygon_count += len(p)
         self.assertEqual(polygon_count, 9)
 
     def test_4_dim_3_class_has_18_polygons(self):
         clf = acoc.PolyACO(4, [0, 1, 2])
         polygon_count = 0
-        for p in clf.polygons:
+        for p in clf.model:
             polygon_count += len(p)
         self.assertEqual(polygon_count, 18)
+
+    def test_4_dims_has_6_planes(self):
+        clf = acoc.PolyACO(4, [0, 1])
+        self.assertEqual(len(clf.model), 6)
+
+    def test_3_classes_has_3_spaces_in_each_plane_in_polygon_list(self):
+        clf = acoc.PolyACO(3, [0, 1, 2])
+        for plane in clf.model:
+            self.assertEqual(len(plane), 3)
+
+    def test_class_indices_with_duplicate_indices_raise_warning(self):
+        with self.assertWarns(UserWarning):
+            acoc.PolyACO(2, [0, 0])
 
 
 class TestEvaluate(unittest.TestCase):
     def setUp(self):
-
         self.data = np.array([[0.1, 0.1, 0.1],
                               [1.3, 1.2, 1.2],
                               [1.1, 1.1, 1.1],
@@ -43,13 +55,13 @@ class TestEvaluate(unittest.TestCase):
 
     def test_evaluate_returns_list_with_equal_length_as_input(self):
         clf = acoc.PolyACO(self.data.shape[1], self.class_indices)
-        clf.polygons = [[self.polygon1, self.polygon2]] * len(clf.planes)
+        clf.model = [[self.polygon1, self.polygon2]] * len(clf.planes)
         result = clf.evaluate(self.data)
         self.assertEqual(len(result), self.data.shape[0])
 
     def test_evaluate_returns_1_point_of_class_0_rest_class_1(self):
         clf = acoc.PolyACO(self.data.shape[1], self.class_indices)
-        clf.polygons = [[self.polygon1, self.polygon2]] * len(clf.planes)
+        clf.model = [[self.polygon1, self.polygon2]] * len(clf.planes)
         result = clf.evaluate(self.data)
         self.assertEqual(sum(result), 4)
         class_0_count = list(result).count(0)
@@ -64,7 +76,7 @@ class TestEvaluate(unittest.TestCase):
         ])
         clf = acoc.PolyACO(data.shape[1], [0, 1, 2])
         polygon3 = load_simple_polygon(Vertex(1, 0))
-        clf.polygons = [[self.polygon1, self.polygon2, polygon3]]
+        clf.model = [[self.polygon1, self.polygon2, polygon3]]
         result = list(clf.evaluate(data))
         self.assertEqual(result.count(0), 1)
         self.assertEqual(result.count(1), 2)
@@ -73,15 +85,28 @@ class TestEvaluate(unittest.TestCase):
     def test_evaluate_3_classes_3_dimensions(self):
         data = np.array([
             [0.1, 0.5, 0.1],
-            [1.1, 1.1, 1.3],
+            [2.1, 1.1, 1.3],
             [1.1, 1.3, 1.7],
             [2.1, 2.4, 2.5]
         ])
         clf = acoc.PolyACO(data.shape[1], [0, 1, 2])
-        clf.polygons = [[self.polygon1, self.polygon2, load_simple_polygon(Vertex(2, 2))]]
+        clf.model = [[self.polygon1, self.polygon2, load_simple_polygon(Vertex(2, 2))]] * len(clf.planes)
         result = list(clf.evaluate(data))
         self.assertEqual(result.count(0), 1)
         self.assertEqual(result.count(1), 2)
+        self.assertEqual(result.count(2), 1)
+
+    def test_evaluate_3_classes_3_dimensions_with_overlap(self):
+        data = np.array([
+            [0.5, 0.5, 0.5],
+            [0.5, 1.5, 1.5],
+            [2.5, 2.5, 2.5]
+        ])
+        clf = acoc.PolyACO(data.shape[1], [0, 1, 2])
+        clf.model = [[self.polygon1, self.polygon2, load_simple_polygon(Vertex(2, 2))]] * len(clf.planes)
+        result = list(clf.evaluate(data))
+        self.assertEqual(result.count(0), 1)
+        self.assertEqual(result.count(1), 1)
         self.assertEqual(result.count(2), 1)
 
 

@@ -8,6 +8,7 @@ import time
 from threading import Thread
 from time import process_time
 from datetime import datetime
+from warnings import warn
 
 import numpy as np
 from numba import cuda, jit
@@ -33,16 +34,17 @@ class PolyACO:
     def __init__(self, dimensions, class_indices, config=None, save_folder=datetime.utcnow().strftime('%Y-%m-%d_%H%M')):
         self.config = config if config is not None else CLASSIFIER_CONFIG
         self.save_folder = save_folder
-
-        self.class_indices = class_indices
+        if len(class_indices) > len(set(class_indices)):
+            warn("Class index array contains duplicate entries")
+        self.class_indices = np.unique(class_indices)
         self.planes = list(combinations(range(dimensions), 2))
-        self.polygons = [[None] * len(class_indices)] * len(self.planes)
+        self.model = []
 
     def evaluate(self, test_data):
-        if self.polygons[0][0] is None:
+        if self.model is None:
             raise RuntimeError('PolyACO must be trained before evaluation')
         inside = np.empty((len(self.planes), len(self.class_indices), test_data.shape[0]), dtype=bool)
-        for i, plane in enumerate(self.polygons):
+        for i, plane in enumerate(self.model):
             plane_data = np.take(test_data, list(self.planes[i]), axis=1)
             for j, poly in enumerate(plane):
                 inside[i, j, :] = is_points_inside_cuda(plane_data, polygon_to_array(poly))
@@ -56,23 +58,25 @@ class PolyACO:
         return predictions
 
     def train(self, training_data, target):
-        for i, plane in enumerate(self.planes):
+        for i, plane_axes in enumerate(self.planes):
+            plane = []
+            self.model.append(plane)
             for j, i_class in enumerate(self.class_indices):
-                plane_string = "plane{}{}_class{}".format(plane[0], plane[1], i_class)
+                plane_string = "plane{}{}_class{}".format(plane_axes[0], plane_axes[1], i_class)
 
                 new_t = copy(target)
                 new_t[new_t != i_class] = -1
                 new_t[new_t == i_class] = 0
                 new_t[new_t == -1] = 1
-                plane_data = np.concatenate((np.take(training_data, list(plane), axis=1), np.array([new_t]).T), axis=1)
+                plane_data = np.concatenate((np.take(training_data, list(plane_axes), axis=1), np.array([new_t]).T), axis=1)
                 _polygon = self._train_plane(plane_data, plane_string,
                                              print_string=', Plane {}/{}'.format(
                                                  i * len(self.class_indices) + (j + 1),
                                                  len(self.planes) * len(self.class_indices)))
-                self.polygons[i][j] = _polygon
+                plane.append(_polygon)
             p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
             if self.config.save:
-                plotter.plot_paths_with_data(self.polygons[i], p_data, save_folder=self.save_folder)
+                plotter.plot_paths_with_data(self.model[i], p_data, save_folder=self.save_folder)
 
     def _train_plane(self, data, plane_string, print_string=''):
         cuda.to_device(data)
@@ -97,12 +101,10 @@ class PolyACO:
 
         Thread(target=print_status).start()
 
-        # while t_elapsed < self.config.run_time:
         while matrix.level <= self.config.max_level:
             start_vertex = get_random_weighted(matrix.edges)
             if self.config.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.config.convergence_rate:
-                    # if matrix.level < self.config.max_level:
                     matrix.level_up(current_best_ant)
                     last_level_up_or_best_ant = len(ant_scores)
             _ant = Ant(start_vertex)
@@ -125,7 +127,6 @@ class PolyACO:
                 self._put_pheromones(current_best_ant, current_best_score)
                 self._reset_at_random(matrix)
                 ant_scores.append(ant_score)
-                t_elapsed = process_time() - t_start
 
         return current_best_ant
 
@@ -171,3 +172,7 @@ def cost_function_gpu(points, edges):
     is_inside = ray_cast.is_points_inside_cuda(points, edges)
     score = np.sum(np.logical_xor(is_inside, points[:, 2]))
     return score / points.shape[0]
+
+
+def compute_score(predictions, ground_truth):
+    return np.equal(predictions, ground_truth).mean() * 100

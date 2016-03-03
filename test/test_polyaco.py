@@ -9,24 +9,6 @@ from acoc.polygon import polygon_length, load_simple_polygon
 
 
 class TestPolyAcoClass(unittest.TestCase):
-    def test_3_dim_3_class_has_9_polygons(self):
-        clf = acoc.PolyACO(3, [0, 1, 2])
-        polygon_count = 0
-        for p in clf.model:
-            polygon_count += len(p)
-        self.assertEqual(polygon_count, 9)
-
-    def test_4_dim_3_class_has_18_polygons(self):
-        clf = acoc.PolyACO(4, [0, 1, 2])
-        polygon_count = 0
-        for p in clf.model:
-            polygon_count += len(p)
-        self.assertEqual(polygon_count, 18)
-
-    def test_4_dims_has_6_planes(self):
-        clf = acoc.PolyACO(4, [0, 1])
-        self.assertEqual(len(clf.model), 6)
-
     def test_3_classes_has_3_spaces_in_each_plane_in_polygon_list(self):
         clf = acoc.PolyACO(3, [0, 1, 2])
         for plane in clf.model:

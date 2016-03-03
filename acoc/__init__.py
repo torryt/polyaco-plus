@@ -41,7 +41,7 @@ class PolyACO:
         self.model = []
 
     def evaluate(self, test_data):
-        if self.model is None:
+        if not self.model:
             raise RuntimeError('PolyACO must be trained before evaluation')
         inside = np.empty((len(self.planes), len(self.class_indices), test_data.shape[0]), dtype=bool)
         for i, plane in enumerate(self.model):

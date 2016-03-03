@@ -2,7 +2,9 @@ from __future__ import division
 import os
 from datetime import datetime
 import numpy as np
+from copy import copy
 import matplotlib
+
 
 #matplotlib.use('Agg')
 
@@ -11,7 +13,7 @@ from scipy.signal import savgol_filter
 from utils import generate_folder_name
 from config import SAVE_DIR
 
-COLORS = ['#0097E8', '#FFCB70', '#9AEDB0', '#C500E8']
+COLORS = ['r', 'g', 'b', 'k']
 
 CLASS_ONE_COLOR = '#FFFFFF'
 CLASS_TWO_COLOR = '#0097E8'
@@ -97,6 +99,16 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
     plt.close(fig)
 
 
+def plot_paths_with_data(plane, data, save_folder):
+    fig, ax = plt.subplots()
+    plt.axis("off")
+    plot_data(data, ax)
+    for path, color in zip(plane, COLORS):
+        plot_path(path, ax, color)
+    save_plot(fig, save_folder, eps=False)
+    plt.close(fig)
+
+
 def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_folder=''):
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -112,20 +124,14 @@ def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_
 
 
 def plot_data(data, subplot=None, show=False):
-    data = data.T
     ax = subplot if subplot is not None else plt
-    if data.shape[0] > 2:
-        temp = data.T
-        red = temp[temp[:, 2] == 0][:, :2].T
-        blue = temp[temp[:, 2] == 1][:, :2].T
-        ax.scatter(red[0], red[1], color=CLASS_ONE_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
-        ax.scatter(blue[0], blue[1], color=CLASS_TWO_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
+    if data.shape[1] > 2:
+        classes = list(np.unique(data[:,2]).astype(int))
+        for i, c in enumerate(classes):
+            temp = data[data[:, 2] == c].T[:2]
+            ax.scatter(temp[0], temp[1], color=COLORS[c], s=80, edgecolor=EDGE_COLOR, lw=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
-    ax.axis([np.amin(data[0]) - .2,
-             np.amax(data[0]) + .2,
-             np.amin(data[1]) - .2,
-             np.amax(data[1]) + .2])
     if show:
         plt.show()
 
@@ -158,7 +164,7 @@ def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False
 
 def plot_path(path, subplot, color='k-'):
     for edge in path:
-        subplot.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], color, linewidth=3)
+        subplot.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], color, linewidth=2)
 
 
 def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):

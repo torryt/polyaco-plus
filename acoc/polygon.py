@@ -18,11 +18,13 @@ def polygon_length(polygon):
     return (x_edges_count * x_edge_length) + (y_edges_count * y_edge_length)
 
 
-def load_simple_polygon():
-    vs = [Vertex(0, 0),
-          Vertex(1, 0),
-          Vertex(0, 1),
-          Vertex(1, 1)]
+def load_simple_polygon(start_vertex, edge_length=1):
+    vs = [
+        start_vertex,
+        Vertex(start_vertex.x + edge_length, start_vertex.y),
+        Vertex(start_vertex.x, start_vertex.y + edge_length),
+        Vertex(start_vertex.x + edge_length, start_vertex.y + edge_length)
+    ]
     return [Edge(vs[0], vs[1]),
             Edge(vs[0], vs[2]),
             Edge(vs[1], vs[3]),

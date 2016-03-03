@@ -10,13 +10,11 @@ import acoc
 import acoc.polygon
 from config import CLASSIFIER_CONFIG
 
-SAVE = False
-SAVE_PHEROMONES_AND_BEST_PATHS = True
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-SHOW_PLOT = False
 
-CLASSIFIER_CONFIG.plot = SAVE_PHEROMONES_AND_BEST_PATHS
-CLASSIFIER_CONFIG.run_time = .7
+CLASSIFIER_CONFIG.plot = True
+CLASSIFIER_CONFIG.save = True
+CLASSIFIER_CONFIG.run_time = 20
 
 
 def run(**kwargs):
@@ -28,8 +26,8 @@ def run(**kwargs):
     iris = datasets.load_iris()
 
     # Use only data samples from 2 out of 3 classes
-    data = iris.data
-    target = iris.target
+    data = iris.data[:100]
+    target = iris.target[:100]
     class_indices = list(set(target))
 
     clf = acoc.PolyACO(data.shape[1], class_indices, conf, SAVE_FOLDER)
@@ -38,7 +36,6 @@ def run(**kwargs):
 
     classification_score = np.equal(results, target).mean() * 100
     return classification_score
-
 
 
 if __name__ == "__main__":

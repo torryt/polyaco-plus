@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from sklearn import datasets
+from sklearn.cross_validation import train_test_split
 from copy import copy
 
 import acoc
@@ -23,19 +24,25 @@ def run(**kwargs):
     # Loads a sample data set from a pickle file.
     data_set = datasets.load_iris()
 
-    # Use only data samples from 2 out of 3 classes
-    data = data_set.data
-    target = data_set.target
-    class_indices = list(set(target))
+    X = data_set.data
+    y = data_set.target
+    class_indices = list(set(y))
 
-    clf = acoc.PolyACO(data.shape[1], class_indices, conf, SAVE_FOLDER)
-    clf.train(data, target)
-    predictions = clf.evaluate(data)
+    # Split data into training and testing set
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.33)
 
-    return acoc.compute_score(predictions, target)
+    clf = acoc.PolyACO(X.shape[1], class_indices, conf, SAVE_FOLDER)
+    clf.train(X_train, y_train)
+    predictions = clf.evaluate(X_test)
+
+    return acoc.compute_score(predictions, y_test)
 
 
 if __name__ == "__main__":
-    # run()
-    for _ in range(1):
-        print("\nFinal classification score: {:.4f}%".format(run()))
+    scores = []
+    runs = 10
+    for i in range(runs):
+        print("\nRun {}/{}".format(i + 1, runs))
+        scores.append(run())
+    print("Average score with {}-fold cross validation: {:.2f}".format(runs, sum(scores) / runs))

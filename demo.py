@@ -13,7 +13,6 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
 CLASSIFIER_CONFIG.plot = False
 CLASSIFIER_CONFIG.save = True
-CLASSIFIER_CONFIG.run_time = 20
 
 
 def run(**kwargs):
@@ -22,11 +21,11 @@ def run(**kwargs):
         conf[k] = v
 
     # Loads a sample data set from a pickle file.
-    iris = datasets.load_iris()
+    data_set = datasets.load_iris()
 
     # Use only data samples from 2 out of 3 classes
-    data = iris.data
-    target = iris.target
+    data = data_set.data
+    target = data_set.target
     class_indices = list(set(target))
 
     clf = acoc.PolyACO(data.shape[1], class_indices, conf, SAVE_FOLDER)

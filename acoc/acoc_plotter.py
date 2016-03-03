@@ -6,7 +6,7 @@ from copy import copy
 import matplotlib
 
 
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -93,7 +93,7 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
     plot_path(path, ax, color)
     plot_data(data, ax)
     if save:
-        save_plot(fig, save_folder, eps=False, file_name=file_name)
+        save_plot(fig, save_folder, file_name=file_name)
     if show:
         plt.show()
     plt.close(fig)
@@ -105,7 +105,7 @@ def plot_paths_with_data(plane, data, save_folder):
     plot_data(data, ax)
     for path, color in zip(plane, COLORS):
         plot_path(path, ax, color)
-    save_plot(fig, save_folder, eps=False)
+    save_plot(fig, save_folder, extension='eps')
     plt.close(fig)
 
 
@@ -220,13 +220,13 @@ def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, 
              matrix.y_min_max[0] - margin_y,
              matrix.y_min_max[1] + margin_y])
     if save:
-        save_plot(fig, folder_name, file_name=file_name, eps=False)
+        save_plot(fig, folder_name, file_name=file_name)
     if show:
         plt.show()
     plt.close(fig)
 
 
-def save_plot(fig=None, parent_folder='', file_name=None, eps=True):
+def save_plot(fig=None, parent_folder='', file_name=None, extension='png'):
     if parent_folder is not None:
         directory = os.path.join(SAVE_DIR, parent_folder)
     else:
@@ -236,9 +236,7 @@ def save_plot(fig=None, parent_folder='', file_name=None, eps=True):
     file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5] if file_name is None else file_name
     if fig is None:
         fig = plt
-    if eps:
-        fig.savefig(os.path.join(directory, file_name + '.eps'))
-    fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
+    fig.savefig(os.path.join(directory, file_name + '.' + extension), transparent=False)
 
 
 def hide_top_and_right_axis(ax):

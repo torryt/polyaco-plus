@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from sklearn import datasets
 from sklearn.cross_validation import train_test_split
 from copy import copy
 
@@ -28,11 +27,10 @@ def run(**kwargs):
     # Loads a sample data set from a pickle file.
     ####
     if conf.data_set == 'iris':
-        data_set = datasets.load_iris()
+        data_set = data_manager.load_iris()
     else:
         CLASSIFIER_CONFIG.data_set = 'breast_cancer'
         data_set = data_manager.load_breast_cancer()
-
 
     X = data_set.data
     y = data_set.target
@@ -51,11 +49,12 @@ def run(**kwargs):
 
 if __name__ == "__main__":
     scores = []
-    runs = 20
+    runs = 10
+    result_str = ''
     for i in range(runs):
         scores.append(run())
-        print("\nRun {}/{} score: {}".format(i + 1, runs, scores[-1]))
+        print("\nRun {}/{} score: {:.4f}".format(i + 1, runs, scores[-1]))
     utils.save_dict(CLASSIFIER_CONFIG, parent_folder=SAVE_FOLDER, file_name='config.json')
-    result_str = "Average score with {}-fold cross validation: {:.2f}".format(runs, sum(scores) / runs)
+    result_str = ','.join([str(s) for s in scores]) + "\nAverage score with {}-fold cross validation: {:.5f}".format(runs, sum(scores) / runs)
     utils.save_string_to_file(result_str, parent_folder=SAVE_FOLDER, file_name='result.txt')
     print("\n" + result_str)

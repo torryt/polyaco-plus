@@ -101,19 +101,9 @@ def generate_various_sized_rectangles(sizes):
     pickle.dump(sets, open('data_sets.pickle', 'wb'))
 
 
-def get_iris():
+def load_iris():
     from sklearn import datasets
     return datasets.load_iris()
-
-
-def load_data():
-    return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
-
-
-def list_datasets():
-    keys = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1').keys()
-    for key in keys:
-        print(key)
 
 
 def load_breast_cancer():
@@ -127,6 +117,19 @@ def load_breast_cancer():
         bc.target = data[:, -1]
         bc.data = data[:, 1:-1]
         return bc
+
+
+def load_data():
+    return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
+
+
+def list_datasets():
+    keys = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1').keys()
+    for key in keys:
+        print(key)
+
+
+
 
 
 def main():

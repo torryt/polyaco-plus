@@ -7,6 +7,8 @@ from sklearn.cross_validation import train_test_split
 from copy import copy
 
 import acoc
+import utils
+from utils import data_manager
 import acoc.polygon
 from config import CLASSIFIER_CONFIG
 
@@ -14,6 +16,7 @@ SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
 CLASSIFIER_CONFIG.plot = False
 CLASSIFIER_CONFIG.save = True
+CLASSIFIER_CONFIG.data_set = 'iris'
 
 
 def run(**kwargs):
@@ -21,8 +24,15 @@ def run(**kwargs):
     for k, v in kwargs.items():
         conf[k] = v
 
+    ####
     # Loads a sample data set from a pickle file.
-    data_set = datasets.load_iris()
+    ####
+    if conf.data_set == 'iris':
+        data_set = datasets.load_iris()
+    else:
+        CLASSIFIER_CONFIG.data_set = 'breast_cancer'
+        data_set = data_manager.load_breast_cancer()
+
 
     X = data_set.data
     y = data_set.target
@@ -41,8 +51,11 @@ def run(**kwargs):
 
 if __name__ == "__main__":
     scores = []
-    runs = 10
+    runs = 20
     for i in range(runs):
-        print("\nRun {}/{}".format(i + 1, runs))
         scores.append(run())
-    print("Average score with {}-fold cross validation: {:.2f}".format(runs, sum(scores) / runs))
+        print("\nRun {}/{} score: {}".format(i + 1, runs, scores[-1]))
+    utils.save_dict(CLASSIFIER_CONFIG, parent_folder=SAVE_FOLDER, file_name='config.json')
+    result_str = "Average score with {}-fold cross validation: {:.2f}".format(runs, sum(scores) / runs)
+    utils.save_string_to_file(result_str, parent_folder=SAVE_FOLDER, file_name='result.txt')
+    print("\n" + result_str)

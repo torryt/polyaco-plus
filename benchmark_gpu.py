@@ -6,7 +6,7 @@ import numpy as np
 import acoc
 from acoc import acoc_plotter
 import utils
-from utils import data_generator as dg
+from utils import data_manager as dg
 from utils import generate_folder_name
 
 CONFIG = {

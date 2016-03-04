@@ -99,13 +99,13 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
     plt.close(fig)
 
 
-def plot_paths_with_data(plane, data, save_folder):
+def plot_paths_with_data(plane, data, save_folder, file_name):
     fig, ax = plt.subplots()
     plt.axis("off")
     plot_data(data, ax)
     for path, color in zip(plane, COLORS):
         plot_path(path, ax, color)
-    save_plot(fig, save_folder, extension='eps')
+    save_plot(fig, save_folder, extension='eps', file_name=file_name)
     plt.close(fig)
 
 
@@ -126,10 +126,10 @@ def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_
 def plot_data(data, subplot=None, show=False):
     ax = subplot if subplot is not None else plt
     if data.shape[1] > 2:
-        classes = list(np.unique(data[:,2]).astype(int))
+        classes = list(np.unique(data[:, 2]).astype(int))
         for i, c in enumerate(classes):
             temp = data[data[:, 2] == c].T[:2]
-            ax.scatter(temp[0], temp[1], color=COLORS[c], s=80, edgecolor=EDGE_COLOR, lw=1.0)
+            ax.scatter(temp[0], temp[1], color=COLORS[i], s=80, edgecolor=EDGE_COLOR, lw=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
     if show:

@@ -53,8 +53,6 @@ class PolyACO:
         max_elements = np.argmax(aggregated_scores, axis=0)
         for i in range(test_data.shape[0]):
             predictions[i] = self.class_indices[max_elements[i]]
-
-        # predictions = aggregated_scores.max(axis=0).astype(int)
         return predictions
 
     def train(self, training_data, target):
@@ -76,7 +74,9 @@ class PolyACO:
                 plane.append(_polygon)
             p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
             if self.config.save:
-                plotter.plot_paths_with_data(self.model[i], p_data, save_folder=self.save_folder)
+                fn = "plane_dims_{}_{}".format(plane_axes[0], plane_axes[1])
+                plotter.plot_paths_with_data(self.model[i], p_data,
+                                             save_folder=osp.join(self.save_folder, 'planes'), file_name=fn)
 
     def _train_plane(self, data, plane_string, print_string=''):
         cuda.to_device(data)
@@ -104,7 +104,7 @@ class PolyACO:
         while matrix.level <= self.config.max_level:
             start_vertex = get_random_weighted(matrix.edges)
             if self.config.multi_level:
-                if (len(ant_scores) - last_level_up_or_best_ant) > self.config.convergence_rate:
+                if (len(ant_scores) - last_level_up_or_best_ant) > self.config.level_convergence_rate:
                     matrix.level_up(current_best_ant)
                     last_level_up_or_best_ant = len(ant_scores)
             _ant = Ant(start_vertex)

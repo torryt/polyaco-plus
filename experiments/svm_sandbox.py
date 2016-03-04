@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn import svm
 
-from utils import data_generator as dg
+from utils import data_manager as dg
 
 MinMax = namedtuple('MinMax', ['min', 'max'])
 

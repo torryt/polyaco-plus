@@ -3,6 +3,8 @@ import random
 from collections import namedtuple
 import numpy as np
 import pickle
+from bunch import Bunch
+import os.path as osp
 
 import utils
 
@@ -114,31 +116,26 @@ def list_datasets():
         print(key)
 
 
+def load_breast_cancer():
+    import csv
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'breast-cancer-wisconsin.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)))
+        mask = np.invert(np.isnan(np.sum(data, axis=1)))
+        data = data[mask]
+        bc.target = data[:, -1]
+        bc.data = data[:, 1:-1]
+        return bc
+
+
 def main():
     sets = generate_data_sets()
     utils.save_object(sets, 'data_sets')
 
 
 if __name__ == "__main__":
-    class_one = uniform_rectangle((0, 2), (3, 5), 150, 0)
-    class_two = uniform_rectangle((4, 6), (0, 2), 150, 1)
-    dataset = np.concatenate((class_one, class_two), axis=1)
-
-    # r = MinMax(math.pi, 2*math.pi)
-    # red = semi_circle_gaussian(1.0, r, 150, 0, spread=0.1)
-    # r = MinMax(0, math.pi)
-    # blue = semi_circle_gaussian(1.0, r, 150, 1, center=(1, -.5), spread=0.1)
-    # data = np.concatenate((red, blue), axis=1)
-
-    # get_iris()
-    # main()
-    # white = semi_circle_gaussian(4.0, MinMax(math.pi, 2*math.pi), 500, 0)
-    # blue = semi_circle_gaussian(4.0, MinMax(0, math.pi), 500, 1, center=(8, -5))
-    # dataset = np.concatenate((white, blue), axis=1)
-    #
-    # from acoc.acoc_plotter import plot_data
-    # plot_data(dataset, show=True)
-
-    # data = pickle.load(open('data_sets.pickle', 'rb'), encoding='latin1')
-    # data['square_spaced'] = dataset
-    # pickle.dump(data, open('data_sets.pickle', 'wb'))
+    # class_one = uniform_rectangle((0, 2), (3, 5), 150, 0)
+    # class_two = uniform_rectangle((4, 6), (0, 2), 150, 1)
+    # dataset = np.concatenate((class_one, class_two), axis=1)
+    load_breast_cancer()

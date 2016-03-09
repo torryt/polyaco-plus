@@ -136,12 +136,14 @@ def plot_data(data, subplot=None, show=False):
         plt.show()
 
 
-def plot_matrix_and_data(matrix, data, show=False):
-    fig, ax = plt.subplots()
+def plot_matrix_and_data(matrix, data, subplot=None, show=False, save=False):
+    ax = subplot if subplot is not None else plt
     plot_matrix(matrix, ax)
     plot_data(data, ax)
     if show:
         plt.show()
+    if save:
+        save_plot(ax, extension='eps')
 
 
 def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False):
@@ -152,8 +154,8 @@ def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False
         for i, v in enumerate(matrix.vertices):
             ax.plot(v.x, v.y, 'o', color='w')
 
-    margin_x = (matrix.x_min_max[1] - matrix.x_min_max[0]) / 2
-    margin_y = (matrix.y_min_max[1] - matrix.y_min_max[0]) / 2
+    margin_x = (matrix.x_min_max[1] - matrix.x_min_max[0]) / 6
+    margin_y = (matrix.y_min_max[1] - matrix.y_min_max[0]) / 6
     ax.axis([matrix.x_min_max[0] - margin_x, matrix.x_min_max[1] + margin_x,
              matrix.y_min_max[0] - margin_y, matrix.y_min_max[1] + margin_y])
     if show:

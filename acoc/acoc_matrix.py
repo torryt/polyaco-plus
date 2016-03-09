@@ -140,13 +140,16 @@ def create_edges(vertices, tau_initial):
 
 
 if __name__ == "__main__":
-    from acoc.acoc_plotter import plot_pheromones, plot_matrix
+    from acoc.acoc_plotter import plot_pheromones, plot_matrix_and_data
     from utils import generate_folder_name
 
-    save = False
+    plot = True
+    save = True
     show = False
-    plot = False
-    dt = np.array([[0, 0, 0], [0, 0, 1], [1, 1, 1]])
+
+    dt = np.array([[0, 0.02, 0],
+                   [0.05, 0, 1],
+                   [1, 1, 1]])
     mtrx = AcocMatrix(dt)
     pol = mtrx.edges[:4]
     mtrx.edges[1].pheromone_strength = 5
@@ -155,11 +158,11 @@ if __name__ == "__main__":
     print("Level {}: Edges {}, vertices {}".format(mtrx.level, len(mtrx.edges), len(mtrx.vertices)))
 
     if plot:
-        plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
-        plot_matrix(mtrx, show=show, save=save)
+        # plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
+        plot_matrix_and_data(mtrx, dt, show=show)
     for i in range(6):
         mtrx.level_up(pol)
         print("Level {}: Edges {}, vertices {}".format(mtrx.level, len(mtrx.edges), len(mtrx.vertices)))
         if plot:
-            plot_matrix(mtrx, show=show, save=save)
-            plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
+            plot_matrix_and_data(mtrx, dt, show=show, save=save)
+            # plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)

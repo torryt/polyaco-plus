@@ -2,7 +2,9 @@ from __future__ import division
 import os
 from datetime import datetime
 import numpy as np
+from copy import copy
 import matplotlib
+
 
 matplotlib.use('Agg')
 
@@ -11,7 +13,7 @@ from scipy.signal import savgol_filter
 from utils import generate_folder_name
 from config import SAVE_DIR
 
-COLORS = ['#0097E8', '#FFCB70', '#9AEDB0', '#C500E8']
+COLORS = ['r', 'g', 'b', 'k']
 
 CLASS_ONE_COLOR = '#FFFFFF'
 CLASS_TWO_COLOR = '#0097E8'
@@ -91,9 +93,20 @@ def plot_path_with_data(path, data, matrix, save=False, show=False, save_folder=
     plot_path(path, ax, color)
     plot_data(data, ax)
     if save:
-        save_plot(fig, save_folder, eps=False, file_name=file_name)
+        save_plot(fig, save_folder, file_name=file_name)
     if show:
         plt.show()
+    plt.close(fig)
+
+
+def plot_paths_with_data(plane, data, save_folder, file_name):
+    fig, ax = plt.subplots()
+    plt.axis("off")
+    plot_data(data, ax)
+    for path, color in zip(plane, COLORS):
+        plot_path(path, ax, color)
+    save_plot(fig, save_folder, extension='eps', file_name=file_name)
+    plt.close(fig)
 
 
 def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_folder=''):
@@ -112,28 +125,26 @@ def plot_multi(best_path, rest_path, data, matrix, save=False, show=False, save_
 
 def plot_data(data, subplot=None, show=False):
     ax = subplot if subplot is not None else plt
-    if data.shape[0] > 2:
-        temp = data.T
-        red = temp[temp[:, 2] == 0][:, :2].T
-        blue = temp[temp[:, 2] == 1][:, :2].T
-        ax.scatter(red[0], red[1], color=CLASS_ONE_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
-        ax.scatter(blue[0], blue[1], color=CLASS_TWO_COLOR, s=80, edgecolor=EDGE_COLOR, lw=1.0)
+    if data.shape[1] > 2:
+        classes = list(np.unique(data[:, 2]).astype(int))
+        for i, c in enumerate(classes):
+            temp = data[data[:, 2] == c].T[:2]
+            ax.scatter(temp[0], temp[1], color=COLORS[i], s=80, edgecolor=EDGE_COLOR, lw=1.0)
     else:
         ax.plot(data[0], data[1], 'o')
-    ax.axis([np.amin(data[0]) - .2,
-             np.amax(data[0]) + .2,
-             np.amin(data[1]) - .2,
-             np.amax(data[1]) + .2])
     if show:
         plt.show()
 
 
-def plot_matrix_and_data(matrix, data, show=False):
-    fig, ax = plt.subplots()
+def plot_matrix_and_data(matrix, data, subplot=None, show=False, save=False):
+    ax = subplot if subplot is not None else plt
     plot_matrix(matrix, ax)
     plot_data(data, ax)
+    plt.axis("off")
     if show:
         plt.show()
+    if save:
+        save_plot(ax, extension='eps')
 
 
 def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False):
@@ -144,8 +155,8 @@ def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False
         for i, v in enumerate(matrix.vertices):
             ax.plot(v.x, v.y, 'o', color='w')
 
-    margin_x = (matrix.x_min_max[1] - matrix.x_min_max[0]) / 2
-    margin_y = (matrix.y_min_max[1] - matrix.y_min_max[0]) / 2
+    margin_x = (matrix.x_min_max[1] - matrix.x_min_max[0]) / 20
+    margin_y = (matrix.y_min_max[1] - matrix.y_min_max[0]) / 20
     ax.axis([matrix.x_min_max[0] - margin_x, matrix.x_min_max[1] + margin_x,
              matrix.y_min_max[0] - margin_y, matrix.y_min_max[1] + margin_y])
     if show:
@@ -156,7 +167,7 @@ def plot_matrix(matrix, subplot=None, show=False, with_vertices=True, save=False
 
 def plot_path(path, subplot, color='k-'):
     for edge in path:
-        subplot.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], color, linewidth=3)
+        subplot.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], color, linewidth=2)
 
 
 def plot_smooth_curves(curves, labels, y_axis_label='Score', show=False, loc='upper left'):
@@ -212,13 +223,13 @@ def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, 
              matrix.y_min_max[0] - margin_y,
              matrix.y_min_max[1] + margin_y])
     if save:
-        save_plot(fig, folder_name, file_name=file_name, eps=False)
+        save_plot(fig, folder_name, file_name=file_name)
     if show:
         plt.show()
     plt.close(fig)
 
 
-def save_plot(fig=None, parent_folder='', file_name=None, eps=True):
+def save_plot(fig=None, parent_folder='', file_name=None, extension='png'):
     if parent_folder is not None:
         directory = os.path.join(SAVE_DIR, parent_folder)
     else:
@@ -228,9 +239,7 @@ def save_plot(fig=None, parent_folder='', file_name=None, eps=True):
     file_name = datetime.utcnow().strftime('%Y-%m-%d %H_%M_%S_%f')[:-5] if file_name is None else file_name
     if fig is None:
         fig = plt
-    if eps:
-        fig.savefig(os.path.join(directory, file_name + '.eps'))
-    fig.savefig(os.path.join(directory, file_name + '.png'), transparent=False)
+    fig.savefig(os.path.join(directory, file_name + '.' + extension), transparent=False)
 
 
 def hide_top_and_right_axis(ax):

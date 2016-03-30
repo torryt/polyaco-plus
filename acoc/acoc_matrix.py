@@ -16,20 +16,18 @@ DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 
 
 class AcocMatrix:
-    def __init__(self, data, tau_initial=1.0, granularity=10, nest_grid=False, nest_grid_initial=False):
+    def __init__(self, data, tau_initial=1.0):
         self.data = data
-
-        self.granularity = 2 if nest_grid else granularity
-        self.x_min_max = np.amin(data[0]) - .1, np.amax(data[0]) + .1
-        self.y_min_max = np.amin(data[1]) - .1, np.amax(data[1]) + .1
-        self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0]) / (self.granularity - 1)
-        self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0]) / (self.granularity - 1)
+        self.x_min_max = np.amin(data[:, 0]) - .1, np.amax(data[:, 0]) + .1
+        self.y_min_max = np.amin(data[:, 1]) - .1, np.amax(data[:, 1]) + .1
+        self.init_edge_length_x = (self.x_min_max[1] - self.x_min_max[0])
+        self.init_edge_length_y = (self.y_min_max[1] - self.y_min_max[0])
         self.tau_initial = tau_initial
         self.sections = []
         self.level = 0
 
-        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=self.granularity, endpoint=True)
-        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=self.granularity, endpoint=True)
+        x_coord = np.linspace(self.x_min_max[0], self.x_min_max[1], num=2, endpoint=True)
+        y_coord = np.linspace(self.y_min_max[0], self.y_min_max[1], num=2, endpoint=True)
 
         coordinates = list(product(x_coord, y_coord))
         self.vertices = [Vertex(x, y) for x, y in coordinates]
@@ -38,46 +36,7 @@ class AcocMatrix:
         # Example: A 4x4 matrix will generate 4(4-1) + 4(4-1) = 24
         self.edges = create_edges(self.vertices, self.tau_initial)
         connect_edges_to_vertices(self.edges)
-        if nest_grid:
-            self.level_up_nested()
-
-    def level_up(self, best_polygon=None):
-        self.level += 1
-        self.granularity = self.granularity * 2 - 1
-
-        new_edges = []
-        new_vertices = []
-
-        for edge in self.edges:
-            v_mid = Vertex(((edge.a.x + edge.b.x) / 2), ((edge.a.y + edge.b.y) / 2))
-            self.vertices.append(v_mid)
-            new_vertices.append(v_mid)
-
-            new_edges.extend([Edge(edge.a, v_mid, edge.pheromone_strength),
-                              Edge(v_mid, edge.b, edge.pheromone_strength)])
-            if best_polygon:
-                if edge in best_polygon:
-                    best_polygon.remove(edge)
-                    best_polygon.extend(new_edges[-2:])
-        self.edges = new_edges
-        connect_edges_to_vertices(self.edges)
-
-        def has_no_vertical_edges(v):
-            return v.connected_edges[DIRECTION['UP']] is None and \
-                   v.connected_edges[DIRECTION['DOWN']] is None
-        vcs = filter(lambda v: has_no_vertical_edges(v) and v.y < self.y_min_max[1], new_vertices)
-        for v_down in vcs:
-            v_right = v_down.connected_edges[DIRECTION['RIGHT']].b.connected_edges[DIRECTION['UP']].b
-            v_left = v_down.connected_edges[DIRECTION['LEFT']].a.connected_edges[DIRECTION['UP']].b
-            v_up = v_left.connected_edges[DIRECTION['UP']].b.connected_edges[DIRECTION['RIGHT']].b
-            v_mid = Vertex(v_down.x, (v_up.y + v_down.y) / 2)
-
-            self.edges.extend([Edge(v_down, v_mid, pheromone_strength=self.tau_initial),
-                               Edge(v_left, v_mid, pheromone_strength=self.tau_initial),
-                               Edge(v_mid, v_right, pheromone_strength=self.tau_initial),
-                               Edge(v_mid, v_up, pheromone_strength=self.tau_initial)])
-            self.vertices.append(v_mid)
-        connect_edges_to_vertices(self.edges)
+        self.level_up()
 
     def not_leveled_sections(self):
         if self.level == 0:
@@ -85,7 +44,7 @@ class AcocMatrix:
         else:
             return self.sections
 
-    def level_up_nested(self, best_polygon=None):
+    def level_up(self, best_polygon=None):
         sections = self.not_leveled_sections()
         new_sections, new_edges, remove_edges = ([] for _ in range(3))
 
@@ -181,26 +140,29 @@ def create_edges(vertices, tau_initial):
 
 
 if __name__ == "__main__":
-    from acoc.acoc_plotter import plot_pheromones, plot_matrix
+    from acoc.acoc_plotter import plot_pheromones, plot_matrix_and_data
     from utils import generate_folder_name
 
-    save = False
+    plot = True
+    save = True
     show = False
-    plot = False
-    dt = np.array([[[0, 0]], [[1, 1]]])
-    mtrx = AcocMatrix(dt, granularity=3)
+
+    dt = np.array([[0, 0.02, 0],
+                   [0.05, 0, 1],
+                   [1, 1, 1]])
+    mtrx = AcocMatrix(dt)
     pol = mtrx.edges[:4]
     mtrx.edges[1].pheromone_strength = 5
     mtrx.edges[0].pheromone_strength = 3
     save_folder = generate_folder_name()
-    print("Level {}: Granularity {}, edges {}, vertices {}".format(mtrx.level, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
+    print("Level {}: Edges {}, vertices {}".format(mtrx.level, len(mtrx.edges), len(mtrx.vertices)))
 
     if plot:
-        plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
-        plot_matrix(mtrx, show=show, save=save)
+        # plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
+        plot_matrix_and_data(mtrx, dt, show=show)
     for i in range(6):
         mtrx.level_up(pol)
-        print("Level {}: Granularity {}, edges {}, vertices {}".format(mtrx.level, mtrx.granularity, len(mtrx.edges), len(mtrx.vertices)))
+        print("Level {}: Edges {}, vertices {}".format(mtrx.level, len(mtrx.edges), len(mtrx.vertices)))
         if plot:
-            plot_matrix(mtrx, show=show, save=save)
-            plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)
+            plot_matrix_and_data(mtrx, dt, show=show, save=save)
+            # plot_pheromones(mtrx, dt, tau_min=1, tau_max=10, folder_name=save_folder, save=save, show=show)

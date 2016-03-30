@@ -22,13 +22,13 @@ def run(*args):
     data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
 
-    clf = acoc.Classifier(config)
+    clf = acoc.PolyACO(config)
     all_ant_scores = np.zeros((number_runs, config['run_time']))
 
     for i in range(number_runs):
         iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
         ant_scores, path = \
-            clf.classify(data, False, ', ' + iter_string)
+            clf.train(data, False, ', ' + iter_string)
         utils.print_on_current_line(iter_string)
         all_ant_scores[i, :] = ant_scores
 

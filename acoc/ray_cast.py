@@ -71,7 +71,6 @@ def is_points_inside_cuda(points, solution):
     p_points = cuda.to_device(points)
     p_edges = cuda.to_device(solution)
     ray_intersect_segment_cuda[blocks_per_grid, threads_per_block](p_points, p_edges, result)
-
     return odd(np.sum(result, axis=1))
 
 
@@ -82,7 +81,7 @@ def is_point_inside(point, solution):
 
 def points_of_both_classes_inside(points, solution):
     has_class_a = has_class_b = False
-    for p in points.T:
+    for p in points:
         if is_point_inside(p, solution):
             if p[2] == 0:
                 has_class_a = True
@@ -91,6 +90,7 @@ def points_of_both_classes_inside(points, solution):
             if has_class_a and has_class_b:
                 return True
     return False
+
 
 @jit
 def is_point_inside_jit(point, solution):

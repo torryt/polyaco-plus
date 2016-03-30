@@ -25,10 +25,10 @@ def run(**kwargs):
     for k, v in kwargs.items():
         conf[k] = v
 
-    clf = acoc.Classifier(conf, SAVE_FOLDER)
+    clf = acoc.PolyACO(conf, SAVE_FOLDER)
     data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['semicircle_gaussian']
 
-    best_ant_history, _ = clf.classify(data)
+    best_ant_history, _ = clf.train(data)
     print(", Best ant score: {}".format(max(best_ant_history)))
     return best_ant_history
 

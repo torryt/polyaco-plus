@@ -34,7 +34,7 @@ def run(*args):
     data = pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
 
-    clf = acoc.Classifier(config)
+    clf = acoc.PolyACO(config)
     dropped = 0
 
     run_times = np.zeros(number_runs, dtype=float)
@@ -42,7 +42,7 @@ def run(*args):
         iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
 
         start = time.clock()
-        a_score, best_poly, dropped = clf.classify(data)
+        a_score, best_poly, dropped = clf.train(data)
         end = time.clock()
         run_times[i] = end - start
 

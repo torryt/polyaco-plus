@@ -7,53 +7,159 @@ import random
 import time
 from threading import Thread
 from time import process_time
+from datetime import datetime
+from warnings import warn
 
 import numpy as np
 from numba import cuda, jit
 from numpy.random.mtrand import choice as np_choice
+from itertools import combinations
+from copy import copy
 
 import acoc.acoc_plotter as plotter
 import utils
 from acoc import ray_cast
+from acoc.ray_cast import is_points_inside_cuda
 from acoc.acoc_matrix import AcocMatrix
 from acoc.ant import Ant
 from acoc.polygon import polygon_to_array, polygon_length
 from acoc.ray_cast import is_point_inside
 from utils import normalize
+from config import CLASSIFIER_CONFIG
 
 odd = np.vectorize(ray_cast.odd)
 
 
-def get_unique_edges(path):
-    z = set(path)
-    unique_edges = list(z)
-    return unique_edges
+class PolyACO:
+    def __init__(self, dimensions, class_indices, config=None, save_folder=datetime.utcnow().strftime('%Y-%m-%d_%H%M')):
+        self.config = config if config is not None else CLASSIFIER_CONFIG
+        self.save_folder = save_folder
+
+        if len(class_indices) > len(set(class_indices)):
+            warn("Class index array contains duplicate entries")
+        self.class_indices = np.unique(class_indices)
+        self.planes = list(combinations(range(dimensions), 2))
+        self.model = []
+
+    def evaluate(self, test_data):
+        if not self.model:
+            raise RuntimeError('PolyACO must be trained before evaluation')
+        inside = np.empty((len(self.planes), len(self.class_indices), test_data.shape[0]), dtype=bool)
+        for i, plane in enumerate(self.model):
+            plane_data = np.take(test_data, list(self.planes[i]), axis=1)
+            for j, poly in enumerate(plane):
+                inside[i, j, :] = is_points_inside_cuda(plane_data, polygon_to_array(poly))
+        aggregated_scores = np.mean(inside, axis=0)
+        predictions = np.empty((test_data.shape[0]), dtype=int)
+        max_elements = np.argmax(aggregated_scores, axis=0)
+        for i in range(test_data.shape[0]):
+            predictions[i] = self.class_indices[max_elements[i]]
+        return predictions
+
+    def train(self, training_data, target):
+        for i, plane_axes in enumerate(self.planes):
+            plane = []
+            self.model.append(plane)
+            for j, i_class in enumerate(self.class_indices):
+                plane_string = "plane{}{}_class{}".format(plane_axes[0], plane_axes[1], i_class)
+
+                new_t = copy(target)
+                new_t[new_t != i_class] = -1
+                new_t[new_t == i_class] = 0
+                new_t[new_t == -1] = 1
+                plane_data = np.concatenate((np.take(training_data, list(plane_axes), axis=1), np.array([new_t]).T), axis=1)
+                _polygon = self._train_plane(plane_data, plane_string,
+                                             print_string=', Plane {}/{}'.format(
+                                                 i * len(self.class_indices) + (j + 1),
+                                                 len(self.planes) * len(self.class_indices)))
+                plane.append(_polygon)
+            p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
+            if self.config.save:
+                fn = "plane_dims_{}_{}".format(plane_axes[0], plane_axes[1])
+                plotter.plot_paths_with_data(self.model[i], p_data,
+                                             save_folder=osp.join(self.save_folder, 'planes'), file_name=fn)
+
+    def _train_plane(self, data, plane_string, print_string=''):
+        cuda.to_device(data)
+        ant_scores = []
+        current_best_ant = []
+        last_level_up_or_best_ant = 0
+        matrix = AcocMatrix(data, tau_initial=self.config.tau_init)
+        current_best_score = 0
+        t_start = process_time()
+
+        def print_status():
+            while matrix.level <= self.config.max_level:
+                if self.config.multi_level:
+                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds, Level {}".format(
+                        len(ant_scores), process_time() - t_start, matrix.level) + print_string
+                else:
+                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds".format(
+                        len(ant_scores), process_time() - t_start) + print_string
+                utils.print_on_current_line(to_print)
+                time.sleep(0.1)
+
+        Thread(target=print_status).start()
+
+        while matrix.level <= self.config.max_level:
+            start_vertex = get_random_weighted(matrix.edges)
+            if self.config.multi_level:
+                if (len(ant_scores) - last_level_up_or_best_ant) > self.config.level_convergence_rate:
+                    matrix.level_up(current_best_ant)
+                    last_level_up_or_best_ant = len(ant_scores)
+            _ant = Ant(start_vertex)
+            _ant.move_ant()
+
+            while not _ant.at_target and not _ant.is_stuck:
+                _ant.move_ant()
+            if _ant.at_target:
+                ant_score = self._score(_ant.edges_travelled, data)
+                if ant_score > current_best_score:
+                    current_best_ant = _ant.edges_travelled
+                    current_best_score = ant_score
+                    last_level_up_or_best_ant = len(ant_scores)
+                    if self.config.plot:
+                        plotter.plot_path_with_data(current_best_ant, data, matrix, save=True,
+                                                    save_folder=osp.join(self.save_folder,
+                                                                         'best_paths/{}/'.format(plane_string)),
+                                                    file_name='ant' + str(len(ant_scores)))
+
+                self._put_pheromones(current_best_ant, current_best_score)
+                self._reset_at_random(matrix)
+                ant_scores.append(ant_score)
+
+        return current_best_ant
+
+    def _reset_at_random(self, matrix):
+        for edge in matrix.edges:
+            rand_num = random.random()
+            if rand_num < self.config.rho:
+                edge.pheromone_strength = self.config.tau_min
+
+    def _grad_pheromone_decay(self, matrix):
+        for edge in matrix.edges:
+            edge.pheromone_strength *= 1 - self.config.rho
+
+    def _score(self, polygon, data):
+        edges = polygon_to_array(polygon)
+        if self.config.gpu:
+            cost = cost_function_gpu(data, edges)
+        else:
+            cost = cost_function(data, edges)
+        # try:
+        length_factor = 1 / polygon_length(polygon)
+        return (cost ** self.config.alpha) * (length_factor ** self.config.beta)
+
+    def _put_pheromones(self, path, score):
+        for edge in path:
+            pheromone_strength = edge.pheromone_strength + score
+            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.config.tau_max else self.config.tau_max
 
 
 def get_random_weighted(edges):
     weights = normalize(np.array([e.pheromone_strength for e in edges]))
     random_weighted_edge = np_choice(edges, p=weights)
     return random.choice([random_weighted_edge.a, random_weighted_edge.b])
-
-
-def select_from_global_best(matrix, current_best_polygon):
-    if len(current_best_polygon) != 0:
-        select_edge = random.choice(current_best_polygon)
-        return random.choice([select_edge.a, select_edge.b])
-    else:
-        return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
-
-
-def select_with_chance_of_global_best(matrix, current_best_polygon):
-    if len(current_best_polygon) != 0:
-        # 50% probability for selecting a point from current best path
-        if random.randint(0, 1) == 0:
-            select_edge = random.choice(current_best_polygon)
-            return select_edge.a
-        else:
-            return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
-    else:
-        return matrix.vertices[random.randint(0, len(matrix.vertices) - 1)]
 
 
 def cost_function(points, edges):
@@ -68,142 +174,5 @@ def cost_function_gpu(points, edges):
     return score / points.shape[0]
 
 
-@jit
-def cost_function_jit(points, edges):
-    is_inside = np.empty((points.shape[0]))
-    for i in range(points.shape[0]):
-        is_inside[i] = ray_cast.is_point_inside_jit(points[i], edges)
-    score = np.sum(np.logical_xor(is_inside, points[:, 2]))
-    return score / points.shape[0]
-
-
-class Classifier:
-    def __init__(self, config, save_folder=''):
-        self.config = config
-        self.run_time = config['run_time']
-        self.tau_min = config['tau_min']
-        self.tau_max = config['tau_max']
-        self.tau_init = config['tau_init']
-        self.rho = config['rho']
-        self.alpha = config['alpha']
-        self.beta = config['beta']
-        self.save_folder = save_folder
-        self.multi_level = config['multi_level']
-        self.granularity = config['granularity']
-        self.nest_grid = config['nest_grid']
-
-        if self.nest_grid and config['max_level'] is not None:
-            self.max_level = config['max_level'] + 1
-        else:
-            self.max_level = config['max_level']
-        if self.multi_level:
-            self.granularity = 3
-
-        self.convergence_rate = config['convergence_rate']
-        self.gpu = config['gpu']
-        self.matrix = None
-
-    def classify(self, data, plot=False, print_string=''):
-        cuda.to_device(data.T)
-        ant_scores = []
-        current_best_polygon = []
-        last_level_up_or_best_ant = 0
-        self.matrix = AcocMatrix(data,
-                                 tau_initial=self.tau_init,
-                                 granularity=self.granularity,
-                                 nest_grid=self.nest_grid)
-        current_best_score = 0
-        best_ant_history = [None] * self.run_time
-        best_ant_history[0] = current_best_score
-
-        t_start = process_time()
-        t_elapsed = 0
-
-        def plot_pheromones():
-            if plot:
-                plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
-                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'), title="Ant {}".format(len(ant_scores)))
-
-        def print_status():
-            while t_elapsed < self.run_time:
-                if self.multi_level or self.nest_grid:
-                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds, Level {}".format(
-                        len(ant_scores), process_time() - t_start, self.matrix.level) + print_string
-                else:
-                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds".format(
-                        len(ant_scores), process_time() - t_start) + print_string
-                utils.print_on_current_line(to_print)
-                time.sleep(0.1)
-
-        def update_history():
-            while t_elapsed < self.run_time:
-                best_ant_history[int(t_elapsed)] = current_best_score
-                time.sleep(1)
-        Thread(target=print_status).start()
-        Thread(target=update_history).start()
-
-        while t_elapsed < self.run_time:
-            start_vertex = get_random_weighted(self.matrix.edges)
-            if self.multi_level:
-                if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
-                    if self.max_level is None or self.matrix.level < self.max_level:
-                        plot_pheromones()
-                        if self.nest_grid:
-                            self.matrix.level_up_nested(current_best_polygon)
-                        else:
-                            self.matrix.level_up(current_best_polygon)
-                        last_level_up_or_best_ant = len(ant_scores)
-            _ant = Ant(start_vertex)
-            _ant.move_ant()
-
-            while not _ant.at_target and not _ant.is_stuck:
-                _ant.move_ant()
-            if _ant.at_target:
-                ant_score = self.score(_ant.edges_travelled, data)
-                if ant_score > current_best_score:
-                    current_best_polygon = _ant.edges_travelled
-                    current_best_score = ant_score
-                    last_level_up_or_best_ant = len(ant_scores)
-                    if plot:
-                        plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
-                                                    save_folder=osp.join(self.save_folder, 'best_paths/'),
-                                                    file_name='ant' + str(len(ant_scores)))
-                        plot_pheromones()
-
-                self.put_pheromones(current_best_polygon, data, current_best_score)
-                self.reset_at_random(self.matrix)
-                ant_scores.append(ant_score)
-                t_elapsed = process_time() - t_start
-
-        for i, e in enumerate(best_ant_history):
-            if e is None:
-                best_ant_history[i] = next(_e for _e in reversed(best_ant_history[:i]) if _e is not None)
-        return best_ant_history, current_best_polygon,
-
-    def reset_at_random(self, matrix):
-        for edge in matrix.edges:
-            rand_num = random.random()
-            if rand_num < self.rho:
-                edge.pheromone_strength = self.tau_min
-
-    def grad_pheromone_decay(self, matrix):
-        for edge in matrix.edges:
-            edge.pheromone_strength *= 1-self.rho
-
-    def score(self, polygon, data):
-        edges = polygon_to_array(polygon)
-        if self.gpu:
-            cost = cost_function_gpu(data.T, edges)
-        else:
-            cost = cost_function(data.T, edges)
-        # try:
-        length_factor = 1 / polygon_length(polygon)
-        # Handles very rare and weird error where length of polygon == 0
-        # except ZeroDivisionError:
-        #     length_factor = 1
-        return (cost**self.alpha) * (length_factor**self.beta)
-
-    def put_pheromones(self, path, data, score):
-        for edge in path:
-            pheromone_strength = edge.pheromone_strength + score
-            edge.pheromone_strength = pheromone_strength if pheromone_strength < self.tau_max else self.tau_max
+def compute_score(predictions, ground_truth):
+    return np.equal(predictions, ground_truth).mean() * 100

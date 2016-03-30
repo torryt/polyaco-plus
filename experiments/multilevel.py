@@ -37,14 +37,14 @@ def run(*args):
     # data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
     number_runs = config['number_runs']
 
-    clf = acoc.Classifier(config, SAVE_PHEROMONE_VALUES)
+    clf = acoc.PolyACO(config, SAVE_PHEROMONE_VALUES)
     polygons = []
     diff_x = []
 
     if number_runs > 1:
         for i in range(number_runs):
             iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
-            _, current_best_polygon, _ = clf.classify(data)
+            _, current_best_polygon, _ = clf.train(data)
             polygons.append(current_best_polygon)
 
             # if len(polygons) > 1:

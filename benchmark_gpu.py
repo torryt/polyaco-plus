@@ -73,7 +73,7 @@ def benchmark_cost_function(data_sizes):
 
     save_folder = generate_folder_name()
     iterations = 10
-    results = np.empty((len(data_sizes), iterations, 3), dtype=float)
+    results = np.empty((len(data_sizes), iterations, 2), dtype=float)
 
     for i, dsize in enumerate(data_sizes):
         data = dg.generate_rectangle_set(dsize)
@@ -81,7 +81,6 @@ def benchmark_cost_function(data_sizes):
         print("\nRun {} with value {}".format(i+1, dsize))
 
         # Compile functions and warm up GPU
-        acoc.cost_function_jit(data.T, polygon)
         acoc.cost_function_gpu(data.T, polygon)
 
         for j in range(iterations):
@@ -91,18 +90,13 @@ def benchmark_cost_function(data_sizes):
             end_cpu = time.clock()
             results[i][j][0] = end_cpu - start_cpu
 
-            start_jit = time.clock()
-            acoc.cost_function_jit(data.T, polygon)
-            end_jit = time.clock()
-            results[i][j][1] = end_jit - start_jit
-
             start_gpu = time.clock()
             acoc.cost_function_gpu(data.T, polygon)
             end_gpu = time.clock()
             results[i][j][2] = end_gpu - start_gpu
 
     mean_results = np.mean(results, axis=1).T
-    acoc_plotter.plot_bar_chart_gpu_benchmark(mean_results, data_sizes, ['CPython', 'JIT', 'GPU'], save_folder, 'results')
+    acoc_plotter.plot_bar_chart_gpu_benchmark(mean_results, data_sizes, ['CPython', 'GPU'], save_folder, 'results')
 
     np.set_printoptions(precision=7, suppress=False)
     print("\nResults: \n{}".format(mean_results))

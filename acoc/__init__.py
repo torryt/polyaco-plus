@@ -91,7 +91,6 @@ class Classifier:
         self.decay_type = config['decay_type']
         self.save_folder = save_folder
         self.multi_level = config['multi_level']
-
         self.granularity = config['granularity']
         self.nest_grid = config['nest_grid']
         self.max_level = config['max_level']

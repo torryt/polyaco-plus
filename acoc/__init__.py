@@ -34,6 +34,7 @@ class PolyACO:
     def __init__(self, dimensions, class_indices, config=None, save_folder=datetime.utcnow().strftime('%Y-%m-%d_%H%M')):
         self.config = config if config is not None else CLASSIFIER_CONFIG
         self.save_folder = save_folder
+
         if len(class_indices) > len(set(class_indices)):
             warn("Class index array contains duplicate entries")
         self.class_indices = np.unique(class_indices)
@@ -84,7 +85,6 @@ class PolyACO:
         current_best_ant = []
         last_level_up_or_best_ant = 0
         matrix = AcocMatrix(data, tau_initial=self.config.tau_init)
-
         current_best_score = 0
         t_start = process_time()
 

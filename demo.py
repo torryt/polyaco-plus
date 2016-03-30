@@ -11,6 +11,9 @@ from utils import data_manager
 import acoc.polygon
 from config import CLASSIFIER_CONFIG
 
+
+SAVE = False
+SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
 CLASSIFIER_CONFIG.plot = False

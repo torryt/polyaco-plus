@@ -4,7 +4,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib
 
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -189,19 +189,19 @@ def plot_curves(curves, labels, y_axis_label='Score', show=False, loc='upper lef
     return f
 
 
-def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, folder_name='', show=False):
+def plot_pheromones(matrix, data, tau_min, tau_max, file_name=None, save=False, folder_name='', show=False, title="Pheromone trail"):
     min_val = 0.5
     max_val = 15.0
 
     plt.close()
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.title("Pheromones")
+    fig, ax = plt.subplots()
+    fig.suptitle(title)
+    plt.axis("off")
     for edge in matrix.edges:
         line = ax.plot([edge.a.x, edge.b.x], [edge.a.y, edge.b.y], 'k-')
         lw = edge.pheromone_strength * ((max_val - min_val) / (tau_max - tau_min))
         plt.setp(line, lw=lw)
-
+    plot_matrix(matrix, ax, with_vertices=False)
     if data is not None:
         plot_data(data)
 

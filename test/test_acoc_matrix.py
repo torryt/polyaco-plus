@@ -92,37 +92,96 @@ class TestMatrix(unittest.TestCase):
         self.assertEqual(first_v.y, smallest_y)
 
 
-class TestMatrixIncreaseSectionGranularity(unittest.TestCase):
+class TestLevelUpNested(unittest.TestCase):
     def setUp(self):
         self.show = False
-        self.data = np.array([[0, 0, 2, 3], [0, 0.5, 2, 3], [0, 1, 0, 1]])
+        self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
 
-    def test_show_two_sections_increase(self):
-        matrix = AcocMatrix(self.data, max_level=2, nest_grid=True)
+    def test_level_up_nested_increase_number_of_edges(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_edge_count = len(matrix.edges)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 24)
-        self.assertEqual(len(matrix.edges), 36)
-
-    def test_show_three_section_increase(self):
-        matrix = AcocMatrix(self.data, max_level=2, nest_grid=True)
+        matrix.level_up_nested()
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 24)
-        self.assertEqual(len(matrix.edges), 36)
+        new_edge_count = len(matrix.edges)
+        self.assertGreater(new_edge_count, old_edge_count)
 
-    def test_show_four_level_matrix(self):
-        matrix = AcocMatrix(self.data, max_level=4, nest_grid=True)
+    def test_level_up_nested_increase_number_of_edges_with_8(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_edge_count = len(matrix.edges)
+        matrix.level_up_nested()
+        new_edge_count = len(matrix.edges)
+        self.assertEqual(new_edge_count - old_edge_count, 8)
+
+    def test_level_up_one_section_increases_vertex_count_with_5(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_vertex_count = len(matrix.vertices)
+        matrix.level_up_nested()
+        new_vertex_count = len(matrix.vertices)
+        self.assertEqual(new_vertex_count - old_vertex_count, 5)
+
+    def test_level_up_two_times_increases_vertex_count_with_10(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_vertex_count = len(matrix.vertices)
+        matrix.level_up_nested()
+        matrix.level_up_nested()
+        new_vertex_count = len(matrix.vertices)
+        self.assertEqual(new_vertex_count - old_vertex_count, 10)
+
+    def test_level_up_5_increase_vertex_count_with_5_times_5(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_vertex_count = len(matrix.vertices)
+        for _ in range(5):
+            matrix.level_up_nested()
+        new_vertex_count = len(matrix.vertices)
+        self.assertEqual(new_vertex_count - old_vertex_count, 5*5)
+
+    def test_level_up_nested_increase_number_of_vertices_by_10_in_other_data_set(self):
+        self.data = np.array([[0, 0, 3, 3], [0, 0, 3, 3], [0, 1, 0, 1]])
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_vertex_count = len(matrix.vertices)
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertEqual(len(matrix.vertices), 24)
-        self.assertEqual(len(matrix.edges), 36)
-
-    def test_that_it_runs_at_all(self):
-        matrix = AcocMatrix(self.data, max_level=5, nest_grid=True)
+        matrix.level_up_nested()
         if self.show:
             plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
-        self.assertTrue(matrix is not None)
+        new_vertex_count = len(matrix.vertices)
+        self.assertEqual(new_vertex_count - old_vertex_count, 10)
+
+    def test_level_up_nested_increase_number_of_vertices_by_9_in_adjacent_sections_set(self):
+        self.data = np.array([[0, 0, 0, 0, 3], [0, 0, 3, 3, 3], [0, 1, 0, 1, 1]])
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        old_vertex_count = len(matrix.vertices)
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        matrix.level_up_nested()
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        new_vertex_count = len(matrix.vertices)
+        self.assertEqual(new_vertex_count - old_vertex_count, 9)
+
+
+class TestIncreaseSectionGranularity(unittest.TestCase):
+    def setUp(self):
+        self.show = False
+        self.data = np.array([[0, 0, 3], [0, 0, 3], [0, 1, 1]])
+
+    def test_increase_section_granularity_preserves_pheromones_on_new_edges(self):
+        matrix = AcocMatrix(self.data, nest_grid=True)
+        edge = matrix.edges[0]
+        edge_start = edge.a
+        strength = 10
+        edge.pheromone_strength = strength
+        matrix.level_up_nested(best_polygon=[edge])
+
+        new_edge = edge_start.connected_edges[DIRECTION['UP']]
+        if self.show:
+            plotter.plot_matrix_and_data(matrix, matrix.data, show=True)
+        self.assertEqual(new_edge.pheromone_strength, strength)
+        next_new_edge = new_edge.b.connected_edges[DIRECTION['UP']]
+        self.assertEqual(next_new_edge.pheromone_strength, strength)
 
 
 class TestVertex(unittest.TestCase):

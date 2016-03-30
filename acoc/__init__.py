@@ -87,16 +87,19 @@ class Classifier:
         self.rho = config['rho']
         self.alpha = config['alpha']
         self.beta = config['beta']
-        self.ant_init = config['ant_init']
-        self.decay_type = config['decay_type']
         self.save_folder = save_folder
         self.multi_level = config['multi_level']
         self.granularity = config['granularity']
         self.nest_grid = config['nest_grid']
-        self.max_level = config['max_level']
+
+        if self.nest_grid and config['max_level'] is not None:
+            self.max_level = config['max_level'] + 1
+        else:
+            self.max_level = config['max_level']
         if self.multi_level:
-            self.convergence_rate = config['convergence_rate']
             self.granularity = 3
+
+        self.convergence_rate = config['convergence_rate']
         self.gpu = config['gpu']
         self.matrix = None
 
@@ -108,8 +111,7 @@ class Classifier:
         self.matrix = AcocMatrix(data,
                                  tau_initial=self.tau_init,
                                  granularity=self.granularity,
-                                 nest_grid=self.nest_grid,
-                                 max_level=self.max_level)
+                                 nest_grid=self.nest_grid)
         current_best_score = 0
         best_ant_history = [None] * self.run_time
         best_ant_history[0] = current_best_score
@@ -120,11 +122,11 @@ class Classifier:
         def plot_pheromones():
             if plot:
                 plotter.plot_pheromones(self.matrix, data, self.tau_min, self.tau_max, file_name='ant' + str(len(ant_scores)),
-                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'))
+                                        save=True, folder_name=osp.join(self.save_folder, 'pheromones/'), title="Ant {}".format(len(ant_scores)))
 
         def print_status():
             while t_elapsed < self.run_time:
-                if self.multi_level:
+                if self.multi_level or self.nest_grid:
                     to_print = "Ant: {}, Time elapsed: {:.1f} seconds, Level {}".format(
                         len(ant_scores), process_time() - t_start, self.matrix.level) + print_string
                 else:
@@ -141,24 +143,16 @@ class Classifier:
         Thread(target=update_history).start()
 
         while t_elapsed < self.run_time:
-            if self.ant_init == 'static':
-                start_vertex = self.matrix.vertices[0]
-            elif self.ant_init == 'weighted':
-                start_vertex = get_random_weighted(self.matrix.edges)
-            elif self.ant_init == 'on_global_best':
-                start_vertex = select_from_global_best(self.matrix, current_best_polygon)
-            elif self.ant_init == 'chance_of_global_best':
-                start_vertex = select_with_chance_of_global_best(self.matrix, current_best_polygon)
-            else:  # Random
-                start_vertex = self.matrix.vertices[random.randint(0, len(self.matrix.vertices) - 1)]
+            start_vertex = get_random_weighted(self.matrix.edges)
             if self.multi_level:
                 if (len(ant_scores) - last_level_up_or_best_ant) > self.convergence_rate:
                     if self.max_level is None or self.matrix.level < self.max_level:
                         plot_pheromones()
-                        self.matrix.level_up(current_best_polygon)
-                        current_best_score = self.score(current_best_polygon, data)
+                        if self.nest_grid:
+                            self.matrix.level_up_nested(current_best_polygon)
+                        else:
+                            self.matrix.level_up(current_best_polygon)
                         last_level_up_or_best_ant = len(ant_scores)
-
             _ant = Ant(start_vertex)
             _ant.move_ant()
 
@@ -170,18 +164,14 @@ class Classifier:
                     current_best_polygon = _ant.edges_travelled
                     current_best_score = ant_score
                     last_level_up_or_best_ant = len(ant_scores)
-
                     if plot:
-                        plot_pheromones()
                         plotter.plot_path_with_data(current_best_polygon, data, self.matrix, save=True,
                                                     save_folder=osp.join(self.save_folder, 'best_paths/'),
                                                     file_name='ant' + str(len(ant_scores)))
+                        plot_pheromones()
 
                 self.put_pheromones(current_best_polygon, data, current_best_score)
-                if self.decay_type == 'probabilistic':
-                    self.reset_at_random(self.matrix)
-                elif self.decay_type == 'gradual':
-                    self.grad_pheromone_decay(self.matrix)
+                self.reset_at_random(self.matrix)
                 ant_scores.append(ant_score)
                 t_elapsed = process_time() - t_start
 

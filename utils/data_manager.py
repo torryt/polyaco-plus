@@ -129,9 +129,6 @@ def list_datasets():
         print(key)
 
 
-
-
-
 def main():
     sets = generate_data_sets()
     utils.save_object(sets, 'data_sets')

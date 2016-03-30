@@ -23,7 +23,6 @@ CLASSIFIER_CONFIG = {
     'max_level':                6,
     'level_convergence_rate':   1200,
 
-    'data_set':                 'semicircle_gaussian',
     'plot':                     False
 }
 CLASSIFIER_CONFIG = Bunch(**CLASSIFIER_CONFIG)

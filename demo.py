@@ -28,9 +28,10 @@ def run(**kwargs):
     ####
     if conf.data_set == 'iris':
         data_set = data_manager.load_iris()
-    else:
-        CLASSIFIER_CONFIG.data_set = 'breast_cancer'
+    elif conf.data_set == 'breast_cancer':
         data_set = data_manager.load_breast_cancer()
+    else:
+        data_set = data_manager.load_data()[conf.data_set]
 
     X = data_set.data
     y = data_set.target
@@ -49,7 +50,7 @@ def run(**kwargs):
 
 if __name__ == "__main__":
     scores = []
-    runs = 10
+    runs = 1
     result_str = ''
     for i in range(runs):
         scores.append(run())

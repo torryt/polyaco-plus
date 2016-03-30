@@ -19,8 +19,8 @@ $ source activate acoc
 ## Configuration
 The project looks for a configuration file called *config.py* in the root folder. This file is ignored by the VCS so that you can make changes without affecting the repository. To get started with a config file simply copy *config_template.py* and rename it to *config.py*. Then you can freely change the contents of the config file without affecting the VCS.
 
-## Usage
-A complete classification example can be found in *demo.py* in the root folder of the repository. The demo use the data set and classifier configuration specified in *config.py*. 
+### CUDA
+The algorithm is optimized for Nvidia GPUs and depends on CUDA. To run the project without CUDA, set `'gpu': false` in *config.py*.
 
-## Limitations
-The algorithm is still at a very early stage. This implementation is only able to classify two-class two-dimensional data sets.
+## Usage
+A complete classification example can be found in *demo.py* in the root folder of the repository. The demo use the classifier configuration specified in *config.py*. 

@@ -13,7 +13,7 @@ import utils
 from utils import data_manager
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CLASSIFIER_CONFIG.runs = 20
+CLASSIFIER_CONFIG.runs = 50
 CLASSIFIER_CONFIG.data_set = 'iris'
 
 
@@ -42,7 +42,7 @@ def run(*args):
 
 
 def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
-    save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
+    save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M') + '_' + config.data_set
     iterator = 0
     full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
     while osp.exists(full_path):
@@ -60,16 +60,23 @@ def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
         utils.print_on_current_line('')
     utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
     header = ','.join(str(s) for s in values)
-    result_str = header + '\n' + ','.join([str(s) for s in scores])
+    result_str = header + '\n' + ','.join(["{:.4f}".format(s) for s in scores])
     utils.save_string_to_file(result_str, parent_folder=save_folder, file_name='result.txt')
 
 
 if __name__ == "__main__":
+    CLASSIFIER_CONFIG.data_set = 'iris'
     CLASSIFIER_CONFIG.level_convergence_rate = 100
     parameter_tester('one_less_class', [True, False])
-
     CLASSIFIER_CONFIG.level_convergence_rate = 200
     parameter_tester('one_less_class', [True, False])
+    CLASSIFIER_CONFIG.level_convergence_rate = 400
+    parameter_tester('one_less_class', [True, False])
 
+    CLASSIFIER_CONFIG.data_set = 'breast_cancer'
+    CLASSIFIER_CONFIG.level_convergence_rate = 100
+    parameter_tester('one_less_class', [True, False])
+    CLASSIFIER_CONFIG.level_convergence_rate = 200
+    parameter_tester('one_less_class', [True, False])
     CLASSIFIER_CONFIG.level_convergence_rate = 400
     parameter_tester('one_less_class', [True, False])

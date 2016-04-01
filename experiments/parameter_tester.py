@@ -2,14 +2,14 @@ from datetime import datetime
 import os.path as osp
 from copy import copy
 from sklearn.cross_validation import train_test_split
-
+import sys
+from matplotlib import pyplot as plt
+from pathlib import Path
+sys.path.append(Path(__file__).parent)
 
 import acoc
-from matplotlib import pyplot as plt
-
 import utils
 from utils import data_manager
-
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
 NUMBER_RUNS = 50

@@ -62,7 +62,7 @@ class PolyACO:
             predictions[i] = self.class_indices[max_elements[i]]
         return predictions
 
-    def train(self, training_data, target, print_append=''):
+    def train(self, training_data, target, print_string=''):
         for i, plane_axes in enumerate(self.planes):
             plane = []
             self.model.append(plane)
@@ -82,7 +82,7 @@ class PolyACO:
                 _polygon = self._train_plane(plane_data, plane_string,
                                              print_string=', Plane {}/{}{}'.format(
                                                  i * len(self.class_indices) + (j + 1),
-                                                 len(self.planes) * len(self.class_indices), print_append))
+                                                 len(self.planes) * len(self.class_indices), print_string))
                 plane.append(_polygon)
             p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
             if self.config.save:

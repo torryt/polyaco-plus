@@ -11,8 +11,8 @@ import utils
 from utils import data_manager
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-NUMBER_RUNS = 50
-DATA_SET = 'iris'
+CLASSIFIER_CONFIG.runs = 20
+CLASSIFIER_CONFIG.data_set = 'iris'
 
 
 def run(*args):
@@ -20,9 +20,9 @@ def run(*args):
     for conf in args:
         config[conf[0]] = conf[1]
 
-    data_set = data_manager.load_data_set(DATA_SET)
+    data_set = data_manager.load_data_set(config.data_set)
     classifier_scores = []
-    for nrun in range(NUMBER_RUNS):
+    for nrun in range(config.runs):
         X = data_set.data
         y = data_set.target
         class_indices = list(set(y))
@@ -32,11 +32,11 @@ def run(*args):
             X, y, test_size=0.33)
 
         clf = acoc.PolyACO(X.shape[1], class_indices, config)
-        clf.train(X_train, y_train, ', Run: {}/{}'.format(nrun, NUMBER_RUNS))
+        clf.train(X_train, y_train, ', Run: {}/{}'.format(nrun + 1, config.runs))
         predictions = clf.evaluate(X_test)
 
         classifier_scores.append(acoc.compute_score(predictions, y_test))
-    return sum(classifier_scores) / NUMBER_RUNS
+    return sum(classifier_scores) / config.runs
 
 
 def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
@@ -63,4 +63,11 @@ def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
 
 
 if __name__ == "__main__":
+    CLASSIFIER_CONFIG.level_convergence_rate = 100
+    parameter_tester('one_less_class', [True, False])
+
+    CLASSIFIER_CONFIG.level_convergence_rate = 200
+    parameter_tester('one_less_class', [True, False])
+
+    CLASSIFIER_CONFIG.level_convergence_rate = 400
     parameter_tester('one_less_class', [True, False])

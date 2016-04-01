@@ -4,8 +4,7 @@ from copy import copy
 from sklearn.cross_validation import train_test_split
 import sys
 from matplotlib import pyplot as plt
-from pathlib import Path
-sys.path.append(Path(__file__).parent)
+sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
 
 import acoc
 import utils

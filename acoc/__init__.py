@@ -42,13 +42,19 @@ class PolyACO:
         self.model = []
 
     def evaluate(self, test_data):
-        if not self.model:
+        if len(self.model) == 0:
             raise RuntimeError('PolyACO must be trained before evaluation')
         inside = np.empty((len(self.planes), len(self.class_indices), test_data.shape[0]), dtype=bool)
         for i, plane in enumerate(self.model):
             plane_data = np.take(test_data, list(self.planes[i]), axis=1)
             for j, poly in enumerate(plane):
                 inside[i, j, :] = is_points_inside_cuda(plane_data, polygon_to_array(poly))
+        if self.config.one_less_class:
+            for i in range(inside.shape[0]):
+                for j in range(inside.shape[2]):
+                    if sum(inside[i,:,j]) == 0:
+                        inside[i,-1,j] = True
+
         aggregated_scores = np.mean(inside, axis=0)
         predictions = np.empty((test_data.shape[0]), dtype=int)
         max_elements = np.argmax(aggregated_scores, axis=0)
@@ -56,22 +62,27 @@ class PolyACO:
             predictions[i] = self.class_indices[max_elements[i]]
         return predictions
 
-    def train(self, training_data, target):
+    def train(self, training_data, target, print_append=''):
         for i, plane_axes in enumerate(self.planes):
             plane = []
             self.model.append(plane)
-            for j, i_class in enumerate(self.class_indices):
-                plane_string = "plane{}{}_class{}".format(plane_axes[0], plane_axes[1], i_class)
+            if self.config.one_less_class:
+                num_class = len(self.class_indices) - 1
+            else:
+                num_class = len(self.class_indices)
+            for j in range(num_class):
+                j_class = self.class_indices[j]
+                plane_string = "plane{}{}_class{}".format(plane_axes[0], plane_axes[1], j_class)
 
                 new_t = copy(target)
-                new_t[new_t != i_class] = -1
-                new_t[new_t == i_class] = 0
+                new_t[new_t != j_class] = -1
+                new_t[new_t == j_class] = 0
                 new_t[new_t == -1] = 1
                 plane_data = np.concatenate((np.take(training_data, list(plane_axes), axis=1), np.array([new_t]).T), axis=1)
                 _polygon = self._train_plane(plane_data, plane_string,
-                                             print_string=', Plane {}/{}'.format(
+                                             print_string=', Plane {}/{}{}'.format(
                                                  i * len(self.class_indices) + (j + 1),
-                                                 len(self.planes) * len(self.class_indices)))
+                                                 len(self.planes) * len(self.class_indices), print_append))
                 plane.append(_polygon)
             p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
             if self.config.save:
@@ -135,10 +146,6 @@ class PolyACO:
             rand_num = random.random()
             if rand_num < self.config.rho:
                 edge.pheromone_strength = self.config.tau_min
-
-    def _grad_pheromone_decay(self, matrix):
-        for edge in matrix.edges:
-            edge.pheromone_strength *= 1 - self.config.rho
 
     def _score(self, polygon, data):
         edges = polygon_to_array(polygon)

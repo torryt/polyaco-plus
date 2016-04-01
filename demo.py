@@ -12,12 +12,10 @@ import acoc.polygon
 from config import CLASSIFIER_CONFIG
 
 
-SAVE = False
-SAVE_PHEROMONES_AND_BEST_PATHS = False
 SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
 CLASSIFIER_CONFIG.plot = False
-CLASSIFIER_CONFIG.save = True
+CLASSIFIER_CONFIG.save = False
 CLASSIFIER_CONFIG.data_set = 'iris'
 
 
@@ -26,15 +24,7 @@ def run(**kwargs):
     for k, v in kwargs.items():
         conf[k] = v
 
-    ####
-    # Loads a sample data set from a pickle file.
-    ####
-    if conf.data_set == 'iris':
-        data_set = data_manager.load_iris()
-    elif conf.data_set == 'breast_cancer':
-        data_set = data_manager.load_breast_cancer()
-    else:
-        data_set = data_manager.load_data()[conf.data_set]
+    data_set = data_manager.load_data_set(conf.data_set)
 
     X = data_set.data
     y = data_set.target

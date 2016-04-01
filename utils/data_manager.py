@@ -119,6 +119,14 @@ def load_breast_cancer():
         return bc
 
 
+def load_data_set(name):
+    if name == 'iris':
+        return load_iris()
+    if name == 'breast_cancer':
+        return load_breast_cancer()
+    return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['name']
+
+
 def load_data():
     return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
 

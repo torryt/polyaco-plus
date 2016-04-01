@@ -3,6 +3,8 @@ import os.path as osp
 from copy import copy
 from sklearn.cross_validation import train_test_split
 import sys
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
 

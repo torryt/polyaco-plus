@@ -2,6 +2,7 @@ import os
 import pickle
 import sys
 import json
+import itertools
 from os import path as osp
 from time import strftime
 from datetime import datetime
@@ -52,11 +53,11 @@ def save_string_to_file(string, parent_folder=None, file_name=None):
         directory = osp.join(SAVE_DIR, strftime("%Y-%m-%d_%H%M"))
     else:
         directory = osp.join(SAVE_DIR, parent_folder)
-    if not os.path.exists(directory):
+    if not osp.exists(directory):
         os.makedirs(directory)
     if file_name is None:
         file_name = datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S-%f')[:-5]
-    name = os.path.join(directory, file_name)
+    name = uniquify_file(osp.join(directory, file_name))
     with open(name, "w") as f:
         f.write(string)
 
@@ -69,11 +70,20 @@ def normalize(values):
     return values * normalize_const
 
 
-def generate_folder_name():
+def generate_folder_name(base=SAVE_DIR):
     now = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
     iterator = 0
-    full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
+    full_path = osp.join(base, now) + '-' + str(iterator)
     while osp.exists(full_path):
         iterator += 1
-        full_path = osp.join(SAVE_DIR, now) + '-' + str(iterator)
+        full_path = osp.join(base, now) + '-' + str(iterator)
     return osp.basename(full_path)
+
+
+def uniquify_file(path):
+    count = 0
+    if not osp.exists(path):
+        return path
+    while osp.exists(path + '_' + str(count)):
+        count += 1
+    return path + '_' + str(count)

@@ -12,12 +12,13 @@ sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
 
 import acoc
 import utils
-from utils import data_manager
+
+from utils import data_manager, uniquify_file
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CLASSIFIER_CONFIG.runs = 100
+CLASSIFIER_CONFIG.runs = 20
 CLASSIFIER_CONFIG.max_level = 3
-CLASSIFIER_CONFIG.level_convergence_rate = 1200
+CLASSIFIER_CONFIG.data_set = 'iris'
 
 
 def run(*args):
@@ -44,14 +45,9 @@ def run(*args):
     return classifier_scores
 
 
-def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
-    save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-    iterator = 0
-    full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
-    while osp.exists(full_path):
-        iterator += 1
-        full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
-    save_folder = osp.basename(full_path)
+def parameter_tester(parameter_name, values, save_folder=None):
+    if save_folder is None:
+        save_folder = utils.generate_folder_name()
     print("\n\nExperiment for parameter '{}' with values {}".format(parameter_name, values))
 
     plt.clf()
@@ -61,15 +57,21 @@ def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
         scores = run((parameter_name, v))
         all_scores.append(scores)
         utils.print_on_current_line('')
-    utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
     header = ','.join(str(s) for s in values)
     result_str = header + '\n' + ','.join(["{:.4f}".format(sum(s) / CLASSIFIER_CONFIG.runs) for s in all_scores]) + \
                  '\n\n' + 'all scores:\n'
 
     for a in all_scores:
         result_str += ','.join('{:.4f}'.format(s) for s in a) + '\n'
-    utils.save_string_to_file(result_str, parent_folder=save_folder, file_name='result.txt')
+    utils.save_string_to_file(result_str, parent_folder=save_folder, file_name='result_' + parameter_name + '.txt')
+
+
+def experiment(title):
+    save_folder = utils.uniquify_file(osp.join(SAVE_DIR, 'tuning_iris'))
+    utils.save_dict(CLASSIFIER_CONFIG, save_folder, 'base_config.txt')
+    parameter_tester('level_convergence_rate', [20, 100, 200, 400, 800, 1600], save_folder)
+    parameter_tester('max_level', [1, 2, 3, 4, 5], save_folder)
 
 
 if __name__ == "__main__":
-    parameter_tester('data_set', ['iris', 'breast_cancer'])
+    experiment('tuning_iris')

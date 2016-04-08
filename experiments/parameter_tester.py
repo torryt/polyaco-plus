@@ -13,12 +13,12 @@ sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
 import acoc
 import utils
 
-from utils import data_manager, uniquify_file
+from utils import data_manager, generate_folder_name
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CLASSIFIER_CONFIG.runs = 20
-CLASSIFIER_CONFIG.max_level = 3
-CLASSIFIER_CONFIG.data_set = 'iris'
+CLASSIFIER_CONFIG.runs = 100
+CLASSIFIER_CONFIG.max_level = 5
+CLASSIFIER_CONFIG.data_set = 'breast_cancer'
 
 
 def run(*args):
@@ -67,11 +67,19 @@ def parameter_tester(parameter_name, values, save_folder=None):
 
 
 def experiment(title):
-    save_folder = utils.uniquify_file(osp.join(SAVE_DIR, 'tuning_iris'))
+    save_folder = generate_folder_name(title)
     utils.save_dict(CLASSIFIER_CONFIG, save_folder, 'base_config.txt')
-    parameter_tester('level_convergence_rate', [20, 100, 200, 400, 800, 1600], save_folder)
-    parameter_tester('max_level', [1, 2, 3, 4, 5], save_folder)
+    parameter_tester('level_convergence_rate', [20, 100, 200, 800, 1600], save_folder)
 
 
 if __name__ == "__main__":
-    experiment('tuning_iris')
+    # CLASSIFIER_CONFIG.runs = 20
+    # experiment('tuning_breast_cancer')
+
+    CLASSIFIER_CONFIG.runs = 100
+    CLASSIFIER_CONFIG.max_level = 5
+    CLASSIFIER_CONFIG.level_convergence_rate = 800
+
+    folder = generate_folder_name('iris-tuned')
+    utils.save_dict(CLASSIFIER_CONFIG, folder, file_name='base_config.txt')
+    parameter_tester('data_set', ['iris'], save_folder=folder)

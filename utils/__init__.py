@@ -3,6 +3,7 @@ import pickle
 import sys
 import json
 import itertools
+from copy import copy
 from os import path as osp
 from time import strftime
 from datetime import datetime
@@ -70,20 +71,19 @@ def normalize(values):
     return values * normalize_const
 
 
-def generate_folder_name(base=SAVE_DIR):
-    now = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-    iterator = 0
-    full_path = osp.join(base, now) + '-' + str(iterator)
-    while osp.exists(full_path):
-        iterator += 1
-        full_path = osp.join(base, now) + '-' + str(iterator)
-    return osp.basename(full_path)
+def generate_folder_name(append=None, base=SAVE_DIR):
+    now = datetime.utcnow().strftime('%d.%m')
+    if append is None:
+        full_path = osp.join(base, now)
+    else:
+        full_path = osp.join(base, now + ', ' + append)
+    return osp.basename(uniquify_file(full_path))
 
 
 def uniquify_file(path):
+    new_path = copy(path)
     count = 0
-    if not osp.exists(path):
-        return path
-    while osp.exists(path + '_' + str(count)):
+    while osp.exists(new_path):
+        new_path = path + '__' + str(count)
         count += 1
-    return path + '_' + str(count)
+    return new_path

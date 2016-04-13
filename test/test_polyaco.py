@@ -5,7 +5,20 @@ from datetime import datetime
 import acoc
 from acoc.edge import Edge
 from acoc.vertex import Vertex
-from acoc.polygon import polygon_length, load_simple_polygon
+from acoc.polygon import polygon_length
+
+
+def load_simple_polygon(start_vertex, edge_length=1):
+    vs = [
+        start_vertex,
+        Vertex(start_vertex.x + edge_length, start_vertex.y),
+        Vertex(start_vertex.x, start_vertex.y + edge_length),
+        Vertex(start_vertex.x + edge_length, start_vertex.y + edge_length)
+    ]
+    return [Edge(vs[0], vs[1]),
+            Edge(vs[0], vs[2]),
+            Edge(vs[1], vs[3]),
+            Edge(vs[2], vs[3])]
 
 
 class TestPolyAcoClass(unittest.TestCase):
@@ -101,5 +114,3 @@ class TestPolygon(unittest.TestCase):
 
         polygon = [e1, e2, e3, e4]
         self.assertEqual(polygon_length(polygon), 4)
-
-

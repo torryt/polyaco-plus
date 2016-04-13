@@ -7,15 +7,15 @@ from copy import copy
 
 import acoc
 import utils
-from utils import data_manager
+from utils import data_manager, generate_folder_name
 import acoc.polygon
-from config import CLASSIFIER_CONFIG
+from config import CLASSIFIER_CONFIG, SAVE_DIR
 
 
-SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
+SAVE_FOLDER = generate_folder_name('demo_run', SAVE_DIR)
 
 CLASSIFIER_CONFIG.plot = False
-CLASSIFIER_CONFIG.save = False
+CLASSIFIER_CONFIG.save = True
 CLASSIFIER_CONFIG.data_set = 'iris'
 
 

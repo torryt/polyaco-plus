@@ -84,6 +84,6 @@ def uniquify_file(path):
     new_path = copy(path)
     count = 0
     while osp.exists(new_path):
-        new_path = path + '__' + str(count)
+        new_path = path + '_' + str(count)
         count += 1
     return new_path

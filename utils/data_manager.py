@@ -119,11 +119,18 @@ def load_breast_cancer():
         return bc
 
 
+def load_adult():
+    path = osp.join(osp.dirname(__file__), 'adult-dataset.csv')
+
+
+
 def load_data_set(name):
     if name == 'iris':
         return load_iris()
     if name == 'breast_cancer':
         return load_breast_cancer()
+    if name == 'adult':
+        return load_adult()
     return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['name']
 
 

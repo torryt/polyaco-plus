@@ -1,4 +1,4 @@
-# PolyACO
+# PolyACO+
 An algorithm using Ant Colony Optimization with polygons and ray casting for classification.
 
 ## Installation

@@ -63,4 +63,3 @@ target/
 config.py
 
 .ipynb_checkpoints/
-*.ipynb

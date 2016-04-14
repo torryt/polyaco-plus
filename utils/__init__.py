@@ -80,6 +80,18 @@ def generate_folder_name(append=None, base=SAVE_DIR):
     return osp.basename(uniquify_file(full_path))
 
 
+def seconds_to_hms(seconds):
+    s = int(seconds)
+    m, s = divmod(s, 60)
+    h, m = divmod(m, 60)
+    hms = "{} seconds".format(int(s))
+    if h >= 1:
+        return "{} hours, {} minutes, {}".format(h, m, hms)
+    if m >= 1:
+        return "{} minutes, {}".format(m, hms)
+    return hms
+
+
 def uniquify_file(path):
     new_path = copy(path)
     count = 0

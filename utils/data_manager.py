@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 from bunch import Bunch
 import os.path as osp
+from sklearn import datasets
 
 import utils
 
@@ -101,11 +102,6 @@ def generate_various_sized_rectangles(sizes):
     pickle.dump(sets, open('data_sets.pickle', 'wb'))
 
 
-def load_iris():
-    from sklearn import datasets
-    return datasets.load_iris()
-
-
 def load_breast_cancer():
     import csv
     bc = Bunch()
@@ -119,18 +115,13 @@ def load_breast_cancer():
         return bc
 
 
-def load_adult():
-    path = osp.join(osp.dirname(__file__), 'adult-dataset.csv')
-
-
-
 def load_data_set(name):
     if name == 'iris':
-        return load_iris()
+        return datasets.load_iris()
     if name == 'breast_cancer':
         return load_breast_cancer()
-    if name == 'adult':
-        return load_adult()
+    if name == 'digits':
+        return datasets.load_digits()
     return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['name']
 
 

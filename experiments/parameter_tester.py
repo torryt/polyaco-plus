@@ -1,4 +1,3 @@
-from datetime import datetime
 import os.path as osp
 from copy import copy
 from sklearn.cross_validation import train_test_split
@@ -16,9 +15,12 @@ import utils
 from utils import data_manager, generate_folder_name
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CLASSIFIER_CONFIG.runs = 100
-CLASSIFIER_CONFIG.max_level = 5
-CLASSIFIER_CONFIG.data_set = 'breast_cancer'
+CLASSIFIER_CONFIG.runs = 5
+CLASSIFIER_CONFIG.level_convergence_rate = 500
+CLASSIFIER_CONFIG.max_level = 3
+CLASSIFIER_CONFIG.data_set = 'iris'
+
+CLASSIFIER_CONFIG.training_test_split = False
 
 
 def run(*args):
@@ -33,11 +35,14 @@ def run(*args):
         y = data_set.target
         class_indices = list(set(y))
 
-        # Split data into training and testing set
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.33)
+        if config.training_test_split:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.33)
+        else:
+            X_train = X_test = X
+            y_train = y_test = y
 
-        clf = acoc.PolyACO(X.shape[1], class_indices, config)
+        clf = acoc.PolyACO(X_train.shape[1], class_indices, config)
         clf.train(X_train, y_train, ', Run: {}/{}'.format(nrun + 1, config.runs))
         predictions = clf.evaluate(X_test)
 
@@ -66,20 +71,8 @@ def parameter_tester(parameter_name, values, save_folder=None):
     utils.save_string_to_file(result_str, parent_folder=save_folder, file_name='result_' + parameter_name + '.txt')
 
 
-def experiment(title):
-    save_folder = generate_folder_name(title)
-    utils.save_dict(CLASSIFIER_CONFIG, save_folder, 'base_config.txt')
-    parameter_tester('level_convergence_rate', [20, 100, 200, 800, 1600], save_folder)
-
-
 if __name__ == "__main__":
-    # CLASSIFIER_CONFIG.runs = 20
-    # experiment('tuning_breast_cancer')
-
-    CLASSIFIER_CONFIG.runs = 100
-    CLASSIFIER_CONFIG.max_level = 5
-    CLASSIFIER_CONFIG.level_convergence_rate = 800
-
-    folder = generate_folder_name('iris-tuned')
+    folder = generate_folder_name('tuning-iris')
     utils.save_dict(CLASSIFIER_CONFIG, folder, file_name='base_config.txt')
-    parameter_tester('data_set', ['iris'], save_folder=folder)
+    parameter_tester('rho', [0.02, 0.05, 0.07], save_folder=folder)
+    parameter_tester('beta', [0.02, 0.05, 0.07], save_folder=folder)

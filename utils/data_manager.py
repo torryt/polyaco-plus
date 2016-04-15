@@ -94,7 +94,7 @@ def generate_rectangle_set(size):
 
 
 def generate_various_sized_rectangles(sizes):
-    sets = load_data()
+    sets = _load_data()
     for s in sizes:
         white = uniform_rectangle((1, 3), (2, 4), s, 0)
         blue = uniform_rectangle((4, 6), (2, 4), s, 1)
@@ -122,10 +122,12 @@ def load_data_set(name):
         return load_breast_cancer()
     if name == 'digits':
         return datasets.load_digits()
-    return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')['name']
+    if name == 'german-credit':
+        return pickle.load(open(osp.join(osp.abspath(osp.dirname(__file__)), 'german-credit.pickle'), 'rb'))
+    return _load_data()['name']
 
 
-def load_data():
+def _load_data():
     return pickle.load(open('utils/data_sets.pickle', 'rb'), encoding='latin1')
 
 

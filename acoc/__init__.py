@@ -55,7 +55,7 @@ class PolyACO:
             predictions[i] = self.class_indices[max_elements[i]]
         return predictions
 
-    def train(self, training_data, target, start_time=time.clock()):
+    def train(self, training_data, target, start_time=time.time()):
         for i, plane_axes in enumerate(self.planes):
             plane = []
             self.model.append(plane)
@@ -69,7 +69,7 @@ class PolyACO:
                 new_t[new_t == j_class] = 0
                 new_t[new_t == -1] = 1
                 plane_data = np.concatenate((np.take(training_data, list(plane_axes), axis=1), np.array([new_t]).T), axis=1)
-                t_elapsed = utils.seconds_to_hms(time.clock() - start_time)
+                t_elapsed = utils.seconds_to_hms(time.time() - start_time)
                 print_string = "Time elapsed: {}, Polygon {}/{}".format(t_elapsed, i * len(self.class_indices) + (j + 1),
                                                 len(self.planes) * len(self.class_indices))
                 utils.print_on_current_line(print_string)

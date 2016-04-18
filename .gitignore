@@ -63,3 +63,6 @@ target/
 config.py
 
 .ipynb_checkpoints/
+notebooks/.aspell.en.prepl
+notebooks/.aspell.en.pws
+

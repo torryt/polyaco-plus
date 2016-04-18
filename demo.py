@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
 from sklearn.cross_validation import train_test_split
 from copy import copy
+from time import time
 
 import acoc
 import utils
-from utils import data_manager
+from utils import data_manager, generate_folder_name
 import acoc.polygon
-from config import CLASSIFIER_CONFIG
+from config import CLASSIFIER_CONFIG, SAVE_DIR
 
-
-SAVE = False
-SAVE_PHEROMONES_AND_BEST_PATHS = False
-SAVE_FOLDER = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 
 CLASSIFIER_CONFIG.plot = False
-CLASSIFIER_CONFIG.save = True
-CLASSIFIER_CONFIG.data_set = 'iris'
+CLASSIFIER_CONFIG.save = False
+CLASSIFIER_CONFIG.training_test_split = True
+
+CLASSIFIER_CONFIG.data_set = 'german-credit'
+SAVE_FOLDER = generate_folder_name(CLASSIFIER_CONFIG.data_set, SAVE_DIR)
 
 
 def run(**kwargs):
@@ -26,39 +25,33 @@ def run(**kwargs):
     for k, v in kwargs.items():
         conf[k] = v
 
-    ####
-    # Loads a sample data set from a pickle file.
-    ####
-    if conf.data_set == 'iris':
-        data_set = data_manager.load_iris()
-    elif conf.data_set == 'breast_cancer':
-        data_set = data_manager.load_breast_cancer()
-    else:
-        data_set = data_manager.load_data()[conf.data_set]
-
+    data_set = data_manager.load_data_set(conf.data_set)
     X = data_set.data
     y = data_set.target
     class_indices = list(set(y))
 
     # Split data into training and testing set
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.33)
+    if conf.training_test_split:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+    else:
+        X_train = X_test = X
+        y_train = y_test = y
 
-    clf = acoc.PolyACO(X.shape[1], class_indices, conf, SAVE_FOLDER)
-    clf.train(X_train, y_train)
+    clf = acoc.PolyACO(X.shape[1], class_indices, save_folder=SAVE_FOLDER)
+    clf.train(X_train, y_train, start_time=conf.start_time)
     predictions = clf.evaluate(X_test)
-
     return acoc.compute_score(predictions, y_test)
 
 
 if __name__ == "__main__":
-    scores = []
-    runs = 1
-    result_str = ''
-    for i in range(runs):
-        scores.append(run())
-        print("\nRun {}/{} score: {:.4f}".format(i + 1, runs, scores[-1]))
     utils.save_dict(CLASSIFIER_CONFIG, parent_folder=SAVE_FOLDER, file_name='config.json')
+    scores = []
+    runs = 5
+    result_str = ''
+    start_time = time()
+    for i in range(runs):
+        scores.append(run(start_time=start_time))
+        print("\nRun {}/{} score: {:.4f}".format(i + 1, runs, scores[-1]))
     result_str = ','.join([str(s) for s in scores]) + "\nAverage score with {}-fold cross validation: {:.5f}".format(runs, sum(scores) / runs)
     utils.save_string_to_file(result_str, parent_folder=SAVE_FOLDER, file_name='result.txt')
     print("\n" + result_str)

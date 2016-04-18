@@ -5,12 +5,11 @@ import math
 from itertools import repeat
 from copy import copy
 
-import acoc.acoc_plotter as plotter
 from acoc.edge import Edge
 from acoc.vertex import Vertex
 from acoc.ray_cast import points_of_both_classes_inside
 from acoc.polygon import polygon_to_array
-
+from utils import data_manager
 
 DIRECTION = {'RIGHT': 0, 'LEFT': 1, 'UP': 2, 'DOWN': 3}
 
@@ -146,10 +145,12 @@ if __name__ == "__main__":
     plot = True
     save = True
     show = False
+    data_set = data_manager.load_data_set('breast_cancer')
 
-    dt = np.array([[0, 0.02, 0],
-                   [0.05, 0, 1],
-                   [1, 1, 1]])
+    dt = np.concatenate((data_set.data[:,:2], data_set.target), axis=1)
+    # dt = np.array([[0, 0.02, 0],
+    #                [0.05, 0, 1],
+    #                [1, 1, 1]])
     mtrx = AcocMatrix(dt)
     pol = mtrx.edges[:4]
     mtrx.edges[1].pheromone_strength = 5

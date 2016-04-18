@@ -1,77 +1,78 @@
-import numpy as np
-import pickle
-from datetime import datetime
 import os.path as osp
+from copy import copy
+from sklearn.cross_validation import train_test_split
+import sys
+import matplotlib
 
-import acoc
-from acoc import acoc_plotter
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
+sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
+
+import acoc
 import utils
 
+from utils import data_manager, generate_folder_name
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CLASSIFIER_CONFIG['number_runs'] = 20
-CLASSIFIER_CONFIG['run_time'] = 30
+CLASSIFIER_CONFIG.runs = 5
+CLASSIFIER_CONFIG.level_convergence_rate = 500
+CLASSIFIER_CONFIG.max_level = 3
+CLASSIFIER_CONFIG.data_set = 'iris'
+
+CLASSIFIER_CONFIG.training_test_split = False
 
 
 def run(*args):
-    config = dict(CLASSIFIER_CONFIG)
+    config = copy(CLASSIFIER_CONFIG)
     for conf in args:
         config[conf[0]] = conf[1]
-    data = pickle.load(open('../utils/data_sets.pickle', 'rb'), encoding='latin1')[config['data_set']]
-    number_runs = config['number_runs']
 
-    clf = acoc.PolyACO(config)
-    all_ant_scores = np.zeros((number_runs, config['run_time']))
+    data_set = data_manager.load_data_set(config.data_set)
+    classifier_scores = []
+    for nrun in range(config.runs):
+        X = data_set.data
+        y = data_set.target
+        class_indices = list(set(y))
 
-    for i in range(number_runs):
-        iter_string = "Iteration: {}/{}".format(i + 1, number_runs)
-        ant_scores, path = \
-            clf.train(data, False, ', ' + iter_string)
-        utils.print_on_current_line(iter_string)
-        all_ant_scores[i, :] = ant_scores
+        if config.training_test_split:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.33)
+        else:
+            X_train = X_test = X
+            y_train = y_test = y
 
-    return all_ant_scores.mean(0)
+        clf = acoc.PolyACO(X_train.shape[1], class_indices, config)
+        clf.train(X_train, y_train, ', Run: {}/{}'.format(nrun + 1, config.runs))
+        predictions = clf.evaluate(X_test)
+
+        classifier_scores.append(acoc.compute_score(predictions, y_test))
+    return classifier_scores
 
 
-def parameter_tester(parameter_name, values, config=CLASSIFIER_CONFIG):
-    save_folder = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
-    iterator = 0
-    full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
-    while osp.exists(full_path):
-        iterator += 1
-        full_path = osp.join(SAVE_DIR, save_folder) + '-' + str(iterator)
-    save_folder = osp.basename(full_path)
+def parameter_tester(parameter_name, values, save_folder=None):
+    if save_folder is None:
+        save_folder = utils.generate_folder_name()
     print("\n\nExperiment for parameter '{}' with values {}".format(parameter_name, values))
 
     plt.clf()
     all_scores = []
     for index, v in enumerate(values):
-        print("Run {} with value {}".format(index+1, v))
+        print("Run {} with value {}".format(index + 1, v))
         scores = run((parameter_name, v))
         all_scores.append(scores)
         utils.print_on_current_line('')
-    utils.save_dict(config, save_folder, 'config_' + parameter_name + '.txt')
-    labels = [parameter_name + '=' + str(v) for v in values]
+    header = ','.join(str(s) for s in values)
+    result_str = header + '\n' + ','.join(["{:.4f}".format(sum(s) / CLASSIFIER_CONFIG.runs) for s in all_scores]) + \
+                 '\n\n' + 'all scores:\n'
 
-    def save_results(data, typ, ylabel):
-        utils.save_object(data, save_folder, 'data_' + typ)
-        fig = acoc_plotter.plot_curves(data, labels, ylabel)
-        acoc_plotter.save_plot(fig, save_folder, 'noise_' + typ)
-        # acoc_plotter.save_plot(acoc_plotter.plot_smooth_curves(data, labels, ylabel), save_folder, 'smooth_' + typ)
+    for a in all_scores:
+        result_str += ','.join('{:.4f}'.format(s) for s in a) + '\n'
+    utils.save_string_to_file(result_str, parent_folder=save_folder, file_name='result_' + parameter_name + '.txt')
 
-    save_results(all_scores, 'best_score', 'Best score')
 
 if __name__ == "__main__":
-
-    # parameter_tester('tau_min', [0.001, 0.01, 0.1])
-    # parameter_tester('tau_max', [0.1, 1.0, 10.0, 100.0])
-    # parameter_tester('beta', [0, 0.01, 0.1, 1.0])
-
-    # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
-    # parameter_tester('ant_init', ['random', 'static', 'weighted', 'on_global_best', 'chance_of_global_best'])
-    # parameter_tester('decay_type', ['probabilistic', 'gradual'])
-    # parameter_tester('tau_init', [CONFIG['tau_max'], CONFIG['tau_min']])
-    parameter_tester('rho', [0.001, 0.01, 0.02, 0.1, 0.3])
-    # parameter_tester('iterations', [1, 2, 5, 10])
+    folder = generate_folder_name('tuning-iris')
+    utils.save_dict(CLASSIFIER_CONFIG, folder, file_name='base_config.txt')
+    parameter_tester('rho', [0.02, 0.05, 0.07], save_folder=folder)
+    parameter_tester('beta', [0.02, 0.05, 0.07], save_folder=folder)

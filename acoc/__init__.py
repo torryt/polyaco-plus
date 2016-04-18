@@ -5,8 +5,6 @@ from __future__ import division
 import os.path as osp
 import random
 import time
-from threading import Thread
-from time import process_time
 from datetime import datetime
 from warnings import warn
 
@@ -42,13 +40,14 @@ class PolyACO:
         self.model = []
 
     def evaluate(self, test_data):
-        if not self.model:
+        if len(self.model) == 0:
             raise RuntimeError('PolyACO must be trained before evaluation')
         inside = np.empty((len(self.planes), len(self.class_indices), test_data.shape[0]), dtype=bool)
         for i, plane in enumerate(self.model):
             plane_data = np.take(test_data, list(self.planes[i]), axis=1)
             for j, poly in enumerate(plane):
                 inside[i, j, :] = is_points_inside_cuda(plane_data, polygon_to_array(poly))
+
         aggregated_scores = np.mean(inside, axis=0)
         predictions = np.empty((test_data.shape[0]), dtype=int)
         max_elements = np.argmax(aggregated_scores, axis=0)
@@ -56,22 +55,25 @@ class PolyACO:
             predictions[i] = self.class_indices[max_elements[i]]
         return predictions
 
-    def train(self, training_data, target):
+    def train(self, training_data, target, start_time=time.time()):
         for i, plane_axes in enumerate(self.planes):
             plane = []
             self.model.append(plane)
-            for j, i_class in enumerate(self.class_indices):
-                plane_string = "plane{}{}_class{}".format(plane_axes[0], plane_axes[1], i_class)
+            num_class = len(self.class_indices)
+            for j in range(num_class):
+                j_class = self.class_indices[j]
+                plane_string = "plane{}{}_class{}".format(plane_axes[0], plane_axes[1], j_class)
 
                 new_t = copy(target)
-                new_t[new_t != i_class] = -1
-                new_t[new_t == i_class] = 0
+                new_t[new_t != j_class] = -1
+                new_t[new_t == j_class] = 0
                 new_t[new_t == -1] = 1
                 plane_data = np.concatenate((np.take(training_data, list(plane_axes), axis=1), np.array([new_t]).T), axis=1)
-                _polygon = self._train_plane(plane_data, plane_string,
-                                             print_string=', Plane {}/{}'.format(
-                                                 i * len(self.class_indices) + (j + 1),
-                                                 len(self.planes) * len(self.class_indices)))
+                t_elapsed = utils.seconds_to_hms(time.time() - start_time)
+                print_string = "Time elapsed: {}, Polygon {}/{}".format(t_elapsed, i * len(self.class_indices) + (j + 1),
+                                                len(self.planes) * len(self.class_indices))
+                utils.print_on_current_line(print_string)
+                _polygon = self._construct_polygon(plane_data, plane_string)
                 plane.append(_polygon)
             p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
             if self.config.save:
@@ -79,27 +81,13 @@ class PolyACO:
                 plotter.plot_paths_with_data(self.model[i], p_data,
                                              save_folder=osp.join(self.save_folder, 'planes'), file_name=fn)
 
-    def _train_plane(self, data, plane_string, print_string=''):
+    def _construct_polygon(self, data, plane_string):
         cuda.to_device(data)
         ant_scores = []
         current_best_ant = []
         last_level_up_or_best_ant = 0
         matrix = AcocMatrix(data, tau_initial=self.config.tau_init)
         current_best_score = 0
-        t_start = process_time()
-
-        def print_status():
-            while matrix.level <= self.config.max_level:
-                if self.config.multi_level:
-                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds, Level {}".format(
-                        len(ant_scores), process_time() - t_start, matrix.level) + print_string
-                else:
-                    to_print = "Ant: {}, Time elapsed: {:.1f} seconds".format(
-                        len(ant_scores), process_time() - t_start) + print_string
-                utils.print_on_current_line(to_print)
-                time.sleep(0.1)
-
-        Thread(target=print_status).start()
 
         while matrix.level <= self.config.max_level:
             start_vertex = get_random_weighted(matrix.edges)
@@ -135,10 +123,6 @@ class PolyACO:
             rand_num = random.random()
             if rand_num < self.config.rho:
                 edge.pheromone_strength = self.config.tau_min
-
-    def _grad_pheromone_decay(self, matrix):
-        for edge in matrix.edges:
-            edge.pheromone_strength *= 1 - self.config.rho
 
     def _score(self, polygon, data):
         edges = polygon_to_array(polygon)

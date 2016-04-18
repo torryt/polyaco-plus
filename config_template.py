@@ -11,7 +11,7 @@ from bunch import Bunch
 SAVE_DIR = os.path.expanduser('~') + '/experiments/'
 
 
-CLASSIFIER_CONFIG = {
+CLASSIFIER_CONFIG = Bunch(**{
     'tau_min':                  0.001,
     'tau_max':                  1.0,
     'tau_init':                 0.001,
@@ -20,9 +20,11 @@ CLASSIFIER_CONFIG = {
     'beta':                     0.01,
     'gpu':                      True,
     'multi_level':              True,
-    'max_level':                6,
-    'level_convergence_rate':   1200,
+    'granularity':              3,
+    'max_level':                2,
+    'level_convergence_rate':   100,
+    'one_less_class':           True,
 
+    'save':                     False,
     'plot':                     False
-}
-CLASSIFIER_CONFIG = Bunch(**CLASSIFIER_CONFIG)
+})

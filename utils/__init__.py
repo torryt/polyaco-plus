@@ -81,10 +81,10 @@ def generate_folder_name(append=None, base=SAVE_DIR):
 
 
 def seconds_to_hms(seconds):
-    s = int(seconds)
-    m, s = divmod(s, 60)
+    s_int = int(seconds)
+    m, s = divmod(s_int, 60)
     h, m = divmod(m, 60)
-    hms = "{} seconds".format(int(s))
+    hms = "{:.1f} seconds".format(s + (seconds - s_int))
     if h >= 1:
         return "{} hours, {} minutes, {}".format(h, m, hms)
     if m >= 1:

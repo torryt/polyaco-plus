@@ -16,7 +16,7 @@ CLASSIFIER_CONFIG.plot = False
 CLASSIFIER_CONFIG.save = False
 CLASSIFIER_CONFIG.training_test_split = True
 
-CLASSIFIER_CONFIG.data_set = 'german-credit'
+CLASSIFIER_CONFIG.data_set = 'iris'
 SAVE_FOLDER = generate_folder_name(CLASSIFIER_CONFIG.data_set, SAVE_DIR)
 
 
@@ -46,7 +46,7 @@ def run(**kwargs):
 if __name__ == "__main__":
     utils.save_dict(CLASSIFIER_CONFIG, parent_folder=SAVE_FOLDER, file_name='config.json')
     scores = []
-    runs = 5
+    runs = 1
     result_str = ''
     start_time = time()
     for i in range(runs):

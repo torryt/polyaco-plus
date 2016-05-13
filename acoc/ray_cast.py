@@ -79,6 +79,12 @@ def is_point_inside(point, solution):
                    for edge in solution))
 
 
+def points_inside(points, solution):
+    result = is_points_inside_cuda(points, solution)
+    p_args = np.nonzero(result)[0]
+    return np.take(points, p_args, axis=0)
+
+
 def points_of_both_classes_inside(points, solution):
     has_class_a = has_class_b = False
     for p in points:

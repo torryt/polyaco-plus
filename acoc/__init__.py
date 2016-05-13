@@ -69,11 +69,9 @@ class PolyACO:
                 new_t[new_t == j_class] = 0
                 new_t[new_t == -1] = 1
                 plane_data = np.concatenate((np.take(training_data, list(plane_axes), axis=1), np.array([new_t]).T), axis=1)
-                t_elapsed = utils.seconds_to_hms(time.time() - start_time)
-                print_string = "Time elapsed: {}, Polygon {}/{}".format(t_elapsed, i * len(self.class_indices) + (j + 1),
+                print_string = "Polygon {}/{}".format(i * len(self.class_indices) + (j + 1),
                                                 len(self.planes) * len(self.class_indices))
-                utils.print_on_current_line(print_string)
-                _polygon = self._construct_polygon(plane_data, plane_string)
+                _polygon = self._construct_polygon(plane_data, plane_string, start_time, print_string)
                 plane.append(_polygon)
             p_data = np.append(np.take(training_data, list(self.planes[i]), axis=1).T, [target], axis=0).T
             if self.config.save:
@@ -81,7 +79,7 @@ class PolyACO:
                 plotter.plot_paths_with_data(self.model[i], p_data,
                                              save_folder=osp.join(self.save_folder, 'planes'), file_name=fn)
 
-    def _construct_polygon(self, data, plane_string):
+    def _construct_polygon(self, data, plane_string, start_time, print_string):
         cuda.to_device(data)
         ant_scores = []
         current_best_ant = []
@@ -115,6 +113,8 @@ class PolyACO:
                 self._put_pheromones(current_best_ant, current_best_score)
                 self._reset_at_random(matrix)
                 ant_scores.append(ant_score)
+                t_elapsed = utils.seconds_to_hms(time.time() - start_time)
+                utils.print_on_current_line("Level {}/{}, {}, Time elapsed: {}".format(matrix.level, self.config.max_level, print_string, t_elapsed))
 
         return current_best_ant
 

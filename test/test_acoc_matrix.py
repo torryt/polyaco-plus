@@ -203,5 +203,26 @@ class TestVertex(unittest.TestCase):
         self.assertEqual(ce[DIRECTION['DOWN']], e_down)
 
 
+class TestHelperMethods(unittest.TestCase):
+    def test_all_points_have_same_position_returns_true(self):
+        points = np.array([[1, 1, 0], [1, 1, 1]])
+        result = am.all_points_have_same_position(points)
+        self.assertTrue(result)
+
+    def test_all_points_have_same_position_returns_false_for_three_points_two_same(self):
+        points = np.array([[1, 1, 0], [1, 1, 1], [0, 1, 1]])
+        result = am.all_points_have_same_position(points)
+        self.assertFalse(result)
+
+    def test_have_points_of_both_classes_returns_true(self):
+        points = np.array([[1.0, 1.0, 0.0], [1.0, 1.0, 1.0]])
+        result = am.have_points_of_both_classes(points)
+        self.assertTrue(result)
+
+    def test_have_points_of_both_classes_returns_false(self):
+        points = np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
+        result = am.have_points_of_both_classes(points)
+        self.assertFalse(result)
+
 if __name__ == '__main__':
     unittest.main()

@@ -100,6 +100,29 @@ class TestCudaGrid(unittest.TestCase):
         self.assertTrue(np.all(arr), 'Not all values in array is True: \n{}'.format(arr))
 
 
+class TestPointsInside(unittest.TestCase):
+    def setUp(self):
+        vs = [Vertex(0, 0),
+              Vertex(1, 0),
+              Vertex(0, 1),
+              Vertex(1, 1)]
+        self.edges = polygon_to_array(
+            [Edge(vs[0], vs[1]),
+             Edge(vs[0], vs[2]),
+             Edge(vs[1], vs[3]),
+             Edge(vs[2], vs[3])])
+
+    def test_returns_list(self):
+        points = np.array([[0.5, 0.5, 1], [1.0, 2.0, 0], [.7, .7, 1]])
+        result = rc.points_inside(points, self.edges)
+        self.assertEqual(type(result), np.ndarray)
+
+    def test_returns_list_with_two_elements(self):
+        points = np.array([[0.5, 0.5, 1], [1.0, 2.0, 0], [.7, .7, 1]])
+        result = rc.points_inside(points, self.edges)
+        self.assertEqual(result.shape, (2, 3))
+
+
 class TestPointsOfBothClassesInside(unittest.TestCase):
     def setUp(self):
         vs = [Vertex(0, 0),

@@ -1,13 +1,11 @@
 from itertools import product
 
 import numpy as np
-import math
-from itertools import repeat
 from copy import copy
 
 from acoc.edge import Edge
 from acoc.vertex import Vertex
-from acoc.ray_cast import points_of_both_classes_inside
+from acoc.ray_cast import points_of_both_classes_inside, points_inside
 from acoc.polygon import polygon_to_array
 from utils import data_manager
 
@@ -60,7 +58,9 @@ class AcocMatrix:
         connect_edges_to_vertices(self.edges)
 
     def increase_section_granularity(self, section, best_polygon=None):
-        if points_of_both_classes_inside(self.data, polygon_to_array(section)):
+        p_inside = points_inside(self.data, polygon_to_array(section))
+
+        if not all_points_have_same_position(p_inside) and have_points_of_both_classes(p_inside):
             new_edges = []
             remove_edges = []
 
@@ -110,6 +110,21 @@ class AcocMatrix:
             return subsections, new_edges, remove_edges
 
 
+def all_points_have_same_position(points):
+    coords = points[:, :2]
+    for i in range(points.shape[0]):
+        if not np.allclose(coords[0], coords[i]):
+            return False
+    return True
+
+
+def have_points_of_both_classes(points):
+    args_class = points[:, 2]
+    if 0 in args_class and 1 in args_class:
+        return True
+    return False
+
+
 def connect_edges_to_vertices(edges):
     for e in edges:
         # if horizontal edge
@@ -147,7 +162,12 @@ if __name__ == "__main__":
     show = False
     data_set = data_manager.load_data_set('breast_cancer')
 
-    dt = np.concatenate((data_set.data[:,:2], data_set.target), axis=1)
+    data = data_set.data[:, :2]
+    target = np.array([data_set.target]).T
+    np.place(target, target == 4, 1)
+    np.place(target, target == 2, 0)
+    dt = np.concatenate((data, target), axis=1)
+
     # dt = np.array([[0, 0.02, 0],
     #                [0.05, 0, 1],
     #                [1, 1, 1]])

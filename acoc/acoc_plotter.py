@@ -1,10 +1,7 @@
-from __future__ import division
 import os
 from datetime import datetime
 import numpy as np
-from copy import copy
 import matplotlib
-
 
 matplotlib.use('Agg')
 

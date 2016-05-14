@@ -52,20 +52,33 @@ def uniform_circle(radius, num_elements, value, spread=0.1):
     return np.array(points).T
 
 
-def semi_circle_gaussian(radius, circle_range, num_elements, value, center=(0, 0), spread=1):
+def semi_circle_gaussian(radius=1.0, c_range=None, size=500, center=(0, 0), spread=0.3):
     points = []
-
-    for e in range(num_elements):
+    if c_range is None:
+        c_range = MinMax(math.pi, 2 * math.pi)
+    for _ in range(size):
         rad = np.random.normal(radius, spread)
-        o = random.random() * (circle_range.max - circle_range.min) + circle_range.min
+        o = random.random() * (c_range.max - c_range.min) + c_range.min
         x = (radius + rad) * math.cos(o)
         y = (radius + rad) * math.sin(o)
-        points.append([x, y, value])
+        points.append([x, y])
 
     array = np.array(points).T
     array[0] += center[0]
     array[1] += center[1]
-    return array
+    return array.T
+
+
+def generate_sm_dataset(size=1000):
+    el_per_class = int(size / 2)
+    a = semi_circle_gaussian(size=el_per_class)
+    c_range = MinMax(0, math.pi)
+    b = semi_circle_gaussian(size=el_per_class, c_range=c_range, center=(1.8, -.7))
+    data = np.concatenate((a, b), axis=0)
+    target = np.zeros(1000, dtype=int)
+    target[:499] = 0
+    target[500:] = 1
+    return Bunch(**{'data': data, 'target': target})
 
 
 def generate_data_sets(size=500):
@@ -74,7 +87,7 @@ def generate_data_sets(size=500):
     r = MinMax(math.pi, 2*math.pi)
     white = semi_circle_gaussian(1.0, r, size, 0)
     r = MinMax(0, math.pi)
-    blue = semi_circle_gaussian(1.0, r, size, 1, center=(1, -.5))
+    blue = semi_circle_gaussian(1.0, r, size, (1, -.5))
     sets['semicircle'] = np.concatenate((white, blue), axis=1)
 
     white = gaussian_circle(1.0, size, 0)
@@ -143,7 +156,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # class_one = uniform_rectangle((0, 2), (3, 5), 150, 0)
-    # class_two = uniform_rectangle((4, 6), (0, 2), 150, 1)
-    # dataset = np.concatenate((class_one, class_two), axis=1)
-    load_breast_cancer()
+    class_one = uniform_rectangle((0, 2), (3, 5), 150, 0)
+    class_two = uniform_rectangle((4, 6), (0, 2), 150, 1)
+    dataset = np.concatenate((class_one, class_two), axis=1)

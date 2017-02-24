@@ -4,6 +4,7 @@
 from sklearn.cross_validation import train_test_split
 from copy import copy
 from time import time
+import numpy as np
 
 import acoc
 import utils
@@ -16,7 +17,7 @@ CLASSIFIER_CONFIG.plot = False
 CLASSIFIER_CONFIG.save = False
 CLASSIFIER_CONFIG.training_test_split = True
 
-CLASSIFIER_CONFIG.data_set = 'iris'
+CLASSIFIER_CONFIG.data_set = 'car'
 SAVE_FOLDER = generate_folder_name(CLASSIFIER_CONFIG.data_set, SAVE_DIR)
 
 
@@ -46,12 +47,24 @@ def run(**kwargs):
 if __name__ == "__main__":
     utils.save_dict(CLASSIFIER_CONFIG, parent_folder=SAVE_FOLDER, file_name='config.json')
     scores = []
-    runs = 1
+    runs = 10
     result_str = ''
     start_time = time()
     for i in range(runs):
         scores.append(run(start_time=start_time))
         print("\nRun {}/{} score: {:.4f}".format(i + 1, runs, scores[-1]))
-    result_str = ','.join([str(s) for s in scores]) + "\nAverage score with {}-fold cross validation: {:.5f}".format(runs, sum(scores) / runs)
-    utils.save_string_to_file(result_str, parent_folder=SAVE_FOLDER, file_name='result.txt')
-    print("\n" + result_str)
+
+    text_template = """
+    {}
+    {}-fold cross validation
+
+    Mean: {}
+    Variance: {}
+    Standard deviation: {}
+    """
+
+    arr_scores = ','.join([str(s) for s in scores])
+    np_scores = np.array(scores)
+    file_string = text_template.format(arr_scores, runs, np_scores.mean(), np_scores.var(), np_scores.std())
+    utils.save_string_to_file(file_string, parent_folder=SAVE_FOLDER, file_name='result.txt')
+    print("\n" + file_string)

@@ -1,5 +1,6 @@
 import math
 import random
+import csv
 from collections import namedtuple
 import numpy as np
 import pickle
@@ -116,7 +117,6 @@ def generate_various_sized_rectangles(sizes):
 
 
 def load_breast_cancer():
-    import csv
     bc = Bunch()
     fn = osp.join(osp.dirname(__file__), 'breast-cancer-wisconsin.csv')
     with open(fn, 'r') as csvfile:
@@ -128,13 +128,56 @@ def load_breast_cancer():
         return bc
 
 
+def load_balance_scale():
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'balance-scale.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)))
+        bc.target = data[:, 0]
+        bc.data = data[:, 1:]
+        return bc
+
+
+def load_tae():
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'tae.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)))
+        bc.target = data[:, -1]
+        bc.data = data[:, 0:-1]
+        return bc
+
+
+def load_car():
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'car.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile))).T.tolist()
+        numeric_data = [to_numeric(col) for col in data]
+        ndata = np.array(numeric_data).T
+        bc.target = ndata[:, -1]
+        bc.data = ndata[:, 0:-1]
+        return bc
+
+
+def to_numeric(str_list):
+    unique_values = list(set(str_list))
+    return [unique_values.index(s) for s in str_list]
+
+
 def load_data_set(name):
     if name == 'iris':
         return datasets.load_iris()
-    if name == 'breast_cancer':
+    if name == 'breast-cancer':
         return load_breast_cancer()
     if name == 'digits':
         return datasets.load_digits()
+    if name == 'balance-scale':
+        return load_balance_scale()
+    if name == 'tae':
+        return load_tae()
+    if name == 'car':
+        return load_car()
     if name == 'german-credit':
         return pickle.load(open(osp.join(osp.abspath(osp.dirname(__file__)), 'german-credit.pickle'), 'rb'))
     return _load_data()['name']

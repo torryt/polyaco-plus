@@ -1,7 +1,8 @@
 name: acoc
+channels: !!python/tuple
+- defaults
 dependencies:
 - appnope=0.1.0=py35_0
-- cudatoolkit=7.0=1
 - cycler=0.10.0=py35_0
 - decorator=4.0.9=py35_0
 - entrypoints=0.2=py35_1
@@ -20,16 +21,17 @@ dependencies:
 - jupyter_core=4.1.0=py35_0
 - libpng=1.6.17=0
 - libtiff=4.0.6=1
-- llvmlite=0.10.0=py35_0
+- llvmlite=0.15.0=py35_0
 - markupsafe=0.23=py35_0
-- matplotlib=1.5.1=np110py35_0
+- matplotlib=1.5.1=np111py35_0
 - mistune=0.7.2=py35_1
-- mkl=11.3.1=0
+- mkl=2017.0.1=0
 - nbconvert=4.2.0=py35_0
 - nbformat=4.0.1=py35_0
 - notebook=4.1.0=py35_2
-- numba=0.25.0=np110py35_0
-- numpy=1.10.4=py35_0
+- numba=0.30.1=np111py35_0
+- numba::cudatoolkit=8.0=0
+- numpy=1.11.3=py35_0
 - openssl=1.0.2g=0
 - path.py=8.2=py35_0
 - pexpect=4.0.1=py35_0
@@ -47,8 +49,8 @@ dependencies:
 - qt=4.8.7=1
 - qtconsole=4.2.1=py35_0
 - readline=6.2=2
-- scikit-learn=0.17.1=np110py35_0
-- scipy=0.17.0=np110py35_0
+- scikit-learn=0.18.1=np111py35_1
+- scipy=0.18.1=np111py35_1
 - setuptools=20.6.7=py35_0
 - simplegeneric=0.8.1=py35_0
 - sip=4.16.9=py35_0
@@ -68,4 +70,5 @@ dependencies:
   - jupyter-console==4.1.1
   - jupyter-core==4.1.0
   - pandas==0.18.0
+prefix: /Users/torrytufteland/miniconda3/envs/acoc
 

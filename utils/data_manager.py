@@ -128,11 +128,65 @@ def load_breast_cancer():
         return bc
 
 
+def load_wine():
+    import csv
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'wine.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)))
+        mask = np.invert(np.isnan(np.sum(data, axis=1)))
+        data = data[mask]
+        bc.target = data[:, 0]
+        bc.data = np.delete(data, 0, 1)
+        return bc
+
+
+def load_tae():
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'tae.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)))
+        bc.target = data[:, -1]
+        bc.data = data[:, 0:-1]
+        return bc
+
+
+def load_balance_scale():
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'balance-scale.csv')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)))
+        bc.target = data[:, 0]
+        bc.data = data[:, 1:]
+        return bc
+
+
+def load_australian_credit():
+    import csv
+    bc = Bunch()
+    fn = osp.join(osp.dirname(__file__), 'aus.dat')
+    with open(fn, 'r') as csvfile:
+        data = np.array(list(csv.reader(csvfile, delimiter=' ', quoting=csv.QUOTE_NONNUMERIC)))
+        mask = np.invert(np.isnan(np.sum(data, axis=1)))
+        data = data[mask]
+        bc.target = data[:, -1]
+        bc.data = data[:, 0:-1]
+        return bc
+
+
 def load_data_set(name):
     if name == 'iris':
         return datasets.load_iris()
     if name == 'breast_cancer':
         return load_breast_cancer()
+    if name == 'wine':
+        return load_wine()
+    if name == 'tae':
+        return load_tae()
+    if name == 'bal':
+        return load_balance_scale()
+    if name == 'aus':
+        return load_australian_credit()
     if name == 'digits':
         return datasets.load_digits()
     if name == 'german-credit':

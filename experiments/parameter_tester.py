@@ -15,12 +15,12 @@ import utils
 from utils import data_manager, generate_folder_name
 from config import SAVE_DIR, CLASSIFIER_CONFIG
 
-CLASSIFIER_CONFIG.runs = 5
-CLASSIFIER_CONFIG.level_convergence_rate = 500
+CLASSIFIER_CONFIG.runs = 8
+CLASSIFIER_CONFIG.level_convergence_rate = 200
 CLASSIFIER_CONFIG.max_level = 3
 CLASSIFIER_CONFIG.data_set = 'iris'
 
-CLASSIFIER_CONFIG.training_test_split = False
+CLASSIFIER_CONFIG.training_test_split = True
 
 
 def run(*args):
@@ -43,10 +43,11 @@ def run(*args):
             y_train = y_test = y
 
         clf = acoc.PolyACO(X_train.shape[1], class_indices, config)
-        clf.train(X_train, y_train, ', Run: {}/{}'.format(nrun + 1, config.runs))
+        clf.train(X_train, y_train)
         predictions = clf.evaluate(X_test)
 
         classifier_scores.append(acoc.compute_score(predictions, y_test))
+        print("\nRun {}/{} score: {:.4f}".format(nrun + 1, config.runs, classifier_scores[-1]))
     return classifier_scores
 
 
@@ -72,7 +73,7 @@ def parameter_tester(parameter_name, values, save_folder=None):
 
 
 if __name__ == "__main__":
-    folder = generate_folder_name('tuning-iris')
+    folder = generate_folder_name('tuning-'.format(CLASSIFIER_CONFIG.data_set))
     utils.save_dict(CLASSIFIER_CONFIG, folder, file_name='base_config.txt')
     parameter_tester('rho', [0.02, 0.05, 0.07], save_folder=folder)
     parameter_tester('beta', [0.02, 0.05, 0.07], save_folder=folder)

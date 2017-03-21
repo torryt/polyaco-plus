@@ -72,7 +72,7 @@ def normalize(values):
 
 
 def generate_folder_name(append=None, base=SAVE_DIR):
-    now = datetime.utcnow().strftime('%Y.%m%.%d')
+    now = datetime.utcnow().strftime('%Y-%m-%d')
     if append is None:
         full_path = osp.join(base, now)
     else:
